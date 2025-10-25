@@ -1,9 +1,9 @@
 import { Navigate, createBrowserRouter, type UIMatch, type RouteObject } from "react-router-dom"
-import AppLayout from "./layouts/AppLayout"
-import Enroll from "./pages/Enroll"
-import Roster from "./pages/Roster"
-import Guardians from "./pages/Guardians"
-import RouteErrorBoundary from "./components/RouteErrorBoundary"
+import AppLayout from "./components/layouts/AppLayout"
+import EnrollStudentPage from "./pages/EnrollStudentPage"
+import StudentRosterPage from "./pages/StudentRosterPage"
+import GuardiansPage from "./pages/GuardiansPage"
+import RouteErrorBoundary from "./components/layouts/RouteErrorBoundary"
 
 export type CrumbHandle = {
   breadcrumb: string | ((match: UIMatch) => string)
@@ -20,17 +20,17 @@ const routes: RouteObject[] = [
       { index: true, element: <Navigate to="/enroll" replace />, handle: { breadcrumb: "Inicio", breadcrumbKey: "navigation:breadcrumbs.home" } satisfies CrumbHandle },
       {
         path: "enroll",
-        element: <Enroll />,
+        element: <EnrollStudentPage />,
         handle: { breadcrumb: "Inscribir", breadcrumbKey: "navigation:breadcrumbs.enroll" } satisfies CrumbHandle,
       },
       {
         path: "roster",
-        element: <Roster />,
+        element: <StudentRosterPage />,
         handle: { breadcrumb: "Listado", breadcrumbKey: "navigation:breadcrumbs.roster" } satisfies CrumbHandle,
       },
       {
         path: "guardians",
-        element: <Guardians />,
+        element: <GuardiansPage />,
         handle: { breadcrumb: "Apoderados", breadcrumbKey: "navigation:breadcrumbs.guardians" } satisfies CrumbHandle,
       },
     ],

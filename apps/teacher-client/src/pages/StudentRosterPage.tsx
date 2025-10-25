@@ -1,11 +1,11 @@
-import { useState } from "react"
-import { useTranslation } from "react-i18next"
-import { StudentRoster } from "@/components/StudentRoster"
-import { Users } from "lucide-react"
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StudentRoster } from '@/components/students/StudentRoster';
+import { Users } from 'lucide-react';
 
-export default function Roster() {
-  const { t } = useTranslation('roster')
-  const [refreshTrigger] = useState(0)
+export default function StudentRosterPage() {
+  const { t } = useTranslation('roster');
+  const [refreshTrigger] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -17,7 +17,5 @@ export default function Roster() {
       </div>
       <StudentRoster refreshTrigger={refreshTrigger} />
     </div>
-  )
+  );
 }
-
-

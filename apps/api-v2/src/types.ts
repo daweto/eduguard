@@ -1,4 +1,10 @@
-import type { Student, StudentFace, LegalGuardian } from "./db/schema";
+import type {
+  Student,
+  StudentFace,
+  LegalGuardian,
+  NewStudent,
+  NewLegalGuardian,
+} from "./db/schema";
 
 type Environment = "dev" | "production";
 
@@ -22,19 +28,34 @@ export interface Bindings {
 // Re-export DB types
 export type { Student, StudentFace, LegalGuardian };
 
+export type StudentProfileInput = Pick<
+  NewStudent,
+  "firstName" | "middleName" | "lastName" | "secondLastName" | "identificationNumber" | "gradeId"
+>;
+
+type RequiredGuardianFields = Pick<
+  NewLegalGuardian,
+  "firstName" | "lastName" | "identificationNumber" | "phone" | "email"
+>;
+
+type OptionalGuardianFields = Partial<
+  Omit<
+    NewLegalGuardian,
+    "id" | "firstName" | "lastName" | "identificationNumber" | "phone" | "email"
+  >
+>;
+
+export type GuardianProfileInput =
+  | ({ id: string } & OptionalGuardianFields)
+  | (RequiredGuardianFields & OptionalGuardianFields);
+
 // API request/response types
 export interface EnrollStudentRequest {
-  name: string;
-  grade?: string;
-  guardian_id?: string;
-  guardian_name: string;
-  guardian_phone: string;
-  guardian_email?: string;
-  // New preferred flow: provide uploaded R2 object keys
+  student: StudentProfileInput;
+  guardian: GuardianProfileInput;
   photo_keys?: string[];
-  // Legacy fallback: base64 upload from client
   photos?: {
-    data: string; // base64 encoded
+    data: string;
     filename: string;
   }[];
 }
@@ -48,20 +69,19 @@ export interface EnrollStudentResponse {
 }
 
 export interface GetStudentsResponse {
-  students: (Student & { photo_urls: string[] })[];
+  students: (
+    Student & {
+      photo_urls: string[];
+      guardian: LegalGuardian | null;
+      gradeDisplayName: string | null;
+    }
+  )[];
   total: number;
   page: number;
   per_page: number;
 }
 
-export interface CreateGuardianRequest {
-  name: string;
-  phone: string;
-  email?: string;
-  preferred_language?: string;
-  relation?: string;
-  address?: string;
-}
+export type CreateGuardianRequest = RequiredGuardianFields & OptionalGuardianFields;
 
 export interface GetGuardiansResponse {
   guardians: LegalGuardian[];

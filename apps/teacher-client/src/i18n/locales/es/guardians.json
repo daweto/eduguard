@@ -1,31 +1,50 @@
 {
   "title": "Registrar Apoderado",
-  "description": "Agrega un apoderado para asignarlo a estudiantes",
+  "description": "Completa los datos personales del apoderado para poder asignarlo a estudiantes",
   "form": {
-    "name": {
-      "label": "Nombre",
-      "placeholder": "Maria Martinez"
+    "title": "Nuevo apoderado",
+    "description": "Completa el formulario con los datos del apoderado.",
+    "legend": "Datos personales",
+    "firstName": {
+      "label": "Primer nombre",
+      "placeholder": "María"
+    },
+    "middleName": {
+      "label": "Segundo nombre (opcional)",
+      "placeholder": "José"
+    },
+    "lastName": {
+      "label": "Primer apellido",
+      "placeholder": "Martínez"
+    },
+    "secondLastName": {
+      "label": "Segundo apellido (opcional)",
+      "placeholder": "López"
+    },
+    "identification": {
+      "label": "RUT o identificación",
+      "placeholder": "12.345.678-9"
     },
     "phone": {
       "label": "Teléfono",
-      "placeholder": "+56912345678"
+      "placeholder": "+56 9 1234 5678"
     },
     "email": {
       "label": "Correo electrónico",
       "placeholder": "maria@example.com"
     },
-    "submit": "Crear Apoderado",
-    "submitting": "Creando Apoderado..."
+    "submit": "Crear apoderado",
+    "submitting": "Creando apoderado..."
   },
   "table": {
-    "title": "Apoderados",
-    "description": "Todos los apoderados registrados",
+    "title": "Apoderados registrados",
+    "description": "Listado completo de apoderados disponibles",
     "loading": "Cargando...",
     "headers": {
-      "name": "Nombre",
+      "name": "Nombre completo",
+      "identification": "Identificación",
       "phone": "Teléfono",
-      "email": "Correo",
-      "language": "Idioma Preferido"
+      "email": "Correo"
     }
   },
   "messages": {
@@ -33,5 +52,3 @@
     "createError": "No se pudo crear el apoderado"
   }
 }
-
-

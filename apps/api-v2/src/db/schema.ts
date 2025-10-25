@@ -26,9 +26,13 @@ export const grades = sqliteTable("grades", {
 // Legal guardians table
 export const legalGuardians = sqliteTable("legal_guardians", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  firstName: text("first_name").notNull(),
+  middleName: text("middle_name"),
+  lastName: text("last_name").notNull(),
+  secondLastName: text("second_last_name"),
+  identificationNumber: text("identification_number").notNull().unique(),
   phone: text("phone").notNull(),
-  email: text("email"),
+  email: text("email").notNull(),
   preferredLanguage: text("preferred_language").default("es"),
   relation: text("relation"),
   address: text("address"),
@@ -37,16 +41,15 @@ export const legalGuardians = sqliteTable("legal_guardians", {
 
 export const students = sqliteTable("students", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  firstName: text("first_name").notNull(),
+  middleName: text("middle_name"),
+  lastName: text("last_name").notNull(),
+  secondLastName: text("second_last_name"),
+  identificationNumber: text("identification_number").notNull().unique(),
   gradeId: text("grade_id").references(() => grades.id),
-  // Optional FK to a legal guardian (denormalized columns kept for now)
   guardianId: text("guardian_id")
     .notNull()
     .references(() => legalGuardians.id),
-  guardianName: text("guardian_name").notNull(),
-  guardianPhone: text("guardian_phone").notNull(),
-  guardianEmail: text("guardian_email"),
-  preferredLanguage: text("preferred_language").default("es"),
   enrollmentDate: text("enrollment_date").notNull(),
   status: text("status").default("active"),
   awsCollectionId: text("aws_collection_id").default("eduguard-school-default"),

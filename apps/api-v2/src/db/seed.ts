@@ -138,12 +138,12 @@ export async function seedDatabase(db: D1Database) {
 
   console.log('Seeding stages...');
   for (const stage of stagesData) {
-    await drizzleDb.insert(stages).values(stage).onConflictDoNothing();
+    await drizzleDb.insert(stages).values(stage);
   }
 
   console.log('Seeding grades...');
   for (const grade of gradesData) {
-    await drizzleDb.insert(grades).values(grade).onConflictDoNothing();
+    await drizzleDb.insert(grades).values(grade);
   }
 
   console.log('Database seeded successfully!');

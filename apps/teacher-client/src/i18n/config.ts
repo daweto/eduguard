@@ -5,6 +5,7 @@ import enrollment from './locales/es/enrollment.json';
 import roster from './locales/es/roster.json';
 import navigation from './locales/es/navigation.json';
 import errors from './locales/es/errors.json';
+import guardians from './locales/es/guardians.json';
 
 const resources = {
   es: {
@@ -13,6 +14,7 @@ const resources = {
     roster,
     navigation,
     errors,
+    guardians,
   },
 };
 

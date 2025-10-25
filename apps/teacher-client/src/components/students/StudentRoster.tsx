@@ -1,8 +1,6 @@
-import { useEffect, useState } from 'react';
 import { StudentCard } from './StudentCard';
 import { Button } from '@/components/ui/button';
-import { getStudents, deleteStudent } from '@/lib/api';
-import type { Student } from '@/types/student';
+import { useStudents } from './hooks/useStudents';
 import { Loader2, Users, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -11,47 +9,7 @@ interface StudentRosterProps {
 }
 
 export function StudentRoster({ refreshTrigger }: StudentRosterProps) {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
-
-  const loadStudents = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await getStudents();
-      setStudents(response.students);
-    } catch (err) {
-      setError('Failed to load students. Please try again.');
-      console.error('Error loading students:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadStudents();
-  }, [refreshTrigger]);
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this student? This action cannot be undone.')) {
-      return;
-    }
-
-    setDeleting(id);
-
-    try {
-      await deleteStudent(id);
-      setStudents(students.filter((s) => s.id !== id));
-    } catch (err) {
-      alert('Failed to delete student. Please try again.');
-      console.error('Error deleting student:', err);
-    } finally {
-      setDeleting(null);
-    }
-  };
+  const { students, loading, error, deleting, refetch, remove } = useStudents(refreshTrigger);
 
   if (loading) {
     return (
@@ -77,7 +35,7 @@ export function StudentRoster({ refreshTrigger }: StudentRosterProps) {
     return (
       <div className="text-center py-12 space-y-4">
         <p className="text-destructive">{error}</p>
-        <Button onClick={loadStudents} variant="outline">
+        <Button onClick={refetch} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
           Try Again
         </Button>
@@ -109,7 +67,7 @@ export function StudentRoster({ refreshTrigger }: StudentRosterProps) {
         <h2 className="text-2xl font-bold">
           Enrolled Students ({students.length})
         </h2>
-        <Button onClick={loadStudents} variant="outline" size="sm">
+        <Button onClick={refetch} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" />
           Refresh
         </Button>
@@ -125,7 +83,7 @@ export function StudentRoster({ refreshTrigger }: StudentRosterProps) {
             )}
             <StudentCard
               student={student}
-              onDelete={handleDelete}
+              onDelete={remove}
             />
           </div>
         ))}

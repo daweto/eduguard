@@ -2,24 +2,23 @@ import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { legalGuardians } from "../db/schema";
-import type { Bindings } from "../types";
+import type { Bindings, CreateGuardianRequest } from "../types";
 
 const guardians = new Hono<{ Bindings: Bindings }>();
 
 // POST /api/guardians - Create guardian
 guardians.post("/", async (c) => {
   try {
-    const body = await c.req.json<{
-      name: string;
-      phone: string;
-      email?: string;
-      preferred_language?: string;
-      relation?: string;
-      address?: string;
-    }>();
+    const body = await c.req.json<CreateGuardianRequest>();
     const db = drizzle(c.env.DB);
 
-    if (!body.name || !body.phone) {
+    if (
+      !body.firstName.trim() ||
+      !body.lastName.trim() ||
+      !body.identificationNumber.trim() ||
+      !body.phone.trim() ||
+      !body.email?.trim()
+    ) {
       return c.json({ error: "Missing required fields" }, 400);
     }
 
@@ -27,18 +26,25 @@ guardians.post("/", async (c) => {
 
     await db.insert(legalGuardians).values({
       id,
-      name: body.name,
-      phone: body.phone,
-      email: body.email ?? null,
-      preferredLanguage: body.preferred_language ?? "es",
+      firstName: body.firstName.trim(),
+      middleName: body.middleName?.trim() ?? null,
+      lastName: body.lastName.trim(),
+      secondLastName: body.secondLastName?.trim() ?? null,
+      identificationNumber: body.identificationNumber.trim(),
+      phone: body.phone.trim(),
+      email: body.email.trim(),
+      preferredLanguage: body.preferredLanguage ?? "es",
       relation: body.relation ?? null,
       address: body.address ?? null,
     });
 
-    return c.json(
-      { id, ...body, preferred_language: body.preferred_language ?? "es" },
-      201,
-    );
+    const [inserted] = await db
+      .select()
+      .from(legalGuardians)
+      .where(eq(legalGuardians.id, id))
+      .limit(1);
+
+    return c.json(inserted, 201);
   } catch (error) {
     console.error("Error creating guardian:", error);
     return c.json({ error: "Internal server error" }, 500);

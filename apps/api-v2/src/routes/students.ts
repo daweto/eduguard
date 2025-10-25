@@ -6,22 +6,46 @@ import {
   students as studentsTable,
   studentFaces as studentFacesTable,
   legalGuardians as legalGuardiansTable,
+  grades as gradesTable,
 } from "../db/schema";
+import type { NewStudent, NewLegalGuardian } from "../db/schema";
 import type {
   Bindings,
   EnrollStudentRequest,
   EnrollStudentResponse,
   GetStudentsResponse,
   Student,
+  LegalGuardian,
 } from "../types";
 import {
   createRekognition,
   indexFaceBytes,
   deleteFaces as awsDeleteFaces,
 } from "../utils/aws";
+import { normalizeRut } from "../utils/rut";
 import { uploadPhoto, base64ToArrayBuffer } from "../utils/storage";
 
 const students = new Hono<{ Bindings: Bindings }>();
+
+type GuardianInsertFields = Pick<
+  NewLegalGuardian,
+  | "firstName"
+  | "middleName"
+  | "lastName"
+  | "secondLastName"
+  | "identificationNumber"
+  | "phone"
+  | "email"
+  | "preferredLanguage"
+  | "relation"
+  | "address"
+>;
+
+const toNullable = (value?: string | null) => {
+  if (value == null) return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
 
 // POST /api/students - Enroll new student
 students.post("/", async (c) => {
@@ -29,8 +53,31 @@ students.post("/", async (c) => {
     const body = await c.req.json<EnrollStudentRequest>();
     const db = drizzle(c.env.DB);
 
-    if (!body.name) {
-      return c.json({ error: "Missing required fields" }, 400);
+    const { student: studentPayload, guardian: guardianPayload } = body;
+
+    const studentFirstName = studentPayload.firstName.trim();
+    const studentLastName = studentPayload.lastName.trim();
+    const studentIdentification = normalizeRut(
+      studentPayload.identificationNumber.trim(),
+    );
+    const studentMiddleName = toNullable(studentPayload.middleName ?? null);
+    const studentSecondLastName = toNullable(
+      studentPayload.secondLastName ?? null,
+    );
+    const studentGradeId = toNullable(studentPayload.gradeId ?? null);
+
+    if (
+      studentFirstName.length === 0 ||
+      studentLastName.length === 0 ||
+      studentIdentification.length === 0
+    ) {
+      return c.json(
+        {
+          error:
+            "Student firstName, lastName, and identificationNumber are required",
+        },
+        400,
+      );
     }
 
     const base64Count = body.photos?.length ?? 0;
@@ -42,59 +89,102 @@ students.post("/", async (c) => {
       return c.json({ error: "Maximum 3 photos allowed" }, 400);
 
     // Resolve guardian
-    let guardianId: string | null = body.guardian_id ?? null;
-    let guardianFromId: {
-      name: string;
-      phone: string;
-      email: string | null;
-    } | null = null;
-    if (guardianId) {
-      const rows = await db
+    let guardianRecord: LegalGuardian | null = null;
+
+    if ("id" in guardianPayload && guardianPayload.id) {
+      const guardianRows = await db
+        .select()
+        .from(legalGuardiansTable)
+        .where(eq(legalGuardiansTable.id, guardianPayload.id))
+        .limit(1);
+      if (!guardianRows.length) {
+        return c.json({ error: "Guardian not found" }, 404);
+      }
+      guardianRecord = guardianRows[0];
+    } else {
+      const guardianDetails = guardianPayload as GuardianInsertFields;
+      const guardianFirstName = guardianDetails.firstName.trim();
+      const guardianLastName = guardianDetails.lastName.trim();
+      const guardianIdentification = normalizeRut(
+        guardianDetails.identificationNumber.trim(),
+      );
+      const guardianPhone = guardianDetails.phone.trim();
+      const guardianMiddleName = toNullable(guardianDetails.middleName ?? null);
+      const guardianSecondLastName = toNullable(
+        guardianDetails.secondLastName ?? null,
+      );
+      const guardianEmail = guardianDetails.email.trim();
+      const guardianPreferredLanguage =
+        toNullable(guardianDetails.preferredLanguage ?? null) ?? "es";
+      const guardianRelation = toNullable(guardianDetails.relation ?? null);
+      const guardianAddress = toNullable(guardianDetails.address ?? null);
+
+      if (
+        guardianFirstName.length === 0 ||
+        guardianLastName.length === 0 ||
+        guardianIdentification.length === 0 ||
+        guardianPhone.length === 0 ||
+        guardianEmail.length === 0
+      ) {
+        return c.json(
+          {
+            error:
+              "Guardian firstName, lastName, identificationNumber, phone, and email are required",
+          },
+          400,
+        );
+      }
+
+      const guardianId = crypto.randomUUID();
+
+      const newGuardianValues: NewLegalGuardian = {
+        id: guardianId,
+        firstName: guardianFirstName,
+        middleName: guardianMiddleName,
+        lastName: guardianLastName,
+        secondLastName: guardianSecondLastName,
+        identificationNumber: guardianIdentification,
+        phone: guardianPhone,
+        email: guardianEmail,
+        preferredLanguage: guardianPreferredLanguage,
+        relation: guardianRelation,
+        address: guardianAddress,
+      };
+
+      await db.insert(legalGuardiansTable).values(newGuardianValues);
+
+      const insertedGuardianRows = await db
         .select()
         .from(legalGuardiansTable)
         .where(eq(legalGuardiansTable.id, guardianId))
         .limit(1);
-      if (rows.length) {
-        guardianFromId = {
-          name: rows[0].name,
-          phone: rows[0].phone,
-          email: rows[0].email ?? null,
-        };
+
+      if (insertedGuardianRows.length === 0) {
+        return c.json({ error: "Unable to resolve guardian" }, 500);
       }
-    } else {
-      if (!body.guardian_name || !body.guardian_phone)
-        return c.json({ error: "Guardian is required" }, 400);
-      guardianId = crypto.randomUUID();
-      await db.insert(legalGuardiansTable).values({
-        id: guardianId,
-        name: body.guardian_name,
-        phone: body.guardian_phone,
-        email: body.guardian_email ?? null,
-        preferredLanguage: "es",
-      });
-      guardianFromId = {
-        name: body.guardian_name,
-        phone: body.guardian_phone,
-        email: body.guardian_email ?? null,
-      };
+
+      guardianRecord = insertedGuardianRows[0];
     }
 
     // Create student
     const studentId = crypto.randomUUID();
     const enrollmentDate = new Date().toISOString();
-    await db.insert(studentsTable).values({
+    const studentValues: NewStudent = {
       id: studentId,
-      name: body.name,
-      gradeId: body.grade ?? null,
-      guardianId,
-      guardianName: guardianFromId?.name ?? body.guardian_name,
-      guardianPhone: guardianFromId?.phone ?? body.guardian_phone,
-      guardianEmail: guardianFromId?.email ?? body.guardian_email ?? null,
+      firstName: studentFirstName,
+      middleName: studentMiddleName,
+      lastName: studentLastName,
+      secondLastName: studentSecondLastName,
+      identificationNumber: studentIdentification,
+      gradeId: studentGradeId,
+      guardianId: guardianRecord.id,
       enrollmentDate,
       status: "active",
-    });
+    };
 
-    // Prepare Rekognition (optional)
+    await db.insert(studentsTable).values(studentValues);
+
+    // Require Rekognition configuration for enrollment
     const faceIds: string[] = [];
     const collectionId =
       c.env.AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default";
@@ -136,10 +226,10 @@ students.post("/", async (c) => {
               typeof result.qualityScore === "number"
                 ? result.qualityScore
                 : undefined;
-          } catch (e: unknown) {
+          } catch (awsError) {
             console.warn(
               "AWS Rekognition indexing failed; storing mock face ID",
-              e,
+              awsError,
             );
           }
         }
@@ -214,25 +304,44 @@ students.get("/", async (c) => {
     const total = countResult[0]?.count ?? 0;
 
     const studentsList = await db
-      .select()
+      .select({
+        student: studentsTable,
+        guardian: legalGuardiansTable,
+        grade: gradesTable,
+      })
       .from(studentsTable)
+      .leftJoin(
+        legalGuardiansTable,
+        eq(studentsTable.guardianId, legalGuardiansTable.id),
+      )
+      .leftJoin(gradesTable, eq(studentsTable.gradeId, gradesTable.id))
       .where(eq(studentsTable.status, "active"))
       .orderBy(desc(studentsTable.createdAt))
       .limit(perPage)
       .offset(offset);
 
-    const studentsWithPhotos: (Student & { photo_urls: string[] })[] =
-      await Promise.all(
-        studentsList.map(async (student) => {
-          const faces = await db
-            .select({ photoUrl: studentFacesTable.photoUrl })
-            .from(studentFacesTable)
-            .where(eq(studentFacesTable.studentId, student.id))
-            .orderBy(studentFacesTable.createdAt);
-          const photoUrls = faces.map((f) => f.photoUrl ?? "");
-          return { ...(student as Student), photo_urls: photoUrls };
-        }),
-      );
+    const studentsWithPhotos = await Promise.all(
+      studentsList.map(async ({ student, guardian, grade }) => {
+        const faces = await db
+          .select({ photoUrl: studentFacesTable.photoUrl })
+          .from(studentFacesTable)
+          .where(eq(studentFacesTable.studentId, student.id))
+          .orderBy(studentFacesTable.createdAt);
+
+        const photoUrls = faces.map((f) => f.photoUrl ?? "");
+
+        return {
+          ...student,
+          photo_urls: photoUrls,
+          guardian: guardian ?? null,
+          gradeDisplayName: grade?.displayName ?? null,
+        } satisfies Student & {
+          photo_urls: string[];
+          guardian: LegalGuardian | null;
+          gradeDisplayName: string | null;
+        };
+      }),
+    );
 
     const response: GetStudentsResponse = {
       students: studentsWithPhotos,
@@ -253,13 +362,23 @@ students.get("/:id", async (c) => {
     const db = drizzle(c.env.DB);
     const studentId = c.req.param("id");
 
-    const student = await db
-      .select()
+    const rows = await db
+      .select({
+        student: studentsTable,
+        guardian: legalGuardiansTable,
+        grade: gradesTable,
+      })
       .from(studentsTable)
+      .leftJoin(
+        legalGuardiansTable,
+        eq(studentsTable.guardianId, legalGuardiansTable.id),
+      )
+      .leftJoin(gradesTable, eq(studentsTable.gradeId, gradesTable.id))
       .where(eq(studentsTable.id, studentId))
       .limit(1);
-    if (student.length === 0)
-      return c.json({ error: "Student not found" }, 404);
+    if (!rows.length) return c.json({ error: "Student not found" }, 404);
+
+    const { student, guardian, grade } = rows[0];
 
     const faces = await db
       .select({
@@ -271,9 +390,16 @@ students.get("/:id", async (c) => {
       .orderBy(studentFacesTable.createdAt);
 
     return c.json({
-      ...student[0],
+      ...student,
       face_ids: faces.map((f) => f.faceId),
       photo_urls: faces.map((f) => f.photoUrl ?? ""),
+      guardian: guardian ?? null,
+      gradeDisplayName: grade?.displayName ?? null,
+    } satisfies Student & {
+      face_ids: string[];
+      photo_urls: string[];
+      guardian: LegalGuardian | null;
+      gradeDisplayName: string | null;
     });
   } catch (error) {
     console.error("Error fetching student:", error);

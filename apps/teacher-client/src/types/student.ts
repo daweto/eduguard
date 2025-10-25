@@ -1,49 +1,44 @@
-// Student types matching backend API
+import type { LegalGuardian, GuardianProfileInput } from "@/types/guardian";
 
 export interface Student {
   id: string;
-  name: string;
-  grade: string | null;
-  guardian_id: string | null;
-  guardian_name: string;
-  guardian_phone: string;
-  guardian_email: string | null;
-  preferred_language: string;
-  enrollment_date: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  secondLastName: string | null;
+  identificationNumber: string;
+  gradeId: string | null;
+  guardianId: string;
+  guardianName: string;
+  guardianPhone: string;
+  guardianEmail: string | null;
+  preferredLanguage: string;
+  enrollmentDate: string;
   status: string;
-  aws_collection_id: string;
-  created_at: string;
+  awsCollectionId: string | null;
+  metadata: string | null;
+  createdAt: string;
   photo_urls?: string[];
   face_ids?: string[];
+  guardian?: LegalGuardian | null;
+  gradeDisplayName?: string | null;
 }
 
-export interface EnrollmentFormData {
-  name: string;
-  grade: string;
-  guardian_name: string;
-  guardian_phone: string;
-  guardian_email: string;
-  photos: File[];
-}
-
-export interface PhotoPreview {
-  file: File;
-  preview: string;
-  base64?: string;
+export interface StudentProfileInput {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  secondLastName?: string;
+  identificationNumber: string;
+  gradeId?: string;
 }
 
 export interface EnrollStudentRequest {
-  name: string;
-  grade?: string;
-  guardian_id?: string;
-  guardian_name: string;
-  guardian_phone: string;
-  guardian_email?: string;
-  // Preferred: keys of photos uploaded directly to R2
+  student: StudentProfileInput;
+  guardian: GuardianProfileInput;
   photo_keys?: string[];
-  // Legacy fallback: base64 payloads
   photos?: {
-    data: string; // base64 encoded
+    data: string;
     filename: string;
   }[];
 }
