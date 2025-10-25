@@ -14,7 +14,6 @@ This is a **Turborepo monorepo** using **pnpm** for package management.
 
 - **apps/api-v2**: Cloudflare Workers backend API using Hono framework
 - **apps/teacher-client**: React frontend (Vite + TypeScript + TailwindCSS v4)
-- **packages/logger**: Isomorphic logging utility
 - **packages/config-eslint**: Shared ESLint configuration
 - **packages/config-typescript**: Shared TypeScript configurations
 
@@ -96,7 +95,7 @@ pnpm cf-typegen
 
 Packages reference each other using workspace protocol:
 ```json
-"@repo/logger": "workspace:*"
+"@repo/eslint-config": "workspace:*",
 ```
 
 ### Turborepo Task Dependencies
@@ -145,6 +144,6 @@ The spec defines a Cloudflare-first architecture with three specialized AI agent
 ## Development Workflow
 
 1. Make changes in specific workspace (`apps/*` or `packages/*`)
-2. If changing shared packages (logger, configs), rebuild them if needed
+2. If changing shared packages (configs), rebuild them if needed
 3. Turborepo caches tasks, use `--force` to bypass cache if needed
 4. For Cloudflare Workers, test locally with `wrangler dev` before deploying
