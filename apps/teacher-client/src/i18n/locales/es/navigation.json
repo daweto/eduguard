@@ -1,0 +1,19 @@
+{
+  "sidebar": {
+    "label": "Navegación",
+    "enroll": "Inscribir Estudiante",
+    "roster": "Listado de Estudiantes",
+    "guardians": "Apoderados"
+  },
+  "breadcrumbs": {
+    "home": "Inicio",
+    "enroll": "Inscribir",
+    "roster": "Listado",
+    "guardians": "Apoderados"
+  },
+  "tooltips": {
+    "enroll": "Inscribir",
+    "roster": "Listado",
+    "guardians": "Apoderados"
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,10 @@ import {
   ApiError,
   getStages,
   getGrades,
+  getGuardians,
 } from '@/lib/api';
 import type { Grade, Stage } from '@/types/grade';
+import type { LegalGuardian } from '@/types/guardian';
 import { CheckCircle2, Loader2, Upload, X } from 'lucide-react';
 import {
   Select,
@@ -33,41 +36,26 @@ import {
   SelectSeparator,
 } from '@/components/ui/select';
 
-const photoSchema = z.object({
-  file: z.instanceof(File, { message: 'Please select a valid image file.' }),
-  preview: z.string(),
-  base64: z.string().optional(),
-});
+type PhotoData = {
+  file: File;
+  preview: string;
+  base64?: string;
+};
 
-const enrollmentFormSchema = z.object({
-  name: z.string().trim().min(1, 'Student name is required'),
-  grade: z
-    .string()
-    .trim()
-    .max(50, 'Grade must be 50 characters or less')
-    .optional()
-    .or(z.literal('')),
-  guardian_name: z.string().trim().min(1, 'Guardian name is required'),
-  guardian_phone: z
-    .string()
-    .trim()
-    .min(7, 'Guardian phone number is required')
-    .max(20, 'Guardian phone number is too long')
-    .regex(/^[-+()\d\s]+$/, 'Enter a valid phone number'),
-  guardian_email: z
-    .string()
-    .trim()
-    .email('Enter a valid email')
-    .or(z.literal(''))
-    .optional(),
-  photos: z.array(photoSchema).min(1, 'Upload at least one photo').max(3, 'Maximum 3 photos allowed'),
-});
-
-type EnrollmentFormValues = z.infer<typeof enrollmentFormSchema>;
+type EnrollmentFormValues = {
+  name: string;
+  grade: string;
+  guardian_id?: string;
+  guardian_name: string;
+  guardian_phone: string;
+  guardian_email?: string;
+  photos: PhotoData[];
+};
 
 const defaultValues: EnrollmentFormValues = {
   name: '',
   grade: '',
+  guardian_id: undefined,
   guardian_name: '',
   guardian_phone: '',
   guardian_email: '',
@@ -79,11 +67,45 @@ interface EnrollmentFormProps {
 }
 
 export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
+  const { t } = useTranslation('enrollment');
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [gradeGroups, setGradeGroups] = useState<Array<Stage & { grades: Grade[] }>>([]);
   const [gradesLoading, setGradesLoading] = useState(true);
   const [gradesError, setGradesError] = useState<string | null>(null);
+  const [guardians, setGuardians] = useState<LegalGuardian[]>([]);
+  const [guardiansLoading, setGuardiansLoading] = useState(true);
+  const [guardiansError, setGuardiansError] = useState<string | null>(null);
+
+  const photoSchema = z.object({
+    file: z.instanceof(File, { message: t('fields.photos.invalidFile') }),
+    preview: z.string(),
+    base64: z.string().optional(),
+  });
+
+  const enrollmentFormSchema = z.object({
+    name: z.string().trim().min(1, t('fields.studentName.required')),
+    grade: z
+      .string()
+      .trim()
+      .max(50, t('common:validation.maxLength', { max: 50 }))
+      .or(z.literal('')),
+    guardian_id: z.string().trim().optional(),
+    guardian_name: z.string().trim().min(1, t('fields.guardianName.required')),
+    guardian_phone: z
+      .string()
+      .trim()
+      .min(7, t('fields.phone.required'))
+      .max(20, t('fields.phone.tooLong'))
+      .regex(/^[-+()\d\s]+$/, t('fields.phone.invalid')),
+    guardian_email: z
+      .string()
+      .trim()
+      .email(t('fields.email.invalid'))
+      .or(z.literal(''))
+      .optional(),
+    photos: z.array(photoSchema).min(1, t('fields.photos.minRequired')).max(3, t('fields.photos.maxExceeded')),
+  });
 
   const form = useForm({
     defaultValues,
@@ -103,6 +125,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
           {
             name: value.name,
             grade: grade ? grade : undefined,
+            guardian_id: value.guardian_id || undefined,
             guardian_name: value.guardian_name,
             guardian_phone: value.guardian_phone,
             guardian_email: guardianEmail ? guardianEmail : undefined,
@@ -117,9 +140,9 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
         onSuccess?.();
       } catch (error) {
         if (error instanceof ApiError) {
-          setServerError(`Error: ${error.message}`);
+          setServerError(t('messages.error', { message: error.message }));
         } else {
-          setServerError('Failed to enroll student. Please try again.');
+          setServerError(t('messages.genericError'));
         }
         console.error('Enrollment error:', error);
       }
@@ -139,10 +162,12 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
     async function loadGrades() {
       setGradesLoading(true);
+      setGuardiansLoading(true);
       try {
-        const [stagesResponse, gradesResponse] = await Promise.all([
+        const [stagesResponse, gradesResponse, guardiansResponse] = await Promise.all([
           getStages(),
           getGrades(),
+          getGuardians(),
         ]);
 
         if (!isMounted) return;
@@ -161,13 +186,17 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
         setGradeGroups(grouped);
         setGradesError(null);
+        setGuardians(guardiansResponse.guardians);
+        setGuardiansError(null);
       } catch (error) {
         console.error('Failed to load grade metadata', error);
         if (!isMounted) return;
-        setGradesError('No pudimos cargar la lista de cursos. Intenta nuevamente.');
+        setGradesError(t('fields.grade.loadError'));
+        setGuardiansError('No pudimos cargar la lista de apoderados.');
       } finally {
         if (isMounted) {
           setGradesLoading(false);
+          setGuardiansLoading(false);
         }
       }
     }
@@ -185,9 +214,9 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Enroll New Student</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          Add a new student to the system with 1-3 portrait photos for facial recognition
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -200,7 +229,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
           noValidate
         >
           <FieldSet className="space-y-4">
-            <FieldLegend variant="label">Student Information</FieldLegend>
+            <FieldLegend variant="label">{t('sections.studentInfo')}</FieldLegend>
             <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <form.Field name="name">
                 {(field) => {
@@ -209,7 +238,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
                   return (
                     <Field data-invalid={showError} className="space-y-2">
-                      <FieldLabel htmlFor={field.name}>Student Name *</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('fields.studentName.label')} *</FieldLabel>
                       <FieldContent>
                         <Input
                           id={field.name}
@@ -217,7 +246,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                           value={field.state.value}
                           onChange={(event) => field.handleChange(event.target.value)}
                           onBlur={field.handleBlur}
-                          placeholder="Sofia Martinez"
+                          placeholder={t('fields.studentName.placeholder')}
                           aria-invalid={showError}
                           autoComplete="name"
                           className="text-base"
@@ -234,17 +263,18 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                   const hasErrors = field.state.meta.errors.length > 0;
                   const showError = formFieldErrorVisible(field.state.meta.isTouched, hasErrors);
                   const placeholder = gradesLoading
-                    ? 'Cargando cursos...'
-                    : 'Selecciona el curso';
+                    ? t('fields.grade.loading')
+                    : t('fields.grade.placeholder');
 
                   return (
                     <Field data-invalid={showError} className="space-y-2">
-                      <FieldLabel htmlFor={field.name}>Grade</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('fields.grade.label')}</FieldLabel>
                       <FieldContent>
                         <Select
                           value={field.state.value || undefined}
                           onValueChange={(value) => {
-                            field.handleChange(value);
+                            const next = value === 'none' ? '' : value;
+                            field.handleChange(next);
                             field.handleBlur();
                           }}
                           disabled={gradesLoading || !!gradesError}
@@ -257,7 +287,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                             <SelectValue placeholder={placeholder} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Sin curso asignado</SelectItem>
+                            <SelectItem value="none">{t('fields.grade.none')}</SelectItem>
                             <SelectSeparator />
                             {gradeGroups.map((stage) => (
                               <SelectGroup key={stage.id}>
@@ -284,8 +314,44 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
           </FieldSet>
 
           <FieldSet className="space-y-4">
-            <FieldLegend variant="label">Guardian Information</FieldLegend>
+            <FieldLegend variant="label">{t('sections.guardianInfo')}</FieldLegend>
             <FieldGroup className="space-y-4">
+              <form.Field name="guardian_id">
+                {(field) => {
+                  return (
+                    <Field className="space-y-2">
+                      <FieldLabel htmlFor={field.name}>{t('fields.guardianSelect.label', { defaultValue: 'Select Existing Guardian' })}</FieldLabel>
+                      <FieldContent>
+                        <Select
+                          value={field.state.value}
+                          onValueChange={(value) => {
+                            field.handleChange(value);
+                            field.handleBlur();
+                            const selected = guardians.find((g) => g.id === value);
+                            if (selected) {
+                              form.setFieldValue('guardian_name', selected.name);
+                              form.setFieldValue('guardian_phone', selected.phone);
+                              form.setFieldValue('guardian_email', selected.email ?? '');
+                            }
+                          }}
+                          disabled={guardiansLoading || !!guardiansError}
+                        >
+                          <SelectTrigger id={field.name} className="w-full justify-between text-left text-base">
+                            <SelectValue placeholder={guardiansLoading ? 'Cargando apoderados...' : 'Selecciona un apoderado'} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {guardians.map((g) => (
+                              <SelectItem key={g.id} value={g.id}>
+                                {g.name} — {g.phone}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FieldContent>
+                    </Field>
+                  );
+                }}
+              </form.Field>
               <form.Field name="guardian_name">
                 {(field) => {
                   const hasErrors = field.state.meta.errors.length > 0;
@@ -293,7 +359,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
                   return (
                     <Field data-invalid={showError} className="space-y-2">
-                      <FieldLabel htmlFor={field.name}>Guardian Name *</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{t('fields.guardianName.label')} *</FieldLabel>
                       <FieldContent>
                         <Input
                           id={field.name}
@@ -301,7 +367,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                           value={field.state.value}
                           onChange={(event) => field.handleChange(event.target.value)}
                           onBlur={field.handleBlur}
-                          placeholder="Maria Martinez"
+                          placeholder={t('fields.guardianName.placeholder')}
                           aria-invalid={showError}
                           autoComplete="name"
                           className="text-base"
@@ -321,7 +387,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
                     return (
                       <Field data-invalid={showError} className="space-y-2">
-                        <FieldLabel htmlFor={field.name}>Phone Number *</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>{t('fields.phone.label')} *</FieldLabel>
                         <FieldContent>
                           <Input
                             id={field.name}
@@ -330,7 +396,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                             value={field.state.value}
                             onChange={(event) => field.handleChange(event.target.value)}
                             onBlur={field.handleBlur}
-                            placeholder="+56912345678"
+                            placeholder={t('fields.phone.placeholder')}
                             aria-invalid={showError}
                             autoComplete="tel"
                             className="text-base"
@@ -349,7 +415,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
                     return (
                       <Field data-invalid={showError} className="space-y-2">
-                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>{t('fields.email.label')}</FieldLabel>
                         <FieldContent>
                           <Input
                             id={field.name}
@@ -358,7 +424,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                             value={field.state.value}
                             onChange={(event) => field.handleChange(event.target.value)}
                             onBlur={field.handleBlur}
-                            placeholder="maria@example.com"
+                            placeholder={t('fields.email.placeholder')}
                             aria-invalid={showError}
                             autoComplete="email"
                             className="text-base"
@@ -374,7 +440,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
           </FieldSet>
 
           <FieldSet className="space-y-4">
-            <FieldLegend variant="label">Student Photos</FieldLegend>
+            <FieldLegend variant="label">{t('sections.photos')}</FieldLegend>
             <form.Field name="photos" mode="array">
               {(field) => {
                 const hasErrors = field.state.meta.errors.length > 0;
@@ -389,7 +455,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
 
                   const remainingSlots = Math.max(0, 3 - photos.length);
                   if (!remainingSlots) {
-                    setServerError('Maximum 3 photos allowed');
+                    setServerError(t('fields.photos.maxExceeded'));
                     field.setMeta((prev) => ({ ...prev, isTouched: true }));
                     event.target.value = '';
                     return;
@@ -420,7 +486,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                 return (
                   <Field data-invalid={showError} className="space-y-4">
                     <FieldDescription>
-                      Upload 1-3 clear photos of the student. Drag-and-drop or click the upload area.
+                      {t('fields.photos.description')}
                     </FieldDescription>
 
                     {photos.length > 0 && (
@@ -429,14 +495,14 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                           <div key={photo.preview} className="relative group">
                             <img
                               src={photo.preview}
-                              alt={`Preview ${index + 1}`}
+                              alt={t('fields.photos.previewAlt', { number: index + 1 })}
                               className="w-full h-40 object-cover rounded-lg border-2 border-border"
                             />
                             <button
                               type="button"
                               onClick={() => removePhoto(index)}
                               className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                              aria-label={`Remove photo ${index + 1}`}
+                              aria-label={t('fields.photos.removeAlt', { number: index + 1 })}
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -454,7 +520,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
                             <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">
-                              Click to upload photo ({photos.length}/3)
+                              {t('fields.photos.uploadLabel', { count: photos.length })}
                             </p>
                           </div>
                           <Input
@@ -486,7 +552,7 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
           {success && (
             <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              <span>Student enrolled successfully!</span>
+              <span>{t('messages.success')}</span>
             </div>
           )}
 
@@ -494,10 +560,10 @@ export function EnrollmentForm({ onSuccess }: EnrollmentFormProps) {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Enrolling Student...
+                {t('button.submitting')}
               </>
             ) : (
-              'Enroll Student'
+              t('button.submit')
             )}
           </Button>
         </form>

@@ -1,0 +1,58 @@
+{
+  "title": "Inscribir Nuevo Estudiante",
+  "description": "Agrega un nuevo estudiante al sistema con 1-3 fotos de retrato para reconocimiento facial",
+  "sections": {
+    "studentInfo": "Información del Estudiante",
+    "guardianInfo": "Información del Apoderado",
+    "photos": "Fotos del Estudiante"
+  },
+  "fields": {
+    "studentName": {
+      "label": "Nombre del Estudiante",
+      "placeholder": "Sofia Martinez",
+      "required": "El nombre del estudiante es requerido"
+    },
+    "grade": {
+      "label": "Curso",
+      "placeholder": "Selecciona el curso",
+      "loading": "Cargando cursos...",
+      "none": "Sin curso asignado",
+      "loadError": "No pudimos cargar la lista de cursos. Intenta nuevamente."
+    },
+    "guardianName": {
+      "label": "Nombre del Apoderado",
+      "placeholder": "Maria Martinez",
+      "required": "El nombre del apoderado es requerido"
+    },
+    "phone": {
+      "label": "Número de Teléfono",
+      "placeholder": "+56912345678",
+      "required": "El número de teléfono del apoderado es requerido",
+      "tooLong": "El número de teléfono es demasiado largo",
+      "invalid": "Ingresa un número de teléfono válido"
+    },
+    "email": {
+      "label": "Correo Electrónico",
+      "placeholder": "maria@example.com",
+      "invalid": "Ingresa un correo electrónico válido"
+    },
+    "photos": {
+      "description": "Sube 1-3 fotos claras del estudiante. Arrastra y suelta o haz clic en el área de carga.",
+      "uploadLabel": "Haz clic para subir foto ({{count}}/3)",
+      "previewAlt": "Vista previa {{number}}",
+      "removeAlt": "Eliminar foto {{number}}",
+      "minRequired": "Sube al menos una foto",
+      "maxExceeded": "Máximo 3 fotos permitidas",
+      "invalidFile": "Por favor selecciona un archivo de imagen válido"
+    }
+  },
+  "button": {
+    "submit": "Inscribir Estudiante",
+    "submitting": "Inscribiendo Estudiante..."
+  },
+  "messages": {
+    "success": "¡Estudiante inscrito exitosamente!",
+    "error": "Error: {{message}}",
+    "genericError": "Falló la inscripción del estudiante. Por favor intenta nuevamente."
+  }
+}

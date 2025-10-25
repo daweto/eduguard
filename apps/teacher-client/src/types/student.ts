@@ -4,6 +4,7 @@ export interface Student {
   id: string;
   name: string;
   grade: string | null;
+  guardian_id: string | null;
   guardian_name: string;
   guardian_phone: string;
   guardian_email: string | null;
@@ -34,10 +35,14 @@ export interface PhotoPreview {
 export interface EnrollStudentRequest {
   name: string;
   grade?: string;
+  guardian_id?: string;
   guardian_name: string;
   guardian_phone: string;
   guardian_email?: string;
-  photos: {
+  // Preferred: keys of photos uploaded directly to R2
+  photo_keys?: string[];
+  // Legacy fallback: base64 payloads
+  photos?: {
     data: string; // base64 encoded
     filename: string;
   }[];

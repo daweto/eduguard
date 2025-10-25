@@ -1,0 +1,6 @@
+{
+  "generic": "Algo salió mal. Por favor intenta nuevamente.",
+  "network": "Error de conexión. Verifica tu conexión a internet.",
+  "notFound": "No se encontró el recurso solicitado.",
+  "serverError": "Error del servidor. Por favor intenta más tarde."
+}

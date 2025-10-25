@@ -1,0 +1,17 @@
+{
+  "appName": "EduGuard",
+  "buttons": {
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "remove": "Eliminar",
+    "upload": "Subir"
+  },
+  "validation": {
+    "required": "Este campo es requerido",
+    "invalidEmail": "Ingresa un correo electrónico válido",
+    "invalidPhone": "Ingresa un número de teléfono válido",
+    "maxLength": "Debe tener {{max}} caracteres o menos",
+    "minLength": "Debe tener al menos {{min}} caracteres"
+  },
+  "copyright": "© {{year}} EduGuard"
+}

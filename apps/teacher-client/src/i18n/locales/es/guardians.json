@@ -1,0 +1,37 @@
+{
+  "title": "Registrar Apoderado",
+  "description": "Agrega un apoderado para asignarlo a estudiantes",
+  "form": {
+    "name": {
+      "label": "Nombre",
+      "placeholder": "Maria Martinez"
+    },
+    "phone": {
+      "label": "Teléfono",
+      "placeholder": "+56912345678"
+    },
+    "email": {
+      "label": "Correo electrónico",
+      "placeholder": "maria@example.com"
+    },
+    "submit": "Crear Apoderado",
+    "submitting": "Creando Apoderado..."
+  },
+  "table": {
+    "title": "Apoderados",
+    "description": "Todos los apoderados registrados",
+    "loading": "Cargando...",
+    "headers": {
+      "name": "Nombre",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "language": "Idioma Preferido"
+    }
+  },
+  "messages": {
+    "loadError": "No pudimos cargar la lista de apoderados.",
+    "createError": "No se pudo crear el apoderado"
+  }
+}
+
+
