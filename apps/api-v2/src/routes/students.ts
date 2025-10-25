@@ -189,15 +189,21 @@ students.post("/", async (c) => {
     const collectionId =
       c.env.AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default";
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = c.env;
-    let rek: RekognitionClient | null = null;
-    if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && AWS_REGION) {
-      rek = createRekognition({
-        AWS_ACCESS_KEY_ID,
-        AWS_SECRET_ACCESS_KEY,
-        AWS_REGION,
-        AWS_REKOGNITION_COLLECTION: collectionId,
-      });
+    if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+      return c.json(
+        {
+          error:
+            "AWS Rekognition credentials are required for enrollment.",
+        },
+        500,
+      );
     }
+    const rek = createRekognition({
+      AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY,
+      AWS_REGION,
+      AWS_REKOGNITION_COLLECTION: collectionId,
+    });
 
     const saveFace = async (
       index: number,
@@ -211,39 +217,26 @@ students.post("/", async (c) => {
           await c.env.PHOTOS.delete(sourceKey).catch(() => {});
         }
 
-        let faceId = `mock-face-${crypto.randomUUID()}`;
-        let qualityScore: number | undefined;
-        if (rek) {
-          try {
-            const result = await indexFaceBytes({
-              client: rek,
-              collectionId,
-              bytes,
-              externalImageId: `student_${studentId}_photo_${String(index + 1)}`,
-            });
-            faceId = result.faceId;
-            qualityScore =
-              typeof result.qualityScore === "number"
-                ? result.qualityScore
-                : undefined;
-          } catch (awsError) {
-            console.warn(
-              "AWS Rekognition indexing failed; storing mock face ID",
-              awsError,
-            );
-          }
-        }
+        const result = await indexFaceBytes({
+          client: rek,
+          collectionId,
+          bytes,
+          externalImageId: `student_${studentId}_photo_${String(index + 1)}`,
+        });
 
         await db.insert(studentFacesTable).values({
           id: crypto.randomUUID(),
           studentId,
-          faceId,
+          faceId: result.faceId,
           photoUrl: destKey,
           indexedAt: new Date().toISOString(),
-          qualityScore: qualityScore ?? 0.95,
+          qualityScore:
+            typeof result.qualityScore === "number"
+              ? result.qualityScore
+              : null,
         });
 
-        faceIds.push(faceId);
+        faceIds.push(result.faceId);
       } catch (error: unknown) {
         console.error(`Error processing photo ${String(index + 1)}:`, error);
       }
