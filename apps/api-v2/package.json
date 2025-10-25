@@ -7,10 +7,12 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "drizzle-orm": "^0.44.7",
     "hono": "^4.10.3"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "drizzle-kit": "^0.31.5",
     "wrangler": "^4.4.0"
   }
 }
