@@ -4,9 +4,17 @@ import importX from "eslint-plugin-import-x";
 import nodePlugin from "eslint-plugin-n";
 import tseslint from "typescript-eslint";
 
+const tsFilePatterns = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
+
+const withTsFiles = (configs) =>
+  configs.map((config) => ({
+    ...config,
+    files: config.files ?? tsFilePatterns,
+  }));
+
 const typeCheckedConfigs = [
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...withTsFiles(tseslint.configs.strictTypeChecked),
+  ...withTsFiles(tseslint.configs.stylisticTypeChecked),
 ];
 
 const edgeRuntimeGlobals = {
@@ -52,10 +60,14 @@ const typescriptRuleOverrides = {
  * @type {import("eslint").Linter.Config[]}
  */
 export const config = [
+  {
+    ignores: [".wrangler/**/*", "**/.wrangler/**/*"],
+  },
   js.configs.recommended,
   nodePlugin.configs["flat/recommended"],
   ...typeCheckedConfigs,
   {
+    files: ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "import-x": importX,
@@ -64,6 +76,9 @@ export const config = [
       globals: edgeRuntimeGlobals,
       ecmaVersion: 2021,
       sourceType: "module",
+      parserOptions: {
+        project: true,
+      },
     },
     rules: {
       curly: ["error", "all"],
