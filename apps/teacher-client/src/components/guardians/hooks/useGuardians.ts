@@ -1,9 +1,10 @@
 /**
- * Hook for fetching and managing guardians
+ * Hook for fetching and managing guardians using React Query
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getGuardians, createGuardian, ApiError } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 import type { LegalGuardian, CreateGuardianRequest } from '@/types/guardian';
 
 export interface UseGuardiansReturn {
@@ -11,62 +12,69 @@ export interface UseGuardiansReturn {
   loading: boolean;
   error: string | null;
   creating: boolean;
-  refetch: () => Promise<void>;
+  refetch: () => void;
   create: (data: CreateGuardianRequest) => Promise<LegalGuardian>;
 }
 
 export function useGuardians(): UseGuardiansReturn {
-  const [guardians, setGuardians] = useState<LegalGuardian[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [creating, setCreating] = useState(false);
+  const queryClient = useQueryClient();
 
-  const loadGuardians = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
+  // Fetch guardians query
+  const {
+    data,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.guardians,
+    queryFn: async () => {
       const response = await getGuardians();
-      setGuardians(response.guardians);
-    } catch (err) {
-      console.error('Failed to load guardians:', err);
-      setError('No pudimos cargar la lista de apoderados. Intenta nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const create = useCallback(
-    async (data: CreateGuardianRequest): Promise<LegalGuardian> => {
-      setCreating(true);
-      setError(null);
-
-      try {
-        const newGuardian = await createGuardian(data);
-        setGuardians((prev) => [...prev, newGuardian]);
-        return newGuardian;
-      } catch (err) {
-        const message =
-          err instanceof ApiError ? err.message : 'No pudimos crear el apoderado. Intenta nuevamente.';
-        setError(message);
-        throw err;
-      } finally {
-        setCreating(false);
-      }
+      return response.guardians;
     },
-    [],
-  );
+  });
 
-  useEffect(() => {
-    void loadGuardians();
-  }, [loadGuardians]);
+  // Create guardian mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateGuardianRequest) => {
+      return await createGuardian(data);
+    },
+    onSuccess: (newGuardian) => {
+      // Optimistic update: add new guardian to cache immediately
+      queryClient.setQueryData<LegalGuardian[]>(queryKeys.guardians, (old) => {
+        return old ? [...old, newGuardian] : [newGuardian];
+      });
+
+      // Also invalidate to ensure data is fresh
+      queryClient.invalidateQueries({ queryKey: queryKeys.guardians });
+    },
+    onError: (err: unknown) => {
+      console.error('Failed to create guardian:', err);
+    },
+  });
+
+  // Create handler
+  const create = async (data: CreateGuardianRequest): Promise<LegalGuardian> => {
+    try {
+      return await createMutation.mutateAsync(data);
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : 'No pudimos crear el apoderado. Intenta nuevamente.';
+      throw new Error(message);
+    }
+  };
 
   return {
-    guardians,
-    loading,
-    error,
-    creating,
-    refetch: loadGuardians,
+    guardians: data ?? [],
+    loading: isLoading,
+    error: queryError
+      ? queryError instanceof ApiError
+        ? queryError.message
+        : 'No pudimos cargar la lista de apoderados. Intenta nuevamente.'
+      : null,
+    creating: createMutation.isPending,
+    refetch: () => {
+      refetch();
+    },
     create,
   };
 }

@@ -153,8 +153,10 @@ export function StudentEnrollmentForm({
           value.photos.map((photo) => photo.file),
         );
 
+        // Revoke object URLs to free memory
         value.photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
 
+        // Reset form before calling onSuccess (which may redirect)
         formApi.reset();
         setSuccess(true);
         onSuccess?.();
@@ -210,9 +212,20 @@ export function StudentEnrollmentForm({
         event.preventDefault();
         form.handleSubmit();
       }}
-      className="space-y-6"
+      className="space-y-6 relative"
       noValidate
     >
+      {/* Loading overlay */}
+      {isSubmitting && (
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-muted-foreground">
+              {t("messages.enrolling")}
+            </p>
+          </div>
+        </div>
+      )}
       <FieldSet className="space-y-4">
         <FieldLegend variant="label">{t("sections.studentInfo")}</FieldLegend>
         <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -608,17 +621,10 @@ export function StudentEnrollmentForm({
 
       <Button
         type="submit"
-        disabled={isSubmitting}
+        loading={isSubmitting}
         className="w-full h-12 text-base"
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {t("button.submitting")}
-          </>
-        ) : (
-          t("button.submit")
-        )}
+        {isSubmitting ? t("button.submitting") : t("button.submit")}
       </Button>
     </form>
   );

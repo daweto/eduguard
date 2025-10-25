@@ -4,12 +4,8 @@ import { useStudents } from './hooks/useStudents';
 import { Loader2, Users, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface StudentRosterProps {
-  refreshTrigger?: number;
-}
-
-export function StudentRoster({ refreshTrigger }: StudentRosterProps) {
-  const { students, loading, error, deleting, refetch, remove } = useStudents(refreshTrigger);
+export function StudentRoster() {
+  const { students, loading, error, deleting, refetch, remove } = useStudents();
 
   if (loading) {
     return (

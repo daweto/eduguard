@@ -99,6 +99,7 @@
   },
   "messages": {
     "success": "¡Estudiante inscrito exitosamente!",
+    "enrolling": "Inscribiendo estudiante...",
     "error": "Error: {{message}}",
     "genericError": "Falló la inscripción del estudiante. Intenta nuevamente."
   }

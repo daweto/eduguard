@@ -1,0 +1,24 @@
+{
+  "page": {
+    "title": "Estudiantes",
+    "description": "Gestiona los estudiantes de tu institución"
+  },
+  "cards": {
+    "enroll": {
+      "title": "Inscribir Estudiante",
+      "description": "Registra un nuevo estudiante en el sistema",
+      "action": "Ir a Inscripción"
+    },
+    "roster": {
+      "title": "Listado de Estudiantes",
+      "description": "Ver y gestionar todos los estudiantes",
+      "action": "Ver Listado"
+    },
+    "grades": {
+      "title": "Calificaciones",
+      "description": "Gestionar notas y evaluaciones",
+      "action": "Ver Calificaciones"
+    }
+  }
+}
+

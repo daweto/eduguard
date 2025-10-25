@@ -6,6 +6,8 @@ import roster from './locales/es/roster.json';
 import navigation from './locales/es/navigation.json';
 import errors from './locales/es/errors.json';
 import guardians from './locales/es/guardians.json';
+import students from './locales/es/students.json';
+import grades from './locales/es/grades.json';
 
 const resources = {
   es: {
@@ -15,6 +17,8 @@ const resources = {
     navigation,
     errors,
     guardians,
+    students,
+    grades,
   },
 };
 

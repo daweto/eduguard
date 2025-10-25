@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/field";
 import type { CreateGuardianRequest } from "@/types/guardian";
 import { zRutString } from "@/lib/helpers/rut";
-import { Loader2 } from "lucide-react";
 import { GuardianFormFields } from "./GuardianFormFields";
 
 interface GuardianCreateFormProps {
@@ -82,17 +81,10 @@ export function GuardianCreateForm({
 
       <Button
         type="submit"
-        disabled={form.state.isSubmitting}
+        loading={form.state.isSubmitting}
         className="w-full"
       >
-        {form.state.isSubmitting ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            {t("form.submitting")}
-          </>
-        ) : (
-          t("form.submit")
-        )}
+        {form.state.isSubmitting ? t("form.submitting") : t("form.submit")}
       </Button>
     </form>
   );

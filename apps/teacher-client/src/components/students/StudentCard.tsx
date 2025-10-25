@@ -1,8 +1,18 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from '@/components/ui/carousel';
+import { ImagePlaceholder } from '@/components/ui/image-placeholder';
 import type { Student } from '@/types/student';
 import { User, Phone, Mail, GraduationCap, Trash2, IdCard } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface StudentCardProps {
   student: Student;
@@ -10,7 +20,11 @@ interface StudentCardProps {
 }
 
 export function StudentCard({ student, onDelete }: StudentCardProps) {
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const { t } = useTranslation('roster');
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
   const photos = student.photo_urls || [];
 
   const studentFullName = [
@@ -32,67 +46,84 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
       ].filter(Boolean).join(' ')
     : student.guardianName;
 
-  const nextPhoto = () => {
-    if (photos.length > 1) {
-      setCurrentPhotoIndex((prev) => (prev + 1) % photos.length);
-    }
-  };
+  // Track carousel state
+  useEffect(() => {
+    if (!carouselApi) return;
 
-  const prevPhoto = () => {
-    if (photos.length > 1) {
-      setCurrentPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length);
-    }
-  };
+    setCount(carouselApi.scrollSnapList().length);
+    setCurrent(carouselApi.selectedScrollSnap());
+
+    carouselApi.on('select', () => {
+      setCurrent(carouselApi.selectedScrollSnap());
+    });
+  }, [carouselApi]);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
-        {/* Photo section */}
+        {/* Photo carousel section */}
         {photos.length > 0 ? (
-          <div className="relative h-48 bg-muted">
-            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-              <User className="w-20 h-20 text-muted-foreground/30" />
-              {/* In production, display actual photo:
-              <img
-                src={photos[currentPhotoIndex]}
-                alt={studentFullName}
-                className="w-full h-full object-cover"
-              />
-              */}
-            </div>
+          <div className="relative">
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent>
+                {photos.map((photoUrl, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative h-48 bg-muted">
+                      <img
+                        src={photoUrl}
+                        alt={`${studentFullName} - Photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Replace with placeholder if image fails to load
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            e.currentTarget.style.display = 'none';
+                            parent.classList.add('flex', 'items-center', 'justify-center', 'bg-gradient-to-br', 'from-primary/20', 'to-primary/5');
+                            const placeholder = document.createElement('div');
+                            placeholder.innerHTML = '<svg class="w-20 h-20 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                            parent.appendChild(placeholder.firstElementChild!);
+                          }
+                        }}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
 
-            {/* Photo navigation (if multiple photos) */}
+              {/* Navigation buttons (only show if multiple photos) */}
+              {photos.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-2 bg-black/50 text-white hover:bg-black/70 border-0" />
+                  <CarouselNext className="right-2 bg-black/50 text-white hover:bg-black/70 border-0" />
+                </>
+              )}
+            </Carousel>
+
+            {/* Photo indicators (only show if multiple photos) */}
             {photos.length > 1 && (
-              <>
-                <button
-                  onClick={prevPhoto}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                >
-                  ‹
-                </button>
-                <button
-                  onClick={nextPhoto}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                >
-                  ›
-                </button>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                  {photos.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-2 h-2 rounded-full ${
-                        index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                {Array.from({ length: count }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === current ? 'bg-white w-4' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             )}
           </div>
         ) : (
-          <div className="h-48 bg-muted flex items-center justify-center">
-            <User className="w-20 h-20 text-muted-foreground/30" />
-          </div>
+          <ImagePlaceholder
+            className="h-48"
+            name={studentFullName}
+          />
         )}
       </div>
 
@@ -115,36 +146,36 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
         {/* Guardian info */}
         <div className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
-            <User className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+            <User className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
             <div>
-              <p className="text-muted-foreground text-xs">Guardian</p>
+              <p className="text-muted-foreground text-xs">{t('studentCard.guardian')}</p>
               <p className="font-medium">{guardianFullName}</p>
             </div>
           </div>
 
           {guardianSource && (
             <div className="flex items-start gap-2">
-              <IdCard className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+              <IdCard className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-muted-foreground text-xs">Identificación</p>
+                <p className="text-muted-foreground text-xs">{t('studentCard.identification')}</p>
                 <p className="font-medium">{guardianSource.identificationNumber}</p>
               </div>
             </div>
           )}
 
           <div className="flex items-start gap-2">
-            <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+            <Phone className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
             <div>
-              <p className="text-muted-foreground text-xs">Phone</p>
+              <p className="text-muted-foreground text-xs">{t('studentCard.phone')}</p>
               <p className="font-medium">{guardianSource?.phone ?? student.guardianPhone}</p>
             </div>
           </div>
 
           {(guardianSource?.email ?? student.guardianEmail) && (
             <div className="flex items-start gap-2">
-              <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+              <Mail className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-muted-foreground text-xs">Email</p>
+                <p className="text-muted-foreground text-xs">{t('studentCard.email')}</p>
                 <p className="font-medium truncate">{guardianSource?.email ?? student.guardianEmail}</p>
               </div>
             </div>
@@ -154,12 +185,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
         {/* Metadata */}
         <div className="pt-3 border-t text-xs text-muted-foreground">
           <div className="flex justify-between items-center">
-            <span>Enrolled: {new Date(student.enrollmentDate).toLocaleDateString()}</span>
-            <span className="text-green-600 dark:text-green-400 font-medium">Active</span>
+            <span>{t('studentCard.enrolled')}: {new Date(student.enrollmentDate).toLocaleDateString()}</span>
+            <span className="text-green-600 dark:text-green-400 font-medium">{t('studentCard.active')}</span>
           </div>
           {student.face_ids && student.face_ids.length > 0 && (
             <div className="mt-1">
-              {student.face_ids.length} face{student.face_ids.length > 1 ? 's' : ''} indexed
+              {t('studentCard.facesIndexed', { count: student.face_ids.length })}
             </div>
           )}
         </div>
@@ -173,7 +204,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
             onClick={() => onDelete(student.id)}
           >
             <Trash2 className="w-4 h-4 mr-2" />
-            Remove Student
+            {t('studentCard.removeStudent')}
           </Button>
         )}
       </CardContent>

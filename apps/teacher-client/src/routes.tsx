@@ -3,6 +3,9 @@ import AppLayout from "./components/layouts/AppLayout"
 import EnrollStudentPage from "./pages/EnrollStudentPage"
 import StudentRosterPage from "./pages/StudentRosterPage"
 import GuardiansPage from "./pages/GuardiansPage"
+import StudentsPage from "./pages/StudentsPage"
+import GuardiansHomePage from "./pages/GuardiansHomePage"
+import GuardiansCreatePage from "./pages/GuardiansCreatePage"
 import RouteErrorBoundary from "./components/layouts/RouteErrorBoundary"
 
 export type CrumbHandle = {
@@ -17,21 +20,48 @@ const routes: RouteObject[] = [
     errorElement: <RouteErrorBoundary />,
     handle: { breadcrumb: "Inicio", breadcrumbKey: "navigation:breadcrumbs.home" } satisfies CrumbHandle,
     children: [
-      { index: true, element: <Navigate to="/enroll" replace />, handle: { breadcrumb: "Inicio", breadcrumbKey: "navigation:breadcrumbs.home" } satisfies CrumbHandle },
+      { index: true, element: <Navigate to="/students" replace />, handle: { breadcrumb: "Inicio", breadcrumbKey: "navigation:breadcrumbs.home" } satisfies CrumbHandle },
+      // Students Domain
       {
-        path: "enroll",
-        element: <EnrollStudentPage />,
-        handle: { breadcrumb: "Inscribir", breadcrumbKey: "navigation:breadcrumbs.enroll" } satisfies CrumbHandle,
+        path: "students",
+        handle: { breadcrumb: "Estudiantes", breadcrumbKey: "navigation:breadcrumbs.students" } satisfies CrumbHandle,
+        children: [
+          {
+            index: true,
+            element: <StudentsPage />,
+          },
+          {
+            path: "enroll",
+            element: <EnrollStudentPage />,
+            handle: { breadcrumb: "Inscribir", breadcrumbKey: "navigation:breadcrumbs.enroll" } satisfies CrumbHandle,
+          },
+          {
+            path: "roster",
+            element: <StudentRosterPage />,
+            handle: { breadcrumb: "Listado", breadcrumbKey: "navigation:breadcrumbs.roster" } satisfies CrumbHandle,
+          },
+        ],
       },
-      {
-        path: "roster",
-        element: <StudentRosterPage />,
-        handle: { breadcrumb: "Listado", breadcrumbKey: "navigation:breadcrumbs.roster" } satisfies CrumbHandle,
-      },
+      // Guardians Domain
       {
         path: "guardians",
-        element: <GuardiansPage />,
         handle: { breadcrumb: "Apoderados", breadcrumbKey: "navigation:breadcrumbs.guardians" } satisfies CrumbHandle,
+        children: [
+          {
+            index: true,
+            element: <GuardiansHomePage />,
+          },
+          {
+            path: "list",
+            element: <GuardiansPage />,
+            handle: { breadcrumb: "Listado", breadcrumbKey: "navigation:breadcrumbs.guardiansList" } satisfies CrumbHandle,
+          },
+          {
+            path: "create",
+            element: <GuardiansCreatePage />,
+            handle: { breadcrumb: "Registrar", breadcrumbKey: "navigation:breadcrumbs.guardiansCreate" } satisfies CrumbHandle,
+          },
+        ],
       },
     ],
   },

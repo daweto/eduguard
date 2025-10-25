@@ -1,4 +1,3 @@
-import type { RekognitionClient } from "@aws-sdk/client-rekognition";
 import { eq, desc, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
@@ -23,7 +22,7 @@ import {
   deleteFaces as awsDeleteFaces,
 } from "../utils/aws";
 import { normalizeRut } from "../utils/rut";
-import { uploadPhoto, base64ToArrayBuffer } from "../utils/storage";
+import { uploadPhoto, base64ToArrayBuffer, generatePresignedUrls, fetchFromRemoteR2, deleteFromRemoteR2, uploadToRemoteR2 } from "../utils/storage";
 
 const students = new Hono<{ Bindings: Bindings }>();
 
@@ -46,6 +45,42 @@ const toNullable = (value?: string | null) => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
+
+async function convertKeysToPresignedUrls(
+  keys: (string | null)[],
+  env: Bindings
+): Promise<string[]> {
+  const validKeys = keys.filter((k): k is string => Boolean(k));
+  if (validKeys.length === 0) {
+    console.log("[PRESIGNED-URLS] No keys to convert");
+    return [];
+  }
+
+  console.log(`[PRESIGNED-URLS] Converting ${String(validKeys.length)} storage key(s) to presigned URLs`);
+  
+  const { R2_ACCOUNT_ID, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = env;
+  
+  // If R2 credentials are not configured, return the keys as-is
+  if (!R2_ACCOUNT_ID || !R2_BUCKET_NAME || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+    console.warn("[PRESIGNED-URLS] ⚠️  R2 credentials not configured, returning storage keys instead of presigned URLs");
+    return validKeys;
+  }
+
+  try {
+    const urls = await generatePresignedUrls(validKeys, {
+      accountId: R2_ACCOUNT_ID,
+      bucketName: R2_BUCKET_NAME,
+      accessKeyId: R2_ACCESS_KEY_ID,
+      secretAccessKey: R2_SECRET_ACCESS_KEY,
+      expiresIn: 60 * 60, // 1 hour
+    });
+    console.log(`[PRESIGNED-URLS] ✓ Generated ${String(urls.length)} presigned URL(s)`);
+    return urls;
+  } catch (error: unknown) {
+    console.error("[PRESIGNED-URLS] ❌ Failed to generate presigned URLs:", error);
+    return validKeys; // Fallback to returning keys
+  }
+}
 
 // POST /api/students - Enroll new student
 students.post("/", async (c) => {
@@ -83,6 +118,9 @@ students.post("/", async (c) => {
     const base64Count = body.photos?.length ?? 0;
     const keyCount = body.photo_keys?.length ?? 0;
     const totalPhotos = base64Count + keyCount;
+    
+    console.log(`[ENROLLMENT] Photo validation - base64: ${String(base64Count)}, presigned keys: ${String(keyCount)}, total: ${String(totalPhotos)}`);
+    
     if (totalPhotos === 0)
       return c.json({ error: "At least one photo is required" }, 400);
     if (totalPhotos > 3)
@@ -183,13 +221,18 @@ students.post("/", async (c) => {
     };
 
     await db.insert(studentsTable).values(studentValues);
+    console.log(`[ENROLLMENT] Student created - ID: ${studentId}, Name: ${studentFirstName} ${studentLastName}`);
 
     // Require Rekognition configuration for enrollment
     const faceIds: string[] = [];
     const collectionId =
       c.env.AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default";
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = c.env;
+    
+    console.log(`[ENROLLMENT] AWS Rekognition config - Collection: ${collectionId}, Region: ${AWS_REGION ?? 'N/A'}`);
+    
     if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+      console.error(`[ENROLLMENT] Missing AWS credentials - cannot proceed with face indexing`);
       return c.json(
         {
           error:
@@ -204,26 +247,53 @@ students.post("/", async (c) => {
       AWS_REGION,
       AWS_REKOGNITION_COLLECTION: collectionId,
     });
+    console.log(`[ENROLLMENT] Starting photo processing for student ${studentId}`);
 
     const saveFace = async (
       index: number,
       bytes: Uint8Array,
       sourceKey?: string,
+      r2Config?: {
+        accountId: string;
+        bucketName: string;
+        accessKeyId: string;
+        secretAccessKey: string;
+      }
     ) => {
       const destKey = `students/${studentId}/photo-${String(index + 1)}.jpg`;
+      const photoNumber = index + 1;
+      
+      console.log(`[PHOTO ${String(photoNumber)}] Starting processing - Size: ${String(bytes.length)} bytes, Dest: ${destKey}${sourceKey ? `, Source: ${sourceKey}` : ''}`);
+      
       try {
-        await uploadPhoto(c.env.PHOTOS, destKey, bytes.buffer as ArrayBuffer);
-        if (sourceKey && sourceKey !== destKey) {
-          await c.env.PHOTOS.delete(sourceKey).catch(() => {});
+        // Step 1: Upload to R2
+        console.log(`[PHOTO ${String(photoNumber)}] Uploading to R2...`);
+        
+        // Use remote R2 if config provided (presigned uploads), otherwise use local binding (base64)
+        if (r2Config) {
+          await uploadToRemoteR2(destKey, bytes.buffer as ArrayBuffer, r2Config);
+          console.log(`[PHOTO ${String(photoNumber)}] ✓ Uploaded to remote R2 successfully`);
+        } else {
+          await uploadPhoto(c.env.PHOTOS, destKey, bytes.buffer as ArrayBuffer);
+          console.log(`[PHOTO ${String(photoNumber)}] ✓ Uploaded to local R2 successfully`);
         }
+        
+        // Note: Temp file cleanup (if sourceKey exists) is handled by the caller
+        // for presigned uploads using deleteFromRemoteR2()
 
+        // Step 2: Index face with AWS Rekognition
+        console.log(`[PHOTO ${String(photoNumber)}] Indexing face with AWS Rekognition...`);
         const result = await indexFaceBytes({
           client: rek,
           collectionId,
           bytes,
-          externalImageId: `student_${studentId}_photo_${String(index + 1)}`,
+          externalImageId: `student_${studentId}_photo_${String(photoNumber)}`,
         });
+        const qualityScoreStr = result.qualityScore !== undefined ? String(result.qualityScore) : 'N/A';
+        console.log(`[PHOTO ${String(photoNumber)}] ✓ Face indexed - FaceID: ${result.faceId}, Quality: ${qualityScoreStr}`);
 
+        // Step 3: Save to database
+        console.log(`[PHOTO ${String(photoNumber)}] Saving face record to database...`);
         await db.insert(studentFacesTable).values({
           id: crypto.randomUUID(),
           studentId,
@@ -235,38 +305,75 @@ students.post("/", async (c) => {
               ? result.qualityScore
               : null,
         });
+        console.log(`[PHOTO ${String(photoNumber)}] ✓ Database record saved`);
 
         faceIds.push(result.faceId);
+        console.log(`[PHOTO ${String(photoNumber)}] ✅ Complete - Successfully processed`);
       } catch (error: unknown) {
-        console.error(`Error processing photo ${String(index + 1)}:`, error);
+        console.error(`[PHOTO ${String(photoNumber)}] ❌ ERROR:`, error);
+        if (error instanceof Error) {
+          console.error(`[PHOTO ${String(photoNumber)}] Error details - Message: ${error.message}, Stack: ${error.stack ?? 'N/A'}`);
+        }
       }
     };
 
     // Base64 photos
-    for (let i = 0; i < (body.photos?.length ?? 0); i++) {
-      const photo = body.photos?.[i];
-      if (!photo) continue;
-      const bytes = new Uint8Array(base64ToArrayBuffer(photo.data));
-      await saveFace(i, bytes);
+    if (base64Count > 0) {
+      console.log(`[ENROLLMENT] Processing ${String(base64Count)} base64 photo(s)...`);
+      for (let i = 0; i < (body.photos?.length ?? 0); i++) {
+        const photo = body.photos?.[i];
+        if (!photo) continue;
+        const bytes = new Uint8Array(base64ToArrayBuffer(photo.data));
+        await saveFace(i, bytes);
+      }
     }
 
     // Presigned keys
-    for (let i = 0; i < (body.photo_keys?.length ?? 0); i++) {
-      const key = body.photo_keys?.[i];
-      if (!key) continue;
-      const obj = await c.env.PHOTOS.get(key);
-      if (!obj) {
-        console.warn("Uploaded key not found in R2", key);
-        continue;
+    if (keyCount > 0) {
+      console.log(`[ENROLLMENT] Processing ${String(keyCount)} presigned photo key(s)...`);
+      
+      const { R2_ACCOUNT_ID, R2_BUCKET_NAME, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY } = c.env;
+      
+      if (!R2_ACCOUNT_ID || !R2_BUCKET_NAME || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+        console.error('[ENROLLMENT] R2 credentials missing - cannot fetch presigned uploads');
+        return c.json({ error: "R2 configuration missing for presigned uploads" }, 500);
       }
-      const arrayBuffer = await obj.bytes();
-      await saveFace(
-        (body.photos?.length ?? 0) + i,
-        new Uint8Array(arrayBuffer),
-        key,
-      );
+      
+      const r2Config = {
+        accountId: R2_ACCOUNT_ID,
+        bucketName: R2_BUCKET_NAME,
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
+      };
+      
+      for (let i = 0; i < (body.photo_keys?.length ?? 0); i++) {
+        const key = body.photo_keys?.[i];
+        if (!key) continue;
+        
+        console.log(`[PRESIGNED ${String(i + 1)}] Fetching from remote R2: ${key}`);
+        const bytes = await fetchFromRemoteR2(key, r2Config);
+        
+        if (!bytes) {
+          console.warn(`[PRESIGNED ${String(i + 1)}] ⚠️  Key not found in remote R2: ${key}`);
+          continue;
+        }
+        console.log(`[PRESIGNED ${String(i + 1)}] ✓ Retrieved from remote R2 - Size: ${String(bytes.length)} bytes`);
+        
+        await saveFace(
+          (body.photos?.length ?? 0) + i,
+          bytes,
+          key,
+          r2Config, // Pass config to use remote R2 storage
+        );
+        
+        // Clean up temp file from remote R2
+        console.log(`[PRESIGNED ${String(i + 1)}] Deleting temp file from remote R2`);
+        await deleteFromRemoteR2(key, r2Config);
+      }
     }
 
+    console.log(`[ENROLLMENT] Photo processing complete - Success: ${String(faceIds.length)}/${String(totalPhotos)}`);
+    
     const response: EnrollStudentResponse = {
       student_id: studentId,
       status: "enrolled",
@@ -275,6 +382,8 @@ students.post("/", async (c) => {
       face_ids: faceIds,
     };
 
+    console.log(`[ENROLLMENT] ✅ Student enrolled successfully - ID: ${studentId}, Photos: ${String(faceIds.length)}, FaceIDs: ${faceIds.join(', ')}`);
+    
     return c.json(response, 201);
   } catch (error) {
     console.error("Error enrolling student:", error);
@@ -321,7 +430,8 @@ students.get("/", async (c) => {
           .where(eq(studentFacesTable.studentId, student.id))
           .orderBy(studentFacesTable.createdAt);
 
-        const photoUrls = faces.map((f) => f.photoUrl ?? "");
+        const photoKeys = faces.map((f) => f.photoUrl);
+        const photoUrls = await convertKeysToPresignedUrls(photoKeys, c.env);
 
         return {
           ...student,
@@ -382,10 +492,13 @@ students.get("/:id", async (c) => {
       .where(eq(studentFacesTable.studentId, studentId))
       .orderBy(studentFacesTable.createdAt);
 
+    const photoKeys = faces.map((f) => f.photoUrl);
+    const photoUrls = await convertKeysToPresignedUrls(photoKeys, c.env);
+
     return c.json({
       ...student,
       face_ids: faces.map((f) => f.faceId),
-      photo_urls: faces.map((f) => f.photoUrl ?? ""),
+      photo_urls: photoUrls,
       guardian: guardian ?? null,
       gradeDisplayName: grade?.displayName ?? null,
     } satisfies Student & {

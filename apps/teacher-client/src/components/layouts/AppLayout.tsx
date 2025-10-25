@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useMatches } from "react-router-dom"
+import { Outlet, NavLink, useMatches, useLocation } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import {
   Sidebar,
@@ -12,12 +12,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { GraduationCap, Users, UserPlus, Shield } from "lucide-react"
+import { GraduationCap, Users, UserPlus, Shield, BookOpen, List, ChevronRight, Home } from "lucide-react"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,6 +29,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@radix-ui/react-collapsible"
 import type { CrumbHandle } from "@/routes"
 
 function AppBreadcrumb() {
@@ -48,9 +56,7 @@ function AppBreadcrumb() {
           <BreadcrumbItem key={item.pathname}>
             {idx < items.length - 1 ? (
               <>
-                <BreadcrumbLink asChild>
-                  <NavLink to={item.pathname}>{item.label}</NavLink>
-                </BreadcrumbLink>
+                <BreadcrumbLink asChild><NavLink to={item.pathname}>{item.label}</NavLink></BreadcrumbLink>
                 <BreadcrumbSeparator />
               </>
             ) : (
@@ -65,10 +71,14 @@ function AppBreadcrumb() {
 
 export default function AppLayout() {
   const { t } = useTranslation(['common', 'navigation'])
+  const location = useLocation()
+
+  const isStudentsActive = location.pathname.startsWith('/students')
+  const isGuardiansActive = location.pathname.startsWith('/guardians')
 
   return (
     <SidebarProvider>
-      <Sidebar>
+      <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex items-center gap-2 px-2 py-1.5">
             <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
@@ -82,30 +92,81 @@ export default function AppLayout() {
             <SidebarGroupLabel>{t('navigation:sidebar.label')}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={false} tooltip={t('navigation:tooltips.enroll')}>
-                    <NavLink to="/enroll" className={({ isActive }) => (isActive ? "data-[active=true]" : undefined)}>
-                      <UserPlus />
-                      <span>{t('navigation:sidebar.enroll')}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={false} tooltip={t('navigation:tooltips.roster')}>
-                    <NavLink to="/roster" className={({ isActive }) => (isActive ? "data-[active=true]" : undefined)}>
-                      <Users />
-                      <span>{t('navigation:sidebar.roster')}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={false} tooltip={t('navigation:tooltips.guardians')}>
-                    <NavLink to="/guardians" className={({ isActive }) => (isActive ? "data-[active=true]" : undefined)}>
-                      <Shield />
-                      <span>{t('navigation:sidebar.guardians')}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                {/* Students Domain */}
+                <Collapsible asChild defaultOpen={isStudentsActive} className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={t('navigation:tooltips.students')} isActive={isStudentsActive}>
+                        <Users />
+                        <span>{t('navigation:sidebar.students.label')}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/students'}><NavLink to="/students">
+                              <Home className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.students.home')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/students/enroll'}><NavLink to="/students/enroll">
+                              <UserPlus className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.students.enroll')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/students/roster'}><NavLink to="/students/roster">
+                              <List className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.students.roster')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/students/grades'}><NavLink to="/students/grades">
+                              <BookOpen className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.students.grades')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+
+                {/* Guardians Domain */}
+                <Collapsible asChild defaultOpen={isGuardiansActive} className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={t('navigation:tooltips.guardians')} isActive={isGuardiansActive}>
+                        <Shield />
+                        <span>{t('navigation:sidebar.guardians.label')}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/guardians'}><NavLink to="/guardians">
+                              <Home className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.guardians.home')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/guardians/list'}><NavLink to="/guardians/list">
+                              <List className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.guardians.list')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild isActive={location.pathname === '/guardians/create'}><NavLink to="/guardians/create">
+                              <UserPlus className="h-4 w-4" />
+                              <span>{t('navigation:sidebar.guardians.create')}</span>
+                            </NavLink></SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

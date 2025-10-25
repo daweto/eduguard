@@ -1,4 +1,15 @@
 {
   "title": "Listado de Estudiantes",
-  "description": "Ver todos los estudiantes inscritos y la información de sus apoderados."
+  "description": "Ver todos los estudiantes inscritos y la información de sus apoderados.",
+  "studentCard": {
+    "guardian": "Apoderado",
+    "identification": "Identificación",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "enrolled": "Inscrito",
+    "active": "Activo",
+    "facesIndexed": "{{count}} rostro indexado",
+    "facesIndexed_other": "{{count}} rostros indexados",
+    "removeStudent": "Eliminar estudiante"
+  }
 }

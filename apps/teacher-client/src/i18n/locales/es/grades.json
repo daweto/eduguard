@@ -1,0 +1,14 @@
+{
+  "page": {
+    "title": "Calificaciones",
+    "description": "Sistema de calificaciones y evaluaciones"
+  },
+  "cards": {
+    "main": {
+      "title": "Calificaciones",
+      "description": "Funcionalidad en desarrollo",
+      "message": "El módulo de calificaciones estará disponible próximamente."
+    }
+  }
+}
+

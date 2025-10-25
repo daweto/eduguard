@@ -1,13 +1,20 @@
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { StudentEnrollmentForm } from '@/components/students/StudentEnrollmentForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function EnrollStudentPage() {
   const { t } = useTranslation('enrollment');
+  const navigate = useNavigate();
 
   const handleEnrollmentSuccess = () => {
-    // no-op for now; roster page can refetch on mount
+    toast.success(t('messages.success'));
+    // Redirect to roster page after a brief delay to show the toast
+    setTimeout(() => {
+      navigate('/students/roster');
+    }, 1000);
   };
 
   return (

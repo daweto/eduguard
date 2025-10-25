@@ -1,16 +1,25 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GuardianCreateForm } from '@/components/guardians/GuardianCreateForm';
 import { GuardiansList } from '@/components/guardians/GuardiansList';
 import { useGuardians } from '@/components/guardians/hooks/useGuardians';
-import { Shield } from 'lucide-react';
+import { Shield, Plus } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 export default function GuardiansPage() {
   const { t } = useTranslation('guardians');
-  const { guardians, loading, error, create } = useGuardians();
+  const { guardians, loading, create } = useGuardians();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleSubmit = async (data: Parameters<typeof create>[0]) => {
+    await create(data);
+  };
 
   const handleCreateSuccess = async () => {
     // Guardian is automatically added to the list via the hook
+    setDialogOpen(false);
   };
 
   const handleCreateError = (error: Error) => {
@@ -26,22 +35,25 @@ export default function GuardiansPage() {
         <p className="text-muted-foreground">{t('description')}</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('form.title')}</CardTitle>
-          <CardDescription>{t('form.description')}</CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            {t('actions.create')}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('dialog.create.title')}</DialogTitle>
+            <DialogDescription>{t('dialog.create.description')}</DialogDescription>
+          </DialogHeader>
           <GuardianCreateForm
+            onSubmit={handleSubmit}
             onSuccess={handleCreateSuccess}
             onError={handleCreateError}
-            onSubmit={async (data) => {
-              await create(data);
-            }}
           />
-          {error && <div className="mt-4 text-sm text-destructive">{error}</div>}
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>

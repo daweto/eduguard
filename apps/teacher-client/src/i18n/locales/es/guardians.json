@@ -1,4 +1,26 @@
 {
+  "page": {
+    "title": "Apoderados",
+    "description": "Gestiona los apoderados y tutores de los estudiantes"
+  },
+  "cards": {
+    "list": {
+      "title": "Listado de Apoderados",
+      "description": "Ver y gestionar todos los apoderados registrados",
+      "action": "Ver Listado"
+    },
+    "create": {
+      "title": "Registrar Apoderado",
+      "description": "Agregar un nuevo apoderado al sistema",
+      "action": "Registrar Nuevo"
+    }
+  },
+  "createPage": {
+    "title": "Registrar Apoderado",
+    "description": "Completa el formulario para registrar un nuevo apoderado",
+    "cardTitle": "Información del Apoderado",
+    "cardDescription": "Ingresa los datos del apoderado o tutor legal"
+  },
   "title": "Registrar Apoderado",
   "description": "Completa los datos personales del apoderado para poder asignarlo a estudiantes",
   "form": {
@@ -47,8 +69,18 @@
       "email": "Correo"
     }
   },
+  "actions": {
+    "create": "Nuevo Apoderado"
+  },
+  "dialog": {
+    "create": {
+      "title": "Registrar Nuevo Apoderado",
+      "description": "Completa el formulario para agregar un nuevo apoderado al sistema"
+    }
+  },
   "messages": {
     "loadError": "No pudimos cargar la lista de apoderados.",
-    "createError": "No se pudo crear el apoderado"
+    "createError": "No se pudo crear el apoderado",
+    "createSuccess": "Apoderado creado exitosamente"
   }
 }

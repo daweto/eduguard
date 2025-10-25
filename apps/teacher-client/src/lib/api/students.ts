@@ -48,20 +48,37 @@ export async function enrollStudent(
   },
   photos: File[],
 ): Promise<EnrollStudentResponse> {
+  console.log(`[ENROLLMENT CLIENT] Starting enrollment with ${photos.length} photo(s)`);
+  
   // Preferred: presign and upload directly to R2, then send keys
   try {
+    console.log('[ENROLLMENT CLIENT] Requesting presigned URLs...');
     const presign = await presignStudentPhotos(photos.length);
+    console.log('[ENROLLMENT CLIENT] Received presigned URLs:', presign.uploads.map(u => ({ key: u.key, url: u.upload_url.substring(0, 50) + '...' })));
+    
+    console.log('[ENROLLMENT CLIENT] Uploading photos to R2...');
     await Promise.all(
       presign.uploads.map(async (u, idx) => {
         const file = photos[idx]!;
+        console.log(`[ENROLLMENT CLIENT] Uploading photo ${idx + 1}/${photos.length} to ${u.key} (${file.size} bytes)`);
+        
         const res = await fetch(u.upload_url, {
           method: 'PUT',
           headers: { 'Content-Type': u.content_type },
           body: file,
         });
-        if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+        
+        if (!res.ok) {
+          const errorText = await res.text().catch(() => 'Unable to read error');
+          console.error(`[ENROLLMENT CLIENT] Upload ${idx + 1} failed with status ${res.status}:`, errorText);
+          throw new Error(`Upload failed: ${res.status}`);
+        }
+        
+        console.log(`[ENROLLMENT CLIENT] ✓ Photo ${idx + 1} uploaded successfully`);
       }),
     );
+    
+    console.log('[ENROLLMENT CLIENT] All photos uploaded, sending enrollment request with keys');
     const requestBody: EnrollStudentRequest = {
       student: payload.student,
       guardian: payload.guardian,
@@ -72,12 +89,16 @@ export async function enrollStudent(
       body: JSON.stringify(requestBody),
     });
   } catch (err) {
+    console.error('[ENROLLMENT CLIENT] Presigned upload failed, falling back to base64:', err);
+    
     // Fallback to base64 if presign/upload failed
     const photoPromises = photos.map(async (file) => {
       const base64 = await fileToBase64(file);
       return { data: base64, filename: file.name };
     });
     const encodedPhotos = await Promise.all(photoPromises);
+    console.log(`[ENROLLMENT CLIENT] Converted ${encodedPhotos.length} photos to base64, sending enrollment request`);
+    
     const requestBody: EnrollStudentRequest = {
       student: payload.student,
       guardian: payload.guardian,

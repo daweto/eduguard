@@ -23,6 +23,7 @@ uploads.post("/presign", async (c) => {
     const secretAccessKey = c.env.R2_SECRET_ACCESS_KEY;
 
     if (!accountId || !bucket || !accessKeyId || !secretAccessKey) {
+      console.log('[UPLOADS] R2 presign env not configured');
       return c.json({ error: "R2 presign env not configured" }, 500);
     }
 

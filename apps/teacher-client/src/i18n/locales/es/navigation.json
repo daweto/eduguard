@@ -1,19 +1,42 @@
 {
+  "domains": {
+    "students": "Estudiantes",
+    "guardians": "Apoderados",
+    "grades": "Calificaciones"
+  },
   "sidebar": {
     "label": "Navegación",
-    "enroll": "Inscribir Estudiante",
-    "roster": "Listado de Estudiantes",
-    "guardians": "Apoderados"
+    "students": {
+      "label": "Estudiantes",
+      "home": "Inicio",
+      "enroll": "Inscribir",
+      "roster": "Listado",
+      "grades": "Calificaciones"
+    },
+    "guardians": {
+      "label": "Apoderados",
+      "home": "Inicio",
+      "list": "Listado",
+      "create": "Registrar"
+    }
   },
   "breadcrumbs": {
     "home": "Inicio",
+    "students": "Estudiantes",
     "enroll": "Inscribir",
     "roster": "Listado",
-    "guardians": "Apoderados"
+    "grades": "Calificaciones",
+    "guardians": "Apoderados",
+    "guardiansList": "Listado",
+    "guardiansCreate": "Registrar"
   },
   "tooltips": {
-    "enroll": "Inscribir",
-    "roster": "Listado",
-    "guardians": "Apoderados"
+    "students": "Gestión de estudiantes",
+    "guardians": "Gestión de apoderados",
+    "enroll": "Inscribir estudiante",
+    "roster": "Ver listado",
+    "grades": "Calificaciones",
+    "guardiansList": "Ver apoderados",
+    "guardiansCreate": "Registrar apoderado"
   }
 }

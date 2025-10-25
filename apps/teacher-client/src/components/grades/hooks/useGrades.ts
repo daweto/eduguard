@@ -1,9 +1,10 @@
 /**
- * Hook for fetching and managing grades/stages metadata
+ * Hook for fetching and managing grades/stages metadata using React Query
  */
 
-import { useEffect, useState } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { getStages, getGrades } from '@/lib/api';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Grade, Stage } from '@/types/grade';
 
 export interface GradeGroup extends Stage {
@@ -14,46 +15,68 @@ export interface UseGradesReturn {
   gradeGroups: GradeGroup[];
   loading: boolean;
   error: string | null;
-  refetch: () => Promise<void>;
+  refetch: () => void;
 }
 
 export function useGrades(): UseGradesReturn {
-  const [gradeGroups, setGradeGroups] = useState<GradeGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Fetch stages and grades in parallel using useQueries
+  const [stagesQuery, gradesQuery] = useQueries({
+    queries: [
+      {
+        queryKey: queryKeys.stages,
+        queryFn: async () => {
+          const response = await getStages();
+          return response.stages;
+        },
+        // Stages rarely change, cache for longer
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      },
+      {
+        queryKey: queryKeys.grades,
+        queryFn: async () => {
+          const response = await getGrades();
+          return response.grades;
+        },
+        // Grades rarely change, cache for longer
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      },
+    ],
+  });
 
-  const loadGrades = async () => {
-    setLoading(true);
-    setError(null);
+  // Combine loading states
+  const loading = stagesQuery.isLoading || gradesQuery.isLoading;
 
-    try {
-      const [stagesResponse, gradesResponse] = await Promise.all([getStages(), getGrades()]);
+  // Combine error states
+  const error =
+    stagesQuery.error || gradesQuery.error
+      ? 'No pudimos cargar la lista de cursos. Intenta nuevamente.'
+      : null;
 
-      const stagesSorted = [...stagesResponse.stages].sort((a, b) => a.order - b.order);
-      const gradesSorted = [...gradesResponse.grades].sort((a, b) => a.order - b.order);
+  // Transform and combine data
+  const gradeGroups: GradeGroup[] = (() => {
+    if (!stagesQuery.data || !gradesQuery.data) return [];
 
-      const grouped = stagesSorted.map((stage) => ({
-        ...stage,
-        grades: gradesSorted.filter((grade) => grade.stageId === stage.id),
-      }));
+    const stagesSorted = [...stagesQuery.data].sort((a, b) => a.order - b.order);
+    const gradesSorted = [...gradesQuery.data].sort((a, b) => a.order - b.order);
 
-      setGradeGroups(grouped);
-    } catch (err) {
-      console.error('Failed to load grades metadata:', err);
-      setError('No pudimos cargar la lista de cursos. Intenta nuevamente.');
-    } finally {
-      setLoading(false);
-    }
+    return stagesSorted.map((stage) => ({
+      ...stage,
+      grades: gradesSorted.filter((grade) => grade.stageId === stage.id),
+    }));
+  })();
+
+  // Refetch both queries
+  const refetch = () => {
+    stagesQuery.refetch();
+    gradesQuery.refetch();
   };
-
-  useEffect(() => {
-    void loadGrades();
-  }, []);
 
   return {
     gradeGroups,
     loading,
     error,
-    refetch: loadGrades,
+    refetch,
   };
 }
