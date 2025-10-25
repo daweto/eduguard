@@ -4,15 +4,26 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit",
+    "migrate:local": "wrangler d1 execute eduguard-db --local --file=./migrations/0000_skinny_maestro.sql",
+    "migrate:remote": "wrangler d1 execute eduguard-db --remote --file=./migrations/0000_skinny_maestro.sql",
+    "seed:local": "curl -X POST http://localhost:8787/api/seed",
+    "db:reset": "rm -rf .wrangler/state && pnpm migrate:local"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.7",
-    "hono": "^4.10.3"
+    "hono": "^4.10.3",
+    "@aws-sdk/client-rekognition": "^3.699.0",
+    "@aws-sdk/client-s3": "^3.699.0",
+    "@aws-sdk/s3-request-presigner": "^3.699.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@types/node": "^24.9.1",
     "drizzle-kit": "^0.31.5",
+    "typescript": "^5.9.3",
     "wrangler": "^4.4.0"
   }
 }
