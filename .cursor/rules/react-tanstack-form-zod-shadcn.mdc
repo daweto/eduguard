@@ -1,0 +1,8 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+For all forms on a react frontend, use:
+- ShadCN components if possible
+- Tanstack form (@tanstack/react-form) for form state management
+- Zod for schema validation
