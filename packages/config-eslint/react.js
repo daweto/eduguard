@@ -1,10 +1,14 @@
-import js from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier";
-import tseslint from "typescript-eslint";
-import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginReact from "eslint-plugin-react";
 import globals from "globals";
+import pluginReactHooks from "eslint-plugin-react-hooks";
 import { config as baseConfig } from "./index.js";
+
+const reactRecommended = pluginReact.configs.flat.recommended;
+const reactHooksRecommendedLatest = pluginReactHooks.configs["recommended-latest"];
+const browserGlobals = {
+  ...globals.serviceworker,
+  ...globals.browser,
+};
 
 /**
  * A custom ESLint configuration for libraries that use React.
@@ -12,26 +16,28 @@ import { config as baseConfig } from "./index.js";
  * @type {import("eslint").Linter.Config} */
 export const config = [
   ...baseConfig,
-  js.configs.recommended,
-  eslintConfigPrettier,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
   {
+    ...reactRecommended,
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
+      ...reactRecommended.languageOptions,
+      ecmaVersion: 2020,
+      sourceType: "module",
       globals: {
-        ...globals.serviceworker,
-        ...globals.browser,
+        ...(reactRecommended.languageOptions?.globals ?? {}),
+        ...browserGlobals,
       },
     },
-  },
-  {
     plugins: {
-      "react-hooks": pluginReactHooks,
+      ...(reactRecommended.plugins ?? {}),
+      ...(reactHooksRecommendedLatest.plugins ?? {}),
     },
-    settings: { react: { version: "detect" } },
+    settings: {
+      ...(reactRecommended.settings ?? {}),
+      react: { version: "detect" },
+    },
     rules: {
-      ...pluginReactHooks.configs.recommended.rules,
+      ...(reactRecommended.rules ?? {}),
+      ...(reactHooksRecommendedLatest.rules ?? {}),
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
     },

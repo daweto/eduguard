@@ -8,7 +8,8 @@
     "./next": "./next.js",
     "./react": "./react.js",
     "./remix": "./remix.js",
-    "./vite": "./vite.js"
+    "./vite": "./vite.js",
+    "./hono": "./hono.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

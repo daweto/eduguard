@@ -1,26 +1,20 @@
-import js from "@eslint/js";
-import globals from "globals";
-import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
-import tseslint from "typescript-eslint";
+import { config as reactConfig } from "./react.js";
 
-export default tseslint.config({
-  extends: [js.configs.recommended, ...tseslint.configs.recommended],
-  files: ["**/*.{ts,tsx}"],
-  ignores: ["dist"],
-  languageOptions: {
-    ecmaVersion: 2020,
-    globals: globals.browser,
-  },
+const viteComponentFiles = ["**/*.{ts,tsx,js,jsx}"];
+
+const reactRefreshViteConfig = {
+  files: viteComponentFiles,
   plugins: {
-    "react-hooks": reactHooks,
-    "react-refresh": reactRefresh,
+    ...(reactRefresh.configs.vite.plugins ?? {}),
   },
   rules: {
-    ...reactHooks.configs.recommended.rules,
+    ...(reactRefresh.configs.vite.rules ?? {}),
     "react-refresh/only-export-components": [
       "warn",
       { allowConstantExport: true },
     ],
   },
-});
+};
+
+export default [...reactConfig, reactRefreshViteConfig];
