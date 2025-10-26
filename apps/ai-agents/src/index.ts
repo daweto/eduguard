@@ -63,7 +63,9 @@ app.get("/health", (c) => {
         voice: {
           provider: "ElevenLabs Conversational AI",
           status:
-            checks.elevenlabs && checks.elevenlabs_agent && checks.elevenlabs_phone
+            checks.elevenlabs &&
+            checks.elevenlabs_agent &&
+            checks.elevenlabs_phone
               ? "ready"
               : "not_configured",
         },

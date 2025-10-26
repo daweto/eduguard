@@ -52,14 +52,14 @@ export default {
     // Comprehensive health check - tests container connectivity
     if (url.pathname === "/worker-health/full") {
       const container = env.AI_AGENTS_CONTAINER.getByName("ai-agents-primary");
-      
+
       try {
         // Try to reach the container's health endpoint
         const healthUrl = new URL(request.url);
         healthUrl.pathname = "/health";
         const containerResponse = await container.fetch(healthUrl.toString());
         const containerHealth = await containerResponse.json();
-        
+
         return Response.json({
           status: "ok",
           worker: "ai-agents-proxy",

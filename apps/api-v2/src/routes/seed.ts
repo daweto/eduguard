@@ -75,5 +75,4 @@ seedRouter.get("/status", async (c) => {
   }
 });
 
-
 export default seedRouter;
