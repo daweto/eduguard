@@ -96,11 +96,23 @@ PORT=3001
 
 ### 4. Run Development Server
 
+**Local Node.js Development:**
+
 ```bash
 pnpm dev
 ```
 
 Server will start on `http://localhost:3001`
+
+**Local Docker Testing:**
+
+```bash
+# Build Docker image
+pnpm docker:build
+
+# Run with .dev.vars
+pnpm docker:test
+```
 
 ## API Endpoints
 
@@ -338,6 +350,47 @@ The server logs all operations:
 
 - Teacher time saved: 50-100 min/day × 5 teachers = 250-500 min/day
 - At $30/hr teacher salary = **$125-250/day saved**
+
+## Deployment
+
+### Cloudflare Container Deployment (Recommended)
+
+The AI Agents service runs as a **Node.js container on Cloudflare Workers**.
+
+**Why Cloudflare Containers?**
+- ✅ Full Node.js runtime support
+- ✅ Same platform as api-v2
+- ✅ Automatic global scaling
+- ✅ Simple deployment (`wrangler deploy`)
+- ✅ Cost-effective (~$5-10/month base)
+
+**Quick Start:**
+
+```bash
+# 1. Set production secrets
+cd apps/ai-agents
+bash scripts/set-production-secrets.sh
+
+# 2. Test locally with Docker
+pnpm docker:build
+pnpm docker:test
+
+# 3. Deploy to Cloudflare
+pnpm deploy
+```
+
+**Automated Deployment:**
+
+Push to `main` branch triggers automatic deployment via GitHub Actions.
+
+**Full Documentation:**
+
+See [CLOUDFLARE_CONTAINER_DEPLOYMENT.md](./CLOUDFLARE_CONTAINER_DEPLOYMENT.md) for:
+- Complete setup guide
+- Secrets configuration
+- GitHub Actions setup
+- Monitoring and troubleshooting
+- Pricing and scaling
 
 ## Troubleshooting
 

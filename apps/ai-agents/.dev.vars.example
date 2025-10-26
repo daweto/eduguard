@@ -1,0 +1,28 @@
+# AI Agents Environment Variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# OpenAI API Key (for GPT-4 reasoning)
+OPENAI_API_KEY=sk-...
+
+# ElevenLabs API Key
+ELEVENLABS_API_KEY=your-elevenlabs-api-key
+
+# ElevenLabs Conversational AI Agent ID
+ELEVENLABS_AGENT_ID=your-agent-id
+
+# ElevenLabs Phone Number ID
+ELEVENLABS_PHONE_NUMBER_ID=your-phone-number-id
+
+# Cloudflare Workers API URL (api-v2)
+# Local: http://localhost:8787
+# Production: https://api-v2.YOUR_SUBDOMAIN.workers.dev
+CLOUDFLARE_API_URL=http://localhost:8787
+
+# School Name (optional)
+SCHOOL_NAME=Colegio Skyward
+
+# Port (optional, defaults to 3001)
+PORT=3001
+
+# Node Environment
+NODE_ENV=development

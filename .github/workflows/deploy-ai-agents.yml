@@ -1,4 +1,4 @@
-name: Deploy AI Agents
+name: Deploy AI Agents (Container)
 
 on:
   push:
@@ -12,67 +12,34 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Cloudflare Workers
     runs-on: ubuntu-latest
+    name: Deploy AI Agents Container to Cloudflare
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Turbo cache
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Lint
-        run: pnpm --filter ai-agents lint
-
-      - name: Type check
-        run: pnpm --filter ai-agents check-types
-
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy to Cloudflare (Container)
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: "apps/ai-agents"
-          command: deploy --minify
-          packageManager: pnpm
+          command: deploy --config apps/ai-agents/wrangler.jsonc
+          workingDirectory: "."
 
       - name: Deployment Summary
         run: |
-          echo "### ✅ AI Agents Deployed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ AI Agents Container Deployed Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://ai-agents.dweinsteint.workers.dev" >> $GITHUB_STEP_SUMMARY
-          echo "**Endpoints:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Reasoning Agent: https://ai-agents.dweinsteint.workers.dev/api/reasoning/analyze" >> $GITHUB_STEP_SUMMARY
-          echo "- Voice Agent: https://ai-agents.dweinsteint.workers.dev/api/voice/call" >> $GITHUB_STEP_SUMMARY
+          echo "**Service:** ai-agents (Node.js Container)" >> $GITHUB_STEP_SUMMARY
+          echo "**Platform:** Cloudflare Workers (Container)" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Expected Endpoints:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Health: https://ai-agents.YOUR_SUBDOMAIN.workers.dev/" >> $GITHUB_STEP_SUMMARY
+          echo "- Reasoning: https://ai-agents.YOUR_SUBDOMAIN.workers.dev/api/reasoning/analyze" >> $GITHUB_STEP_SUMMARY
+          echo "- Voice: https://ai-agents.YOUR_SUBDOMAIN.workers.dev/api/voice/call" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Secrets are managed via Cloudflare dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "Run 'pnpm --filter ai-agents wrangler secret list' to verify secrets"
+

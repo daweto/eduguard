@@ -7,13 +7,18 @@
     "dev:worker": "wrangler dev",
     "build": "tsc",
     "start": "node dist/index.js",
-    "deploy": "wrangler deploy --minify",
+    "docker:build": "cd ../.. && docker build -f apps/ai-agents/Dockerfile -t eduguard-ai-agents:local .",
+    "docker:test": "cd ../.. && docker run -p 3001:3001 --env-file apps/ai-agents/.dev.vars eduguard-ai-agents:local",
+    "deploy": "cd ../.. && wrangler deploy --config apps/ai-agents/wrangler.jsonc",
+    "containers:list": "wrangler containers list",
+    "containers:images": "wrangler containers images list",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
     "agents:create": "tsx scripts/createAgent.mts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.5",
+    "@cloudflare/containers": "^0.0.29",
     "@elevenlabs/elevenlabs-js": "^2.20.1",
     "@hono/node-server": "^1.14.1",
     "ai": "^5.0.79",
@@ -22,10 +27,11 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
     "@repo/eslint-config": "workspace:*",
     "@types/node": "^24.9.1",
     "tsx": "^4.19.2",
     "typescript": "^5.9.3",
-    "wrangler": "^3.114.15"
+    "wrangler": "^4.45.0"
   }
 }

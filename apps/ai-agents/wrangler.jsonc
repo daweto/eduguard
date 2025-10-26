@@ -1,17 +1,45 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ai-agents",
-  "main": "src/index.ts",
+  "main": "src/worker.ts",
   "compatibility_date": "2025-10-26",
-  "compatibility_flags": ["nodejs_compat"],
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
-  // Environment variables will be set as secrets via wrangler
-  // Required secrets:
+  
+  // Container configuration
+  "containers": [
+    {
+      "max_instances": 5,
+      "class_name": "AIAgentsContainer",
+      "image": "./Dockerfile",
+      "image_build_context": "../.."
+    }
+  ],
+  
+  // Durable Object bindings
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "AI_AGENTS_CONTAINER",
+        "class_name": "AIAgentsContainer"
+      }
+    ]
+  },
+  
+  // Migrations for Durable Objects
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["AIAgentsContainer"]
+    }
+  ]
+  
+  // Required secrets (set with: pnpm wrangler secret put <SECRET_NAME>):
   // - OPENAI_API_KEY
   // - ELEVENLABS_API_KEY
   // - ELEVENLABS_AGENT_ID
   // - ELEVENLABS_PHONE_NUMBER_ID
-  // - SCHOOL_NAME (optional, defaults to "Colegio Skyward")
+  // - CLOUDFLARE_API_URL
+  // - SCHOOL_NAME (optional)
 }
