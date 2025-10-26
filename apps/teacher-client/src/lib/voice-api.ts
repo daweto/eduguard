@@ -36,7 +36,9 @@ export interface CallStatus {
 /**
  * Initiate a voice call to a guardian
  */
-export async function initiateCall(params: InitiateCallParams): Promise<CallResponse> {
+export async function initiateCall(
+  params: InitiateCallParams,
+): Promise<CallResponse> {
   const response = await fetch(`${API_BASE_URL}/api/voice/call`, {
     method: "POST",
     headers: {

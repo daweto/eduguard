@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowLeft, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+} from "lucide-react";
 import { AttendanceDataTable } from "@/components/attendance/attendance-data-table";
 import { columns } from "@/components/attendance/columns";
 import { StudentInfoCard } from "@/components/students/StudentInfoCard";
-import type { StudentAttendanceResponse, AttendanceRecord } from "@/types/attendance";
+import type {
+  StudentAttendanceResponse,
+  AttendanceRecord,
+} from "@/types/attendance";
 import type { Student } from "@/types/student";
 import { getStudent } from "@/lib/api/students";
 
@@ -31,14 +46,14 @@ export default function StudentAttendancePage() {
   const fetchData = async (id: string) => {
     try {
       setIsLoading(true);
-      
+
       // Fetch both student info and attendance data in parallel
       const [attendanceResponse, studentData] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/students/${id}/attendance`).then(res => {
+        fetch(`${API_BASE_URL}/api/students/${id}/attendance`).then((res) => {
           if (!res.ok) throw new Error("Failed to fetch attendance data");
           return res.json();
         }),
-        getStudent(id)
+        getStudent(id),
       ]);
 
       setData(attendanceResponse);
@@ -110,7 +125,10 @@ export default function StudentAttendancePage() {
               Historial completo de asistencia del estudiante
             </p>
           </div>
-          <Badge variant={summary.attendanceRate >= 80 ? "default" : "destructive"} className="text-lg px-4 py-2">
+          <Badge
+            variant={summary.attendanceRate >= 80 ? "default" : "destructive"}
+            className="text-lg px-4 py-2"
+          >
             {summary.attendanceRate}% Asistencia
           </Badge>
         </div>
@@ -144,9 +162,14 @@ export default function StudentAttendancePage() {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-700">{summary.present}</div>
+            <div className="text-2xl font-bold text-green-700">
+              {summary.present}
+            </div>
             <p className="text-xs text-green-600 mt-1">
-              {summary.total > 0 ? Math.round((summary.present / summary.total) * 100) : 0}% del total
+              {summary.total > 0
+                ? Math.round((summary.present / summary.total) * 100)
+                : 0}
+              % del total
             </p>
           </CardContent>
         </Card>
@@ -159,9 +182,14 @@ export default function StudentAttendancePage() {
             <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-700">{summary.absent}</div>
+            <div className="text-2xl font-bold text-red-700">
+              {summary.absent}
+            </div>
             <p className="text-xs text-red-600 mt-1">
-              {summary.total > 0 ? Math.round((summary.absent / summary.total) * 100) : 0}% del total
+              {summary.total > 0
+                ? Math.round((summary.absent / summary.total) * 100)
+                : 0}
+              % del total
             </p>
           </CardContent>
         </Card>
@@ -193,7 +221,10 @@ export default function StudentAttendancePage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AttendanceDataTable columns={columns} data={records as AttendanceRecord[]} />
+          <AttendanceDataTable
+            columns={columns}
+            data={records as AttendanceRecord[]}
+          />
         </CardContent>
       </Card>
     </div>

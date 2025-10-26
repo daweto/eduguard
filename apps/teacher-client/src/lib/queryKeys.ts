@@ -5,15 +5,15 @@
 
 export const queryKeys = {
   // Students
-  students: ['students'] as const,
-  student: (id: string) => ['students', id] as const,
+  students: ["students"] as const,
+  student: (id: string) => ["students", id] as const,
 
   // Guardians (Legal Guardians)
-  guardians: ['guardians'] as const,
-  guardian: (id: string) => ['guardians', id] as const,
+  guardians: ["guardians"] as const,
+  guardian: (id: string) => ["guardians", id] as const,
 
   // Grades and Stages
-  stages: ['stages'] as const,
-  grades: ['grades'] as const,
-  gradeGroups: ['grade-groups'] as const,
+  stages: ["stages"] as const,
+  grades: ["grades"] as const,
+  gradeGroups: ["grade-groups"] as const,
 } as const;

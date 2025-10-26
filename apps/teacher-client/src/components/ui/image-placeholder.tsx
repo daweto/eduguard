@@ -3,8 +3,8 @@
  * Used when no image is available for students or other entities
  */
 
-import { User, type LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { User, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ImagePlaceholderProps {
   icon?: LucideIcon;
@@ -22,18 +22,18 @@ export function ImagePlaceholder({
   // Generate initials from name if provided
   const initials = name
     ? name
-        .split(' ')
+        .split(" ")
         .filter(Boolean)
         .slice(0, 2)
         .map((word) => word[0]?.toUpperCase())
-        .join('')
+        .join("")
     : null;
 
   return (
     <div
       className={cn(
-        'flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5',
-        className
+        "flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5",
+        className,
       )}
     >
       {initials ? (
@@ -41,7 +41,9 @@ export function ImagePlaceholder({
           {initials}
         </div>
       ) : (
-        <Icon className={cn('w-20 h-20 text-muted-foreground/30', iconClassName)} />
+        <Icon
+          className={cn("w-20 h-20 text-muted-foreground/30", iconClassName)}
+        />
       )}
     </div>
   );

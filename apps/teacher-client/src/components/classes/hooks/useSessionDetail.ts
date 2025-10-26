@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getSessionDetail, type SessionDetailResponse } from "@/lib/api/attendance";
+import {
+  getSessionDetail,
+  type SessionDetailResponse,
+} from "@/lib/api/attendance";
 
 export function useSessionDetail(sessionId: string) {
   return useQuery<SessionDetailResponse>({
@@ -8,4 +11,3 @@ export function useSessionDetail(sessionId: string) {
     enabled: !!sessionId,
   });
 }
-

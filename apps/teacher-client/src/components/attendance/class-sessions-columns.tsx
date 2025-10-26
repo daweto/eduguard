@@ -52,7 +52,10 @@ export function createClassSessionColumns({
         );
       },
       sortingFn: (rowA, rowB) => {
-        return new Date(rowA.original.timestamp).getTime() - new Date(rowB.original.timestamp).getTime();
+        return (
+          new Date(rowA.original.timestamp).getTime() -
+          new Date(rowB.original.timestamp).getTime()
+        );
       },
     },
     {
@@ -123,30 +126,35 @@ export function createClassSessionColumns({
       ),
       cell: ({ row }) => {
         const { present, late, total } = row.original.attendanceSummary;
-        const attendanceRate = total > 0
-          ? Math.round(((present + late) / total) * 100)
-          : 0;
+        const attendanceRate =
+          total > 0 ? Math.round(((present + late) / total) * 100) : 0;
 
         const colorClass =
           attendanceRate >= 90
-            ? 'text-green-600'
+            ? "text-green-600"
             : attendanceRate >= 75
-              ? 'text-yellow-600'
-              : 'text-red-600';
+              ? "text-yellow-600"
+              : "text-red-600";
 
         return (
-          <span className={`font-medium ${colorClass}`}>
-            {attendanceRate}%
-          </span>
+          <span className={`font-medium ${colorClass}`}>{attendanceRate}%</span>
         );
       },
       sortingFn: (rowA, rowB) => {
-        const rateA = rowA.original.attendanceSummary.total > 0
-          ? ((rowA.original.attendanceSummary.present + rowA.original.attendanceSummary.late) / rowA.original.attendanceSummary.total) * 100
-          : 0;
-        const rateB = rowB.original.attendanceSummary.total > 0
-          ? ((rowB.original.attendanceSummary.present + rowB.original.attendanceSummary.late) / rowB.original.attendanceSummary.total) * 100
-          : 0;
+        const rateA =
+          rowA.original.attendanceSummary.total > 0
+            ? ((rowA.original.attendanceSummary.present +
+                rowA.original.attendanceSummary.late) /
+                rowA.original.attendanceSummary.total) *
+              100
+            : 0;
+        const rateB =
+          rowB.original.attendanceSummary.total > 0
+            ? ((rowB.original.attendanceSummary.present +
+                rowB.original.attendanceSummary.late) /
+                rowB.original.attendanceSummary.total) *
+              100
+            : 0;
         return rateA - rateB;
       },
     },

@@ -9,14 +9,17 @@ Go to: **Your Repo** → **Settings** → **Secrets and variables** → **Action
 ### Create these secrets:
 
 - [ ] **CLOUDFLARE_API_TOKEN**
+
   ```
   Value: <your-cloudflare-api-token>
   ```
+
   👉 [Create token here](https://dash.cloudflare.com/profile/api-tokens)
   - Use template: "Edit Cloudflare Workers"
   - Add permissions: Cloudflare Pages (Edit), D1 (Edit), R2 (Edit)
 
 - [ ] **CLOUDFLARE_ACCOUNT_ID**
+
   ```
   Value: 776b3be3bc7908baf073d7cce212c74f
   ```
@@ -37,6 +40,7 @@ pnpm exec wrangler pages project create teacher-client
 ```
 
 Or create it via the Cloudflare Dashboard:
+
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. Click **"Workers & Pages"**
 3. Click **"Create"** → **"Pages"** → **"Upload assets"**
@@ -47,16 +51,19 @@ Or create it via the Cloudflare Dashboard:
 Make sure these resources exist in Cloudflare:
 
 - [ ] D1 Database: `eduguard-db`
+
   ```bash
   pnpm --filter api-v2 exec wrangler d1 list
   ```
 
 - [ ] R2 Bucket: `eduguard-photos`
+
   ```bash
   pnpm --filter api-v2 exec wrangler r2 bucket list
   ```
 
 - [ ] Worker: `api-v2` (deployed)
+
   ```bash
   curl https://api-v2.dweinsteint.workers.dev
   ```
@@ -105,6 +112,7 @@ After workflows run successfully:
 ## 🎉 You're All Set!
 
 From now on:
+
 - Every PR → Runs CI (lint, type-check, format)
 - Every push to `main` → Deploys changed apps automatically
 - Manual deployments available via "Run workflow" button
@@ -112,6 +120,7 @@ From now on:
 ## 📋 Quick Reference
 
 ### Run CI checks locally:
+
 ```bash
 pnpm lint
 pnpm check-types
@@ -119,6 +128,7 @@ pnpm exec prettier --check "**/*.{ts,tsx,md,json}"
 ```
 
 ### Deploy manually:
+
 ```bash
 # API
 pnpm --filter api-v2 exec wrangler deploy --minify
@@ -132,6 +142,7 @@ pnpm exec wrangler pages deploy dist --project-name=teacher-client
 ```
 
 ### View logs:
+
 ```bash
 # Real-time logs
 pnpm --filter api-v2 exec wrangler tail
@@ -143,4 +154,3 @@ pnpm --filter webhook-proxy exec wrangler tail
 ---
 
 **Need help?** See [DEPLOYMENT.md](.github/DEPLOYMENT.md) for full documentation.
-

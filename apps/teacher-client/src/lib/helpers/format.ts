@@ -23,5 +23,5 @@ export function formatFullName(person: PersonName): string {
     person.secondLastName?.trim() ? person.secondLastName : null,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 }

@@ -1,14 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { overrideAttendance, type OverrideAttendanceRequest } from "@/lib/api/attendance";
+import {
+  overrideAttendance,
+  type OverrideAttendanceRequest,
+} from "@/lib/api/attendance";
 import { toast } from "sonner";
 
 export function useOverrideAttendance() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ 
-      attendanceId, 
-      ...data 
+    mutationFn: ({
+      attendanceId,
+      ...data
     }: OverrideAttendanceRequest & { attendanceId: string }) =>
       overrideAttendance(attendanceId, data),
     onSuccess: () => {
@@ -22,4 +25,3 @@ export function useOverrideAttendance() {
     },
   });
 }
-

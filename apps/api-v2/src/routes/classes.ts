@@ -59,7 +59,10 @@ classes.get("/teacher/:teacherId", async (c) => {
       })
       .from(classesTable)
       .innerJoin(coursesTable, eq(classesTable.courseId, coursesTable.id))
-      .innerJoin(classroomsTable, eq(classesTable.classroomId, classroomsTable.id))
+      .innerJoin(
+        classroomsTable,
+        eq(classesTable.classroomId, classroomsTable.id),
+      )
       .innerJoin(teachersTable, eq(classesTable.teacherId, teachersTable.id))
       .where(eq(classesTable.teacherId, teacherId));
 
@@ -72,8 +75,8 @@ classes.get("/teacher/:teacherId", async (c) => {
           .where(
             and(
               eq(enrollmentsTable.classId, cls.id),
-              eq(enrollmentsTable.status, "active")
-            )
+              eq(enrollmentsTable.status, "active"),
+            ),
           );
 
         return {
@@ -81,7 +84,7 @@ classes.get("/teacher/:teacherId", async (c) => {
           enrolledStudents: enrollments.length,
           displayName: `${cls.course.name} - Sección ${cls.section}`,
         };
-      })
+      }),
     );
 
     return c.json({
@@ -121,7 +124,10 @@ classes.get("/:classId/students", async (c) => {
       })
       .from(classesTable)
       .innerJoin(coursesTable, eq(classesTable.courseId, coursesTable.id))
-      .innerJoin(classroomsTable, eq(classesTable.classroomId, classroomsTable.id))
+      .innerJoin(
+        classroomsTable,
+        eq(classesTable.classroomId, classroomsTable.id),
+      )
       .where(eq(classesTable.id, classId))
       .limit(1);
 
@@ -155,13 +161,19 @@ classes.get("/:classId/students", async (c) => {
         },
       })
       .from(enrollmentsTable)
-      .innerJoin(studentsTable, eq(enrollmentsTable.studentId, studentsTable.id))
-      .innerJoin(guardiansTable, eq(studentsTable.guardianId, guardiansTable.id))
+      .innerJoin(
+        studentsTable,
+        eq(enrollmentsTable.studentId, studentsTable.id),
+      )
+      .innerJoin(
+        guardiansTable,
+        eq(studentsTable.guardianId, guardiansTable.id),
+      )
       .where(
         and(
           eq(enrollmentsTable.classId, classId),
-          eq(enrollmentsTable.status, "active")
-        )
+          eq(enrollmentsTable.status, "active"),
+        ),
       );
 
     // Get face count for each student
@@ -175,9 +187,10 @@ classes.get("/:classId/students", async (c) => {
         return {
           ...record,
           faceCount: faces.length,
-          fullName: `${record.student.firstName} ${record.student.middleName ?? ""} ${record.student.lastName} ${record.student.secondLastName ?? ""}`.trim(),
+          fullName:
+            `${record.student.firstName} ${record.student.middleName ?? ""} ${record.student.lastName} ${record.student.secondLastName ?? ""}`.trim(),
         };
-      })
+      }),
     );
 
     return c.json({
@@ -218,7 +231,10 @@ classes.get("/:classId", async (c) => {
       })
       .from(classesTable)
       .innerJoin(coursesTable, eq(classesTable.courseId, coursesTable.id))
-      .innerJoin(classroomsTable, eq(classesTable.classroomId, classroomsTable.id))
+      .innerJoin(
+        classroomsTable,
+        eq(classesTable.classroomId, classroomsTable.id),
+      )
       .innerJoin(teachersTable, eq(classesTable.teacherId, teachersTable.id))
       .where(eq(classesTable.id, classId))
       .limit(1);
@@ -235,4 +251,3 @@ classes.get("/:classId", async (c) => {
 });
 
 export default classes;
-

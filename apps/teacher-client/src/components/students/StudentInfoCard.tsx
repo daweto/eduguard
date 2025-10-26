@@ -1,6 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { User, Phone, Mail, IdCard, GraduationCap } from "lucide-react";
 import type { Student } from "@/types/student";
@@ -27,7 +33,9 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
         guardianSource.firstName,
         guardianSource.middleName?.trim() ? guardianSource.middleName : null,
         guardianSource.lastName,
-        guardianSource.secondLastName?.trim() ? guardianSource.secondLastName : null,
+        guardianSource.secondLastName?.trim()
+          ? guardianSource.secondLastName
+          : null,
       ]
         .filter(Boolean)
         .join(" ")
@@ -44,7 +52,10 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
                 <CarouselContent>
                   {student.photo_urls.map((photoUrl, index) => (
                     <CarouselItem key={index}>
-                      <AspectRatio ratio={3 / 4} className="rounded-lg overflow-hidden">
+                      <AspectRatio
+                        ratio={3 / 4}
+                        className="rounded-lg overflow-hidden"
+                      >
                         <img
                           src={photoUrl}
                           alt={`${studentFullName} - Foto ${index + 1}`}
@@ -63,7 +74,10 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
                 )}
               </Carousel>
             ) : (
-              <AspectRatio ratio={3 / 4} className="rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <AspectRatio
+                ratio={3 / 4}
+                className="rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center"
+              >
                 <User className="w-20 h-20 text-muted-foreground/30" />
               </AspectRatio>
             )}
@@ -89,7 +103,9 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
 
             <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t">
               <div>
-                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Información del Apoderado</h3>
+                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
+                  Información del Apoderado
+                </h3>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <User className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
@@ -104,7 +120,9 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
                       <IdCard className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
                       <div>
                         <p className="text-xs text-muted-foreground">RUT</p>
-                        <p className="font-medium">{formatRut(guardianSource.identificationNumber)}</p>
+                        <p className="font-medium">
+                          {formatRut(guardianSource.identificationNumber)}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -112,13 +130,17 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Contacto</h3>
+                <h3 className="text-sm font-semibold mb-3 text-muted-foreground">
+                  Contacto
+                </h3>
                 <div className="space-y-2">
                   <div className="flex items-start gap-2">
                     <Phone className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Teléfono</p>
-                      <p className="font-medium">{guardianSource?.phone ?? student.guardianPhone}</p>
+                      <p className="font-medium">
+                        {guardianSource?.phone ?? student.guardianPhone}
+                      </p>
                     </div>
                   </div>
 
@@ -127,7 +149,9 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
                       <Mail className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
                       <div>
                         <p className="text-xs text-muted-foreground">Email</p>
-                        <p className="font-medium text-sm">{guardianSource?.email ?? student.guardianEmail}</p>
+                        <p className="font-medium text-sm">
+                          {guardianSource?.email ?? student.guardianEmail}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -137,14 +161,24 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
 
             <div className="pt-4 border-t text-xs text-muted-foreground">
               <div className="flex justify-between items-center">
-                <span>Fecha de matrícula: {new Date(student.enrollmentDate).toLocaleDateString()}</span>
-                <Badge variant="outline" className="text-green-600 border-green-600">
+                <span>
+                  Fecha de matrícula:{" "}
+                  {new Date(student.enrollmentDate).toLocaleDateString()}
+                </span>
+                <Badge
+                  variant="outline"
+                  className="text-green-600 border-green-600"
+                >
                   {student.status === "active" ? "Activo" : student.status}
                 </Badge>
               </div>
               {student.face_ids && student.face_ids.length > 0 && (
                 <div className="mt-1">
-                  {student.face_ids.length} {student.face_ids.length === 1 ? "foto indexada" : "fotos indexadas"} en el sistema
+                  {student.face_ids.length}{" "}
+                  {student.face_ids.length === 1
+                    ? "foto indexada"
+                    : "fotos indexadas"}{" "}
+                  en el sistema
                 </div>
               )}
             </div>
@@ -154,4 +188,3 @@ export function StudentInfoCard({ student, className }: StudentInfoCardProps) {
     </Card>
   );
 }
-

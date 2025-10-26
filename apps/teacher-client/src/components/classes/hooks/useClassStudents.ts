@@ -47,7 +47,9 @@ export interface ClassStudentsResponse {
 }
 
 export function useClassStudents(classId: string | undefined) {
-  const [classData, setClassData] = useState<ClassStudentsResponse | null>(null);
+  const [classData, setClassData] = useState<ClassStudentsResponse | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -63,7 +65,7 @@ export function useClassStudents(classId: string | undefined) {
         setError(null);
 
         const response = await fetch(
-          `${API_BASE_URL}/api/classes/${classId}/students`
+          `${API_BASE_URL}/api/classes/${classId}/students`,
         );
 
         if (!response.ok) {
@@ -84,13 +86,14 @@ export function useClassStudents(classId: string | undefined) {
 
   const refetch = async () => {
     if (!classId) return;
-    
+
     try {
       setIsLoading(true);
       const response = await fetch(
-        `${API_BASE_URL}/api/classes/${classId}/students`
+        `${API_BASE_URL}/api/classes/${classId}/students`,
       );
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       setClassData(data);
     } catch (err) {
@@ -102,4 +105,3 @@ export function useClassStudents(classId: string | undefined) {
 
   return { classData, isLoading, error, refetch };
 }
-

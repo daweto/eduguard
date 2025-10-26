@@ -1,12 +1,29 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Upload, X, Camera, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Upload,
+  X,
+  Camera,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
-import { getStudent, uploadStudentPhotos, type Student } from "@/lib/api/students";
+import {
+  getStudent,
+  uploadStudentPhotos,
+  type Student,
+} from "@/lib/api/students";
 import { formatRut } from "@/lib/helpers/rut";
 
 type PhotoData = {
@@ -18,7 +35,7 @@ export default function EditStudentPage() {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation("students");
-  
+
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [photos, setPhotos] = useState<PhotoData[]>([]);
@@ -26,7 +43,12 @@ export default function EditStudentPage() {
   const [success, setSuccess] = useState(false);
 
   const fullName = student
-    ? [student.firstName, student.middleName, student.lastName, student.secondLastName]
+    ? [
+        student.firstName,
+        student.middleName,
+        student.lastName,
+        student.secondLastName,
+      ]
         .filter(Boolean)
         .join(" ")
     : "";
@@ -34,7 +56,7 @@ export default function EditStudentPage() {
   useEffect(() => {
     const fetchStudentData = async () => {
       if (!studentId) return;
-      
+
       try {
         const data = await getStudent(studentId);
         setStudent(data);
@@ -59,7 +81,7 @@ export default function EditStudentPage() {
 
     for (let i = 0; i < Math.min(files.length, remainingSlots); i++) {
       const file = files[i];
-      
+
       // Validate file type
       if (!file.type.startsWith("image/")) {
         toast.error(t("edit.errors.invalidImage", { fileName: file.name }));
@@ -106,10 +128,12 @@ export default function EditStudentPage() {
       // Upload photos using presigned URLs
       const photoFiles = photos.map((photo) => photo.file);
       const result = await uploadStudentPhotos(studentId, photoFiles);
-      
+
       setSuccess(true);
-      toast.success(t("edit.success.photosUploaded", { count: result.photos_uploaded }));
-      
+      toast.success(
+        t("edit.success.photosUploaded", { count: result.photos_uploaded }),
+      );
+
       // Clean up
       photos.forEach((photo) => URL.revokeObjectURL(photo.preview));
       setPhotos([]);
@@ -120,7 +144,7 @@ export default function EditStudentPage() {
     } catch (error) {
       console.error("Error uploading photos:", error);
       toast.error(
-        error instanceof Error ? error.message : t("edit.errors.uploadFailed")
+        error instanceof Error ? error.message : t("edit.errors.uploadFailed"),
       );
     } finally {
       setUploading(false);
@@ -141,7 +165,9 @@ export default function EditStudentPage() {
       <div className="container mx-auto p-6 max-w-4xl">
         <Card className="border-red-200 bg-red-50">
           <CardHeader>
-            <CardTitle className="text-red-900">{t("common:error", "Error")}</CardTitle>
+            <CardTitle className="text-red-900">
+              {t("common:error", "Error")}
+            </CardTitle>
             <CardDescription className="text-red-700">
               {t("edit.errors.notFound")}
             </CardDescription>
@@ -175,29 +201,49 @@ export default function EditStudentPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <p className="text-sm text-muted-foreground">{t("edit.info.fullName")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("edit.info.fullName")}
+              </p>
               <p className="font-medium">{fullName}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t("edit.info.rut")}</p>
-              <p className="font-medium">{formatRut(student.identificationNumber)}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("edit.info.rut")}
+              </p>
+              <p className="font-medium">
+                {formatRut(student.identificationNumber)}
+              </p>
             </div>
             {student.gradeId && (
               <div>
-                <p className="text-sm text-muted-foreground">{t("edit.info.grade")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("edit.info.grade")}
+                </p>
                 <p className="font-medium">{student.gradeId}</p>
               </div>
             )}
             <div className="pt-3 border-t">
-              <p className="text-sm text-muted-foreground">{t("edit.info.currentPhotos")}</p>
-              <p className="font-medium">{t("edit.info.photosCount", { count: student.photo_urls?.length || 0 })}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("edit.info.currentPhotos")}
+              </p>
+              <p className="font-medium">
+                {t("edit.info.photosCount", {
+                  count: student.photo_urls?.length || 0,
+                })}
+              </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">{t("edit.info.indexedFaces")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("edit.info.indexedFaces")}
+              </p>
               <p className="font-medium">
-                {t("edit.info.facesCount", { count: student.face_ids?.length || 0 })}
+                {t("edit.info.facesCount", {
+                  count: student.face_ids?.length || 0,
+                })}
                 {student.face_ids && student.face_ids.length > 0 && (
-                  <span className="text-green-600 ml-2">{t("edit.info.readyForAttendance")}</span>
+                  <span className="text-green-600 ml-2">
+                    {t("edit.info.readyForAttendance")}
+                  </span>
                 )}
               </p>
             </div>
@@ -213,10 +259,15 @@ export default function EditStudentPage() {
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
                 {student.photo_urls?.map((url: string, index: number) => (
-                  <div key={index} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                  <div
+                    key={index}
+                    className="aspect-square rounded-lg overflow-hidden bg-muted"
+                  >
                     <img
                       src={url}
-                      alt={t("edit.currentPhotos.photoAlt", { index: index + 1 })}
+                      alt={t("edit.currentPhotos.photoAlt", {
+                        index: index + 1,
+                      })}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -231,16 +282,16 @@ export default function EditStudentPage() {
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>{t("edit.upload.title")}</CardTitle>
-          <CardDescription>
-            {t("edit.upload.description")}
-          </CardDescription>
+          <CardDescription>{t("edit.upload.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {success && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
               <div>
-                <p className="font-medium text-green-900">{t("edit.upload.success.title")}</p>
+                <p className="font-medium text-green-900">
+                  {t("edit.upload.success.title")}
+                </p>
                 <p className="text-sm text-green-700">
                   {t("edit.upload.success.message")}
                 </p>
@@ -268,7 +319,10 @@ export default function EditStudentPage() {
               >
                 <span>
                   <Camera className="h-4 w-4 mr-2" />
-                  {t("edit.upload.selectButton", { current: photos.length, max: 5 })}
+                  {t("edit.upload.selectButton", {
+                    current: photos.length,
+                    max: 5,
+                  })}
                 </span>
               </Button>
             </label>
@@ -277,7 +331,10 @@ export default function EditStudentPage() {
           {photos.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {photos.map((photo, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                <div
+                  key={index}
+                  className="relative aspect-square rounded-lg overflow-hidden bg-muted"
+                >
                   <img
                     src={photo.preview}
                     alt={t("edit.upload.previewAlt", { index: index + 1 })}
@@ -323,4 +380,3 @@ export default function EditStudentPage() {
     </div>
   );
 }
-

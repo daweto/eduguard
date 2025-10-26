@@ -3,6 +3,7 @@
 ## Overview
 
 This guide documents the implementation of the attendance drilldown feature, which allows teachers to:
+
 - View their classes and sessions
 - Drill down into session-level attendance details
 - Review and override attendance records
@@ -13,6 +14,7 @@ This guide documents the implementation of the attendance drilldown feature, whi
 ### New Tables
 
 #### `grade_sections` (Homerooms)
+
 Represents homeroom sections like "4° Básico A", "1° Medio B".
 
 ```sql
@@ -36,10 +38,12 @@ CREATE TABLE `grade_sections` (
 ### Modified Tables
 
 #### `students` table
+
 - **Added:** `grade_section_id` (FK to grade_sections)
 - **Added:** `academic_year` (text, e.g., "2024-2025")
 
 #### `attendance` table
+
 - **Added:** `corrected_at` (text, ISO timestamp)
 - **Added:** `corrected_by` (text, teacher ID)
 
@@ -65,12 +69,14 @@ CREATE INDEX `idx_enrollments_class_student` ON `class_enrollments`(`class_id`, 
 **File:** `migrations/0002_add_grade_sections_attendance_drilldown.sql`
 
 The migration includes:
+
 1. Creates `grade_sections` table with indices
 2. Adds new columns to `students` and `attendance`
 3. Backfills default grade sections (one "A" section per grade for 2024-2025)
 4. Updates existing students to assign them to default sections
 
 **To run:**
+
 ```bash
 # Local development
 pnpm --filter api-v2 migrate:local
@@ -94,6 +100,7 @@ Returns all classes taught by a teacher with enrollment counts.
 Lists all attendance sessions for a class with attendance summaries.
 
 **Response:**
+
 ```json
 {
   "class_id": "class-123",
@@ -124,6 +131,7 @@ Lists all attendance sessions for a class with attendance summaries.
 Get detailed roster for a specific session.
 
 **Response:**
+
 ```json
 {
   "session": {
@@ -165,9 +173,10 @@ Get detailed roster for a specific session.
 Correct/override an attendance record.
 
 **Request:**
+
 ```json
 {
-  "status": "present",  // "present" | "absent" | "excused" | "late"
+  "status": "present", // "present" | "absent" | "excused" | "late"
   "teacher_id": "teacher-001",
   "notes": "Student arrived late but was present"
 }
@@ -180,6 +189,7 @@ Correct/override an attendance record.
 Get attendance history for a student with optional filters.
 
 **Query Parameters:**
+
 - `classId` - Filter by specific class
 - `courseId` - Filter by course
 - `subject` - Filter by subject (e.g., "Matemáticas")
@@ -189,6 +199,7 @@ Get attendance history for a student with optional filters.
 - `status` - Filter by status ("present", "absent", "excused", "late")
 
 **Response:**
+
 ```json
 {
   "student_id": "student-001",
@@ -245,11 +256,13 @@ Get attendance history for a student with optional filters.
 ## Seed Data Updates
 
 The seed file now includes:
+
 - **Grade Sections:** 19 sections across all grades (A and B sections for key grades)
 - **Students:** Updated to include `gradeSectionId` and `academicYear`
 - **Homeroom Teachers:** Some grade sections assigned to homeroom teachers
 
 Example grade sections:
+
 - `gs-1sec-a` → "1° Medio A" (homeroom teacher: teacher-001)
 - `gs-1sec-b` → "1° Medio B"
 - `gs-4elem-a` → "4° Básico A"
@@ -278,7 +291,6 @@ Example grade sections:
      - Attendance history (with filter controls)
      - Classes enrolled
      - Notes (future)
-   
 5. **Shared Components**
    - Filter components (teacher/time range/status chips)
    - Attendance status badges
@@ -333,10 +345,14 @@ const useSessionDetail = (sessionId: string) => {
 };
 
 // useStudentAttendance.ts
-const useStudentAttendance = (studentId: string, filters?: AttendanceFilters) => {
+const useStudentAttendance = (
+  studentId: string,
+  filters?: AttendanceFilters,
+) => {
   return useQuery({
     queryKey: ["student", studentId, "attendance", filters],
-    queryFn: () => apiClient.get(`/students/${studentId}/attendance`, { params: filters }),
+    queryFn: () =>
+      apiClient.get(`/students/${studentId}/attendance`, { params: filters }),
   });
 };
 
@@ -344,7 +360,7 @@ const useStudentAttendance = (studentId: string, filters?: AttendanceFilters) =>
 const useOverrideAttendance = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ attendanceId, ...data }) => 
+    mutationFn: ({ attendanceId, ...data }) =>
       apiClient.patch(`/attendance/${attendanceId}/override`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["session"] });
@@ -357,6 +373,7 @@ const useOverrideAttendance = () => {
 ## Enrollment Form Updates (TODO)
 
 Update `StudentEnrollmentForm.tsx` to include:
+
 - Grade section selector (dropdown)
 - Fetch grade sections based on selected grade
 - Academic year field (auto-populated or manual)
@@ -378,6 +395,7 @@ const gradeSections = useGradeSections(selectedGradeId, academicYear);
 Add to `apps/teacher-client/src/i18n/locales/es/`:
 
 **students.json:**
+
 ```json
 {
   "gradeSection": "Curso/Sección",
@@ -389,6 +407,7 @@ Add to `apps/teacher-client/src/i18n/locales/es/`:
 ```
 
 **attendance.json** (new file):
+
 ```json
 {
   "sessions": "Sesiones",
@@ -468,4 +487,3 @@ Add to `apps/teacher-client/src/i18n/locales/es/`:
 - [ ] Integration with parent portal
 - [ ] Attendance reports by grade section
 - [ ] Automated attendance alerts (e.g., 3+ absences)
-

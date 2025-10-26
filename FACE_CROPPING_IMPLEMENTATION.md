@@ -15,26 +15,28 @@ for each photo:
   1. IndexFacesCommand → Add ALL 7 faces to collection temporarily
      - Returns: 7 face IDs with bounding boxes
      - ExternalImageId: temp_attendance_{sessionId}_photo{n}
-  
+
   2. For EACH indexed face:
      a. SearchFacesCommand with the temp face ID
      b. Filter out self-match (temp face matches itself)
      c. Find best match among real student faces
      d. Store match if ≥95% confidence
-  
+
   3. DeleteFacesCommand → Remove ALL temp faces (cleanup)
-  
+
   4. Result: ALL 7 students identified (if they have photos registered)
 ```
 
 ### Why This Works in Cloudflare Workers
 
 **Cloudflare Workers Limitations:**
+
 - ❌ No `createImageBitmap` (browser API)
 - ❌ No `Canvas` (Node.js API)
 - ❌ No image manipulation libraries
 
 **IndexFaces Approach:**
+
 - ✅ Pure AWS API calls (no image processing)
 - ✅ Works in any environment
 - ✅ Designed for this exact use case
@@ -55,6 +57,7 @@ DeleteFaces → Remove temp faces
 ### Visual Indicators
 
 **On Photo:**
+
 - **Thick green boxes (5px)** = Student identified ✓
 - **Red boxes (3px)** = Student NOT identified ✗
 - **Labels** = Student name + confidence % OR "No identificado"
@@ -62,6 +65,7 @@ DeleteFaces → Remove temp faces
 **Below Photo:**
 
 #### ✅ Identified Students (Green Cards)
+
 ```
 ✓ Joel Salas
 Confianza detección: 99.8%
@@ -73,6 +77,7 @@ Otras posibles coincidencias:
 ```
 
 #### ❌ Unidentified Faces (Red Cards)
+
 ```
 ✗ Rostro sin identificar #1
 Confianza detección: 98.5%
@@ -91,6 +96,7 @@ Confianza detección: 98.5%
 ## Performance Impact
 
 ### Before (Single Search per Photo)
+
 ```
 1 photo with 7 faces = 1 SearchFacesByImageCommand = 1 identified
 Cost: 1 API call
@@ -98,6 +104,7 @@ Time: ~200ms
 ```
 
 ### After (IndexFaces + SearchFaces)
+
 ```
 1 photo with 7 faces = 1 IndexFaces + 7 SearchFaces + 1 DeleteFaces = ALL 7 identified
 Cost: 9 API calls (1 index + 7 searches + 1 delete)
@@ -105,6 +112,7 @@ Time: ~2 seconds
 ```
 
 **Trade-off:**
+
 - ✅ Identifies ALL students (not just 1)
 - ✅ No image manipulation (works in Workers!)
 - ✅ Native AWS approach
@@ -126,7 +134,12 @@ Time: ~2 seconds
       "totalFacesInPhoto": 7,
       "faces": [
         {
-          "boundingBox": { "Width": 0.15, "Height": 0.2, "Left": 0.5, "Top": 0.3 },
+          "boundingBox": {
+            "Width": 0.15,
+            "Height": 0.2,
+            "Left": 0.5,
+            "Top": 0.3
+          },
           "confidence": 99.8,
           "matchedStudent": {
             "id": "student-001",
@@ -135,16 +148,33 @@ Time: ~2 seconds
           },
           "faceId": "face-abc123",
           "topMatches": [
-            { "studentName": "Joel Salas", "similarity": 97.5, "belowThreshold": false },
-            { "studentName": "María González", "similarity": 92.3, "belowThreshold": true }
+            {
+              "studentName": "Joel Salas",
+              "similarity": 97.5,
+              "belowThreshold": false
+            },
+            {
+              "studentName": "María González",
+              "similarity": 92.3,
+              "belowThreshold": true
+            }
           ]
         },
         {
-          "boundingBox": { "Width": 0.12, "Height": 0.18, "Left": 0.7, "Top": 0.4 },
+          "boundingBox": {
+            "Width": 0.12,
+            "Height": 0.18,
+            "Left": 0.7,
+            "Top": 0.4
+          },
           "confidence": 98.5,
           "noMatchReason": "Mejor coincidencia: Pedro Sánchez con 92.5% (requiere ≥95%)",
           "topMatches": [
-            { "studentName": "Pedro Sánchez", "similarity": 92.5, "belowThreshold": true }
+            {
+              "studentName": "Pedro Sánchez",
+              "similarity": 92.5,
+              "belowThreshold": true
+            }
           ]
         }
       ]
@@ -171,25 +201,31 @@ Now when you see "6 faces not identified", you'll get:
 ### Common Scenarios You'll See:
 
 **Scenario 1: Students not registered**
+
 ```
 ✗ Rostro #1: No hay rostros registrados en la colección
 ✗ Rostro #2: No coincide con ningún estudiante de esta clase
 ```
+
 → Need to register these students' photos
 
 **Scenario 2: Below threshold (fixable)**
+
 ```
 ✗ Rostro #3: Mejor coincidencia: Ana Torres con 92.5% (requiere ≥95%)
   Ana Torres - 92.5% ⚠
 ```
+
 → Almost there! Student needs 1-2 more photos or lower threshold slightly
 
 **Scenario 3: Poor photo quality**
+
 ```
 ✗ Rostro #4
   Confianza detección: 65.2%
   No hay coincidencias
 ```
+
 → Face is blurry/obscured, need better photo
 
 ## Performance Optimization
@@ -220,6 +256,7 @@ Currently implemented for clarity, can optimize later if needed.
 ### Step-by-Step Process
 
 1. **IndexFaces** - Add all faces from photo to collection
+
    ```typescript
    IndexFacesCommand({
      CollectionId: 'eduguard-school-default',
@@ -231,6 +268,7 @@ Currently implemented for clarity, can optimize later if needed.
    ```
 
 2. **SearchFaces** - For each temp face, find matches
+
    ```typescript
    for each tempFaceId:
      SearchFacesCommand({
@@ -253,6 +291,7 @@ Currently implemented for clarity, can optimize later if needed.
 ### Self-Match Filtering
 
 **Important:** When searching a temp face, it will match itself!
+
 ```typescript
 // Example: temp-face-1 searches collection
 // Results: [
@@ -261,7 +300,7 @@ Currently implemented for clarity, can optimize later if needed.
 // ]
 
 // Filter out self
-const realMatches = allMatches.filter(m => m.Face?.FaceId !== tempFaceId);
+const realMatches = allMatches.filter((m) => m.Face?.FaceId !== tempFaceId);
 ```
 
 ### Collection State During Processing
@@ -271,7 +310,7 @@ BEFORE attendance:
   Collection: [joel-face-1, sheen-face-1, boris-face-1]
 
 DURING attendance (temporary):
-  Collection: [joel-face-1, sheen-face-1, boris-face-1, 
+  Collection: [joel-face-1, sheen-face-1, boris-face-1,
                temp-1, temp-2, temp-3, temp-4, temp-5, temp-6, temp-7]
 
 AFTER cleanup:
@@ -283,6 +322,7 @@ AFTER cleanup:
 **Potential Issue:** If 2 teachers take attendance simultaneously, temp faces could interfere.
 
 **Mitigation:**
+
 - Unique external ID per session: `temp_attendance_{sessionId}_photo{idx}`
 - Immediate cleanup in `finally` block
 - Cleanup happens even if processing fails
@@ -295,11 +335,13 @@ AFTER cleanup:
 **After:** 1 photo with 30 students = 1 index + 30 searches + 1 delete = 32 calls
 
 **AWS Rekognition Pricing (approximate):**
+
 - DetectFaces: $0.001 per image
 - SearchFaces: $0.001 per search
 - 30 students = $0.031 per photo (~3 cents)
 
 For a 1000-student school taking attendance daily:
+
 - ~$30/month if using group photos
 - Can reduce by using individual photos or lower resolution
 
@@ -310,4 +352,3 @@ For a 1000-student school taking attendance daily:
 3. Review unmatched faces to see if they need photos registered
 4. Adjust threshold if many students are at 90-94%
 5. Consider parallel processing if performance is slow
-

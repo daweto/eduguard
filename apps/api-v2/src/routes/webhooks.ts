@@ -23,9 +23,20 @@ webhooks.post("/elevenlabs/call-completed", async (c) => {
       recording_url?: string;
     }>();
 
-    console.log("📥 ElevenLabs webhook received:", JSON.stringify(payload, null, 2));
+    console.log(
+      "📥 ElevenLabs webhook received:",
+      JSON.stringify(payload, null, 2),
+    );
 
-    const { call_id, status, duration, dtmf_input, dtmf_response, transcript, recording_url } = payload;
+    const {
+      call_id,
+      status,
+      duration,
+      dtmf_input,
+      dtmf_response,
+      transcript,
+      recording_url,
+    } = payload;
 
     if (!call_id) {
       return c.json({ error: "call_id is required" }, 400);
@@ -48,7 +59,9 @@ webhooks.post("/elevenlabs/call-completed", async (c) => {
       })
       .where(eq(calls.id, call_id));
 
-    console.log(`✅ Call ${call_id} updated: status=${status}, duration=${String(duration ?? 0)}s`);
+    console.log(
+      `✅ Call ${call_id} updated: status=${status}, duration=${String(duration ?? 0)}s`,
+    );
 
     return c.json({
       received: true,
@@ -62,7 +75,7 @@ webhooks.post("/elevenlabs/call-completed", async (c) => {
         error: "Failed to process webhook",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      500
+      500,
     );
   }
 });

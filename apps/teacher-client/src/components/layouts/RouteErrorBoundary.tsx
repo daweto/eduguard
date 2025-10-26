@@ -1,15 +1,15 @@
-import { isRouteErrorResponse, useRouteError } from "react-router-dom"
+import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 
 export function RouteErrorBoundary() {
-  const error = useRouteError()
-  let title = "Something went wrong"
-  let message = "An unexpected error occurred."
+  const error = useRouteError();
+  let title = "Something went wrong";
+  let message = "An unexpected error occurred.";
 
   if (isRouteErrorResponse(error)) {
-    title = `Error ${error.status}`
-    message = error.statusText || message
+    title = `Error ${error.status}`;
+    message = error.statusText || message;
   } else if (error instanceof Error) {
-    message = error.message
+    message = error.message;
   }
 
   return (
@@ -17,9 +17,7 @@ export function RouteErrorBoundary() {
       <h2 className="text-lg font-semibold">{title}</h2>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
-  )
+  );
 }
 
-export default RouteErrorBoundary
-
-
+export default RouteErrorBoundary;

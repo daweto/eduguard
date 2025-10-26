@@ -2,10 +2,10 @@
  * Hook for fetching and managing guardians using React Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getGuardians, createGuardian, ApiError } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
-import type { LegalGuardian, CreateGuardianRequest } from '@/types/guardian';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getGuardians, createGuardian, ApiError } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import type { LegalGuardian, CreateGuardianRequest } from "@/types/guardian";
 
 export interface UseGuardiansReturn {
   guardians: LegalGuardian[];
@@ -48,17 +48,21 @@ export function useGuardians(): UseGuardiansReturn {
       queryClient.invalidateQueries({ queryKey: queryKeys.guardians });
     },
     onError: (err: unknown) => {
-      console.error('Failed to create guardian:', err);
+      console.error("Failed to create guardian:", err);
     },
   });
 
   // Create handler
-  const create = async (data: CreateGuardianRequest): Promise<LegalGuardian> => {
+  const create = async (
+    data: CreateGuardianRequest,
+  ): Promise<LegalGuardian> => {
     try {
       return await createMutation.mutateAsync(data);
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : 'No pudimos crear el apoderado. Intenta nuevamente.';
+        err instanceof ApiError
+          ? err.message
+          : "No pudimos crear el apoderado. Intenta nuevamente.";
       throw new Error(message);
     }
   };
@@ -69,7 +73,7 @@ export function useGuardians(): UseGuardiansReturn {
     error: queryError
       ? queryError instanceof ApiError
         ? queryError.message
-        : 'No pudimos cargar la lista de apoderados. Intenta nuevamente.'
+        : "No pudimos cargar la lista de apoderados. Intenta nuevamente."
       : null,
     creating: createMutation.isPending,
     refetch: () => {

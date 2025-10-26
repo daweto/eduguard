@@ -193,4 +193,3 @@ export interface StudentFormValues {
   enrollmentDate: string;
   academicYear?: string;
 }
-

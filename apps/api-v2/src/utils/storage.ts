@@ -1,12 +1,17 @@
 // R2 storage utilities
-import { S3Client, GetObjectCommand, DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export async function uploadPhoto(
   bucket: R2Bucket,
   key: string,
   data: ArrayBuffer,
-  contentType: string = 'image/jpeg'
+  contentType: string = "image/jpeg",
 ): Promise<void> {
   await bucket.put(key, data, {
     httpMetadata: {
@@ -15,7 +20,10 @@ export async function uploadPhoto(
   });
 }
 
-export async function getPhotoUrl(bucket: R2Bucket, key: string): Promise<string | null> {
+export async function getPhotoUrl(
+  bucket: R2Bucket,
+  key: string,
+): Promise<string | null> {
   const object = await bucket.get(key);
   if (!object) return null;
 
@@ -32,7 +40,7 @@ export async function generatePresignedUrl(
     accessKeyId: string;
     secretAccessKey: string;
     expiresIn?: number;
-  }
+  },
 ): Promise<string> {
   const s3 = new S3Client({
     region: "auto",
@@ -48,8 +56,8 @@ export async function generatePresignedUrl(
     Key: key,
   });
 
-  return await getSignedUrl(s3, command, { 
-    expiresIn: config.expiresIn ?? 60 * 60 // 1 hour default
+  return await getSignedUrl(s3, command, {
+    expiresIn: config.expiresIn ?? 60 * 60, // 1 hour default
   });
 }
 
@@ -61,20 +69,23 @@ export async function generatePresignedUrls(
     accessKeyId: string;
     secretAccessKey: string;
     expiresIn?: number;
-  }
+  },
 ): Promise<string[]> {
   return await Promise.all(
-    keys.map(key => generatePresignedUrl(key, config))
+    keys.map((key) => generatePresignedUrl(key, config)),
   );
 }
 
-export async function deletePhoto(bucket: R2Bucket, key: string): Promise<void> {
+export async function deletePhoto(
+  bucket: R2Bucket,
+  key: string,
+): Promise<void> {
   await bucket.delete(key);
 }
 
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   // Remove data:image/...;base64, prefix if present
-  const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
+  const base64Data = base64.replace(/^data:image\/\w+;base64,/, "");
   const binaryString = atob(base64Data);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {
@@ -94,7 +105,7 @@ export async function fetchFromRemoteR2(
     bucketName: string;
     accessKeyId: string;
     secretAccessKey: string;
-  }
+  },
 ): Promise<Uint8Array | null> {
   const s3 = new S3Client({
     region: "auto",
@@ -117,9 +128,9 @@ export async function fetchFromRemoteR2(
     // Convert ReadableStream to Uint8Array
     const chunks: Uint8Array[] = [];
     const reader = response.Body.transformToWebStream().getReader();
-    
+
     let readResult;
-    while ((readResult = await reader.read(), !readResult.done)) {
+    while (((readResult = await reader.read()), !readResult.done)) {
       chunks.push(readResult.value as Uint8Array);
     }
 
@@ -149,7 +160,7 @@ export async function deleteFromRemoteR2(
     bucketName: string;
     accessKeyId: string;
     secretAccessKey: string;
-  }
+  },
 ): Promise<void> {
   const s3 = new S3Client({
     region: "auto",
@@ -184,7 +195,7 @@ export async function uploadToRemoteR2(
     accessKeyId: string;
     secretAccessKey: string;
   },
-  contentType: string = 'image/jpeg'
+  contentType: string = "image/jpeg",
 ): Promise<void> {
   const s3 = new S3Client({
     region: "auto",
@@ -194,7 +205,7 @@ export async function uploadToRemoteR2(
       secretAccessKey: config.secretAccessKey,
     },
   });
-  
+
   const command = new PutObjectCommand({
     Bucket: config.bucketName,
     Key: key,
@@ -204,4 +215,3 @@ export async function uploadToRemoteR2(
 
   await s3.send(command);
 }
-

@@ -83,6 +83,7 @@
 ### Scenario: Sofia Martinez leaves campus after Period 1
 
 **8:00 AM - Period 1 (English)**
+
 ```
 Teacher takes photo
   ↓
@@ -92,6 +93,7 @@ Attendance: Sofia = PRESENT
 ```
 
 **9:00 AM - Period 2 (Math)**
+
 ```
 Teacher takes photo
   ↓
@@ -110,23 +112,23 @@ Reasoning Agent triggered:
   }
   ↓
 Reasoning Agents (parallel analysis):
-  
+
   🏃 Sneak-Out Detector:
     "Pattern detected: Student present Period 1, absent Period 2.
      HIGH RISK - Classic sneak-out pattern. Student likely left campus
      without authorization mid-day."
-  
+
   🔍 Truancy Detector:
     "Last 7 days: 2 full-day absences. MEDIUM RISK - Monitoring required
      but not yet chronic truancy threshold (3+ days)."
-  
+
   ✂️ Class-Cutting Detector:
     "No selective cutting pattern. Student attends all classes when present."
-  
+
   🔮 Predictive Risk Agent:
     "Attendance declining over 30 days (95% → 87% → 80%).
      MEDIUM RISK - Early intervention recommended."
-  
+
   ↓
 Consolidated Output: {
   risk_level: "high",
@@ -142,6 +144,7 @@ UI shows: 🚨 HIGH RISK badge + "Call Parent" button
 ```
 
 **Automatic Voice Notification (Natural Conversation):**
+
 ```
 9:30 AM - System Check:
   ↓
@@ -152,30 +155,30 @@ UI shows: 🚨 HIGH RISK badge + "Call Parent" button
 Voice Agent AUTOMATICALLY triggers:
   1. Fetches guardian phone: +56912345678
   2. Initiates NATURAL CONVERSATION in Spanish:
-     
+
      [Phone rings]
-     
-     AI Agent (natural Spanish voice): 
+
+     AI Agent (natural Spanish voice):
      "Hola, buenos días. Soy el asistente virtual del Colegio San José.
       ¿Hablo con la mamá de Sofia Martinez?"
-     
+
      Parent (SPEAKING): "Sí, soy yo."
-     
-     AI Agent: 
+
+     AI Agent:
      "Le llamo para informarle que Sofia no ha asistido a clases hoy.
       ¿Está usted al tanto de esta ausencia?"
-     
+
      Parent (SPEAKING): "¿Qué? ¡No tenía idea! Ella salió esta mañana."
-     
-     AI Agent: 
+
+     AI Agent:
      "Entiendo su preocupación. Sofia no fue detectada en ninguna clase.
       Un administrador se pondrá en contacto con usted inmediatamente
       para dar seguimiento. ¿Tiene alguna pregunta?"
-     
+
      Parent (SPEAKING): "No, voy a buscarla ahora mismo. Gracias."
-     
+
      AI Agent: "Por favor manténganos informados. Que tenga buen día."
-     
+
      [Call ends - total: 65 seconds]
   ↓
 System analyzes conversation transcript:
@@ -200,24 +203,26 @@ Alert created for school administrator:
 
 ## Technical Stack
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Agent 1** | AWS Rekognition | Face detection & recognition |
-| **Agent 2** | OpenAI GPT-4 + Vercel AI SDK | Pattern analysis & reasoning |
-| **Agent 3** | ElevenLabs Conversational AI | Natural language phone calls |
-| **Backend** | Cloudflare Workers + Hono | Serverless API |
-| **Database** | Cloudflare D1 (SQLite) | Attendance records |
-| **Storage** | Cloudflare R2 | Photo storage |
-| **Frontend** | React + Vite + TailwindCSS | Teacher interface |
+| Component    | Technology                   | Purpose                      |
+| ------------ | ---------------------------- | ---------------------------- |
+| **Agent 1**  | AWS Rekognition              | Face detection & recognition |
+| **Agent 2**  | OpenAI GPT-4 + Vercel AI SDK | Pattern analysis & reasoning |
+| **Agent 3**  | ElevenLabs Conversational AI | Natural language phone calls |
+| **Backend**  | Cloudflare Workers + Hono    | Serverless API               |
+| **Database** | Cloudflare D1 (SQLite)       | Attendance records           |
+| **Storage**  | Cloudflare R2                | Photo storage                |
+| **Frontend** | React + Vite + TailwindCSS   | Teacher interface            |
 
 ---
 
 ## API Endpoints
 
 ### Vision Agent (Existing ✅)
+
 - `POST /api/attendance/session` - Process classroom photos
 
 ### Reasoning Agents (To Build ⚠️)
+
 - `POST /api/reasoning/analyze` - Run all reasoning agents in parallel
 - `POST /api/reasoning/truancy/detect` - Truancy detection only
 - `POST /api/reasoning/sneakout/detect` - Sneak-out detection only
@@ -226,6 +231,7 @@ Alert created for school administrator:
 - `GET /api/reasoning/flags` - Get all flagged students
 
 ### Voice Agent (To Build ⚠️)
+
 - `POST /api/voice/notify-absence` - Automatic call for unexcused absence
 - `POST /api/voice/check-excuses` - Check if excuse exists before calling
 - `GET /api/voice/call/:id` - Get call status
@@ -237,6 +243,7 @@ Alert created for school administrator:
 ## Code Implementation Preview
 
 ### Reasoning Agents (Vercel AI SDK - Parallel Execution)
+
 ```typescript
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
@@ -303,7 +310,7 @@ const consolidatedRisk = {
     truancy.object.risk_level,
     sneakout.object.risk_level,
     cutting.object.risk_level,
-    predictive.object.future_risk
+    predictive.object.future_risk,
   ),
   patterns: {
     truancy: truancy.object,
@@ -311,7 +318,7 @@ const consolidatedRisk = {
     cutting: cutting.object,
     predictive: predictive.object,
   },
-  should_notify: 
+  should_notify:
     truancy.object.risk_level === "high" ||
     sneakout.object.risk_level === "high",
 };
@@ -371,10 +378,10 @@ await logCall({
   timestamp: new Date(),
 });
 
-return { 
-  call_id: call.call_id, 
+return {
+  call_id: call.call_id,
   status: "initiated",
-  purpose: "notify_unexcused_absence" 
+  purpose: "notify_unexcused_absence",
 };
 ```
 
@@ -383,7 +390,9 @@ return {
 ## Why This Architecture?
 
 ### Separation of Concerns
+
 Each agent does ONE thing exceptionally well:
+
 - **Vision** = Identity (Who is here?)
 - **Reasoning** = Analysis (What patterns exist?)
   - **Truancy Detector** = Chronic absence patterns
@@ -393,6 +402,7 @@ Each agent does ONE thing exceptionally well:
 - **Voice** = Action (Notify the parent)
 
 ### Scalability
+
 - **Vision**: AWS Rekognition scales automatically
 - **Reasoning**: Multiple agents run in parallel
   - Each agent is independent and specialized
@@ -401,6 +411,7 @@ Each agent does ONE thing exceptionally well:
 - **Voice**: ElevenLabs handles concurrent calls
 
 ### Flexibility (Vercel AI SDK)
+
 ```typescript
 // Today: OpenAI
 import { openai } from "@ai-sdk/openai";
@@ -418,11 +429,13 @@ const model = anthropic("claude-3-5-sonnet-20241022");
 ## Demo Impact
 
 ### Before EduGuard:
+
 1. Teacher manually marks attendance (10 minutes)
 2. Student sneaks out after Period 1
 3. Parent finds out 3 days later when report sent
 
 ### After EduGuard:
+
 1. Teacher takes photo (2 seconds)
 2. AI detects sneak-out pattern (3 seconds)
 3. Parent receives call (5 seconds)
@@ -432,13 +445,13 @@ const model = anthropic("claude-3-5-sonnet-20241022");
 
 ## Success Metrics
 
-| Metric | Target | Technology |
-|--------|--------|------------|
-| **Face Recognition Accuracy** | >98% | AWS Rekognition |
-| **Pattern Detection Accuracy** | >90% | GPT-4 analysis |
-| **Call Connection Rate** | >95% | ElevenLabs |
-| **End-to-End Latency** | <15s | Full pipeline |
-| **False Positive Rate** | <2% | Confidence thresholds |
+| Metric                         | Target | Technology            |
+| ------------------------------ | ------ | --------------------- |
+| **Face Recognition Accuracy**  | >98%   | AWS Rekognition       |
+| **Pattern Detection Accuracy** | >90%   | GPT-4 analysis        |
+| **Call Connection Rate**       | >95%   | ElevenLabs            |
+| **End-to-End Latency**         | <15s   | Full pipeline         |
+| **False Positive Rate**        | <2%    | Confidence thresholds |
 
 ---
 
@@ -452,8 +465,9 @@ const model = anthropic("claude-3-5-sonnet-20241022");
 
 **The Solution:**
 "We built 3 specialized AI agents that work together like a relay race:
+
 1. Vision Agent (AWS) identifies faces in 2 seconds
-2. Reasoning Agent (GPT-4) detects dangerous patterns in 3 seconds  
+2. Reasoning Agent (GPT-4) detects dangerous patterns in 3 seconds
 3. Voice Agent (ElevenLabs) calls parents in 5 seconds with natural Spanish conversation
 
 From classroom photo to parent's phone ringing in under 10 seconds."
@@ -469,16 +483,19 @@ From classroom photo to parent's phone ringing in under 10 seconds."
 ## Next Steps After Hackathon
 
 ### Phase 1 (Weeks 1-2):
+
 - Add SMS follow-up after voice calls
 - Multi-language support (English + Spanish)
 - Call recording playback in UI
 
 ### Phase 2 (Weeks 3-4):
+
 - Historical trend analysis
 - Predictive risk scoring
 - Integration with student information systems
 
 ### Phase 3 (Month 2+):
+
 - Mobile app for parents
 - Real-time attendance dashboard
 - District-wide analytics
@@ -486,4 +503,3 @@ From classroom photo to parent's phone ringing in under 10 seconds."
 ---
 
 **Built with ❤️ for student safety**
-

@@ -75,6 +75,7 @@ Successfully implemented a comprehensive class-based attendance system that allo
 ### Seed Data
 
 Updated `apps/api-v2/src/db/seed.ts` with sample data:
+
 - 3 teachers (María González, Carlos Rodríguez, Ana Martínez)
 - 4 classrooms (A1, A2, B1, Lab Ciencias 1)
 - 4 courses (Matemática, Lenguaje, Química, Física)
@@ -106,6 +107,7 @@ Updated `apps/api-v2/src/db/seed.ts` with sample data:
 ### Enhanced Attendance API (`/api/attendance`)
 
 **NEW: POST `/api/attendance/session`**
+
 - Create attendance session with 1-10 photos
 - Processes all photos and aggregates detected faces
 - Creates session record and individual attendance records
@@ -113,6 +115,7 @@ Updated `apps/api-v2/src/db/seed.ts` with sample data:
 - Returns present/absent lists with confidence scores
 
 **Request:**
+
 ```json
 {
   "class_id": "class-math-1m-a",
@@ -123,6 +126,7 @@ Updated `apps/api-v2/src/db/seed.ts` with sample data:
 ```
 
 **Response:**
+
 ```json
 {
   "session_id": "session-xyz",
@@ -200,12 +204,15 @@ Updated `apps/api-v2/src/db/seed.ts` with sample data:
 ### Example Scenario
 
 **Teacher**: María González (teacher-001)
+
 - Teaches: Math Section A (Period 1) and Physics Section A (Period 3)
 
 **Students**: Sofía, Diego, Catalina
+
 - All enrolled in Math Section A and Physics Section A
 
 **Workflow**:
+
 1. Teacher opens app → sees "Mis Clases"
 2. Selects "Matemática I - Sección A"
 3. Takes 1-10 photos of classroom
@@ -337,4 +344,3 @@ apps/
 ## 🎉 Success!
 
 The system is now fully configured to support teacher-based class attendance with multi-photo capture and automatic face recognition scoring!
-

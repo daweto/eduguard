@@ -1,18 +1,26 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function StudentsPage() {
-  const { t } = useTranslation(['students'])
+  const { t } = useTranslation(["students"]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{t('students:page.title')}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {t("students:page.title")}
+        </h1>
         <p className="text-muted-foreground mt-2">
-          {t('students:page.description')}
+          {t("students:page.description")}
         </p>
       </div>
 
@@ -21,14 +29,18 @@ export default function StudentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserPlus className="h-5 w-5" />
-              {t('students:cards.enroll.title')}
+              {t("students:cards.enroll.title")}
             </CardTitle>
             <CardDescription>
-              {t('students:cards.enroll.description')}
+              {t("students:cards.enroll.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full"><Link to="/students/enroll">{t('students:cards.enroll.action')}</Link></Button>
+            <Button asChild className="w-full">
+              <Link to="/students/enroll">
+                {t("students:cards.enroll.action")}
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -36,18 +48,21 @@ export default function StudentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              {t('students:cards.roster.title')}
+              {t("students:cards.roster.title")}
             </CardTitle>
             <CardDescription>
-              {t('students:cards.roster.description')}
+              {t("students:cards.roster.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline" className="w-full"><Link to="/students/roster">{t('students:cards.roster.action')}</Link></Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/students/roster">
+                {t("students:cards.roster.action")}
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

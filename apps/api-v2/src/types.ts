@@ -35,7 +35,12 @@ export type { Student, StudentFace, LegalGuardian };
 
 export type StudentProfileInput = Pick<
   NewStudent,
-  "firstName" | "middleName" | "lastName" | "secondLastName" | "identificationNumber" | "gradeId"
+  | "firstName"
+  | "middleName"
+  | "lastName"
+  | "secondLastName"
+  | "identificationNumber"
+  | "gradeId"
 >;
 
 type RequiredGuardianFields = Pick<
@@ -74,19 +79,18 @@ export interface EnrollStudentResponse {
 }
 
 export interface GetStudentsResponse {
-  students: (
-    Student & {
-      photo_urls: string[];
-      guardian: LegalGuardian | null;
-      gradeDisplayName: string | null;
-    }
-  )[];
+  students: (Student & {
+    photo_urls: string[];
+    guardian: LegalGuardian | null;
+    gradeDisplayName: string | null;
+  })[];
   total: number;
   page: number;
   per_page: number;
 }
 
-export type CreateGuardianRequest = RequiredGuardianFields & OptionalGuardianFields;
+export type CreateGuardianRequest = RequiredGuardianFields &
+  OptionalGuardianFields;
 
 export interface GetGuardiansResponse {
   guardians: LegalGuardian[];

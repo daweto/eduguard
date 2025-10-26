@@ -19,7 +19,7 @@
 ### Automatic Trigger Conditions (All must be true):
 
 ```typescript
-const shouldCallParent = 
+const shouldCallParent =
   studentAbsent === true &&              // Not detected in any class
   hasExcuseNote === false &&             // No excuse/note on file
   currentTime > schoolStartTime + 60min  // After 9 AM (1 hour buffer)
@@ -27,6 +27,7 @@ const shouldCallParent =
 ```
 
 ### Manual Trigger (Teacher Override):
+
 Teacher can click "Call Parent" button to immediately notify regardless of above conditions.
 
 ---
@@ -38,38 +39,38 @@ Teacher can click "Call Parent" button to immediately notify regardless of above
 ```
 [PHONE RINGS]
 
-Agent (natural Spanish voice): 
+Agent (natural Spanish voice):
 "Hola, buenos días. Soy el asistente virtual del Colegio San José.
 ¿Hablo con [GUARDIAN_NAME]?"
 
 Parent: "Sí, soy yo." / "Sí." / "Habla."
 
-Agent: 
-"Le llamo para informarle que [STUDENT_NAME] no ha asistido a 
+Agent:
+"Le llamo para informarle que [STUDENT_NAME] no ha asistido a
 clases hoy. ¿Está usted al tanto de esta situación?"
 
 Parent: "Sí, está enfermo en casa." / "Sí, tiene cita médica."
   ↓
-  Agent: 
-  "Perfecto, gracias por confirmar. Registraremos la ausencia como 
+  Agent:
+  "Perfecto, gracias por confirmar. Registraremos la ausencia como
    justificada. ¿Hay algo más que deba saber?"
-  
+
   Parent: "No, eso es todo."
-  
+
   Agent: "Muchas gracias. Que se mejore pronto. Que tenga buen día."
 
 OR
 
 Parent: "¿Qué? ¡No sabía!" / "No tenía idea!" / "¿Cómo?"
   ↓
-  Agent: 
-  "Entiendo su preocupación. Su hijo/a no fue detectado en ninguna 
+  Agent:
+  "Entiendo su preocupación. Su hijo/a no fue detectado en ninguna
    clase hoy. Un administrador del colegio se pondrá en contacto con
    usted inmediatamente para dar seguimiento a esta situación.
    ¿Tiene alguna pregunta?"
-  
+
   Parent: "No, voy a buscar a mi hijo ahora mismo."
-  
+
   Agent: "Por favor manténganos informados. Gracias."
 
 OR
@@ -85,6 +86,7 @@ Parent doesn't answer / Voicemail:
 ```
 
 ### Timing
+
 - Total call duration: **30-90 seconds** (natural conversation)
 - AI responds in real-time to parent's speech
 - No DTMF keypresses needed - **just talk naturally**
@@ -95,6 +97,7 @@ Parent doesn't answer / Voicemail:
 ## Response Handling (Natural Language Understanding)
 
 ### Scenario 1: Parent Aware - Justified
+
 **Parent says:** "Sí, está enfermo" / "Tiene cita médica" / "Está en casa conmigo"
 
 ```typescript
@@ -109,12 +112,14 @@ Parent doesn't answer / Voicemail:
 ```
 
 **System Actions:**
+
 1. ✅ Mark absence as "excused"
 2. ✅ Log parent confirmation with transcript
 3. ✅ No further action needed
 4. 📝 Record excuse reason from conversation
 
 ### Scenario 2: Parent Unaware - URGENT
+
 **Parent says:** "¿Qué? ¡No sabía!" / "¿Cómo que no está?" / "¡Imposible!"
 
 ```typescript
@@ -130,6 +135,7 @@ Parent doesn't answer / Voicemail:
 ```
 
 **System Actions:**
+
 1. 🚨 Create URGENT alert for school admin
 2. 📧 Send immediate email to admin + principal
 3. 📱 Flag as potential **safety emergency**
@@ -137,6 +143,7 @@ Parent doesn't answer / Voicemail:
 5. 🔔 Push notification to school security
 
 ### Scenario 3: Parent Says Will Handle
+
 **Parent says:** "Voy a buscarlo ahora" / "Voy para allá" / "Me ocupo inmediatamente"
 
 ```typescript
@@ -150,11 +157,13 @@ Parent doesn't answer / Voicemail:
 ```
 
 **System Actions:**
+
 1. ⏰ Log parent taking action
 2. 📋 Notify admin for monitoring
 3. ✅ No additional intervention unless parent doesn't follow up
 
 ### Scenario 4: Parent Questions/Confused
+
 **Parent says:** "¿Está seguro?" / "Debe ser un error" / "Él salió esta mañana"
 
 ```typescript
@@ -168,11 +177,13 @@ Parent doesn't answer / Voicemail:
 ```
 
 **System Actions:**
+
 1. 🔍 Double-check attendance records
 2. 📞 Admin calls back with details
 3. 📸 Review attendance photos for verification
 
 ### Scenario 5: No Answer / Voicemail
+
 ```typescript
 {
   status: "no_answer",
@@ -183,6 +194,7 @@ Parent doesn't answer / Voicemail:
 ```
 
 **System Actions:**
+
 1. 🎙️ Leave voicemail message
 2. ⏰ Schedule retry call in 2 hours
 3. 📧 Send email notification as backup
@@ -195,52 +207,49 @@ Parent doesn't answer / Voicemail:
 ### Endpoint: `POST /api/voice/notify-absence`
 
 ```typescript
-app.post('/notify-absence', async (c) => {
+app.post("/notify-absence", async (c) => {
   const { student_id } = await c.req.json();
-  
+
   // 1. Check if should call
   const shouldCall = await checkCallCriteria(student_id);
   if (!shouldCall.eligible) {
-    return c.json({ 
-      skipped: true, 
-      reason: shouldCall.reason 
+    return c.json({
+      skipped: true,
+      reason: shouldCall.reason,
     });
   }
-  
+
   // 2. Get student & guardian info
   const student = await getStudent(student_id);
   const guardian = await getGuardian(student.guardian_id);
-  
+
   // 3. Build Spanish prompt
-  const prompt = buildAbsenceNotificationPrompt(
-    student.name,
-    guardian.name,
-  );
-  
+  const prompt = buildAbsenceNotificationPrompt(student.name, guardian.name);
+
   // 4. Initiate call
-  const client = new ElevenLabsClient({ 
-    apiKey: c.env.ELEVENLABS_API_KEY 
+  const client = new ElevenLabsClient({
+    apiKey: c.env.ELEVENLABS_API_KEY,
   });
-  
+
   const call = await client.conversationalAi.call({
     agentId: c.env.ELEVENLABS_AGENT_ID,
     phoneNumber: guardian.phone,
     systemPrompt: prompt,
   });
-  
+
   // 5. Log call
   await db.insert(calls).values({
     id: generateId(),
     student_id,
     call_id: call.call_id,
     initiated_at: new Date().toISOString(),
-    status: 'in_progress',
-    reason: 'unexcused_absence',
+    status: "in_progress",
+    reason: "unexcused_absence",
   });
-  
+
   return c.json({
     call_id: call.call_id,
-    status: 'initiated',
+    status: "initiated",
     student_name: student.name,
     guardian_phone: guardian.phone,
   });
@@ -250,69 +259,69 @@ app.post('/notify-absence', async (c) => {
 ### Endpoint: `POST /api/voice/webhook/call-completed`
 
 ```typescript
-app.post('/webhook/call-completed', async (c) => {
+app.post("/webhook/call-completed", async (c) => {
   const { call_id, dtmf_input, duration, status } = await c.req.json();
-  
+
   // 1. Get call record
   const call = await db
     .select()
     .from(calls)
     .where(eq(calls.call_id, call_id))
     .limit(1);
-  
+
   // 2. Interpret response
   const interpretation = interpretDTMF(dtmf_input);
-  
+
   // 3. Update database
   await db
     .update(calls)
     .set({
-      status: 'completed',
+      status: "completed",
       completed_at: new Date().toISOString(),
       duration_seconds: duration,
       dtmf_response: dtmf_input,
       parent_aware: interpretation.parent_aware,
     })
     .where(eq(calls.call_id, call_id));
-  
+
   // 4. Take action based on response
   if (interpretation.urgent) {
     await createAdminAlert({
-      type: 'URGENT',
+      type: "URGENT",
       student_id: call[0].student_id,
-      message: 'Parent unaware of absence - immediate follow-up required',
+      message: "Parent unaware of absence - immediate follow-up required",
     });
   }
-  
+
   if (interpretation.mark_excused) {
     await markAbsenceExcused(call[0].student_id);
   }
-  
+
   return c.json({ processed: true });
 });
 
 function interpretDTMF(input: string | null) {
-  switch(input) {
-    case '1':
+  switch (input) {
+    case "1":
       return {
         parent_aware: true,
         mark_excused: true,
         urgent: false,
-        action: 'Mark as excused',
+        action: "Mark as excused",
       };
-    case '2':
+    case "2":
       return {
         parent_aware: false,
         mark_excused: false,
         urgent: true,
-        action: 'Alert administrator',
+        action: "Alert administrator",
       };
     default:
       return {
         parent_aware: null,
         mark_excused: false,
         urgent: false,
-        action: 'Schedule retry',
+        action: "Schedule retry",
       };
   }
 }
@@ -383,8 +392,8 @@ CREATE TABLE absence_excuses (
 ```typescript
 // In attendance results for absent students
 {student.status === 'absent' && !student.has_excuse && (
-  <Button 
-    variant="outline" 
+  <Button
+    variant="outline"
     onClick={() => callParent(student.id)}
   >
     <Phone className="h-4 w-4 mr-2" />
@@ -411,7 +420,7 @@ CREATE TABLE absence_excuses (
 ### System Prompt Template (Natural Conversation)
 
 ```
-Eres un asistente virtual de asistencia escolar del Colegio San José. 
+Eres un asistente virtual de asistencia escolar del Colegio San José.
 Hablas español de forma natural y profesional.
 
 CONTEXTO:
@@ -514,12 +523,14 @@ curl -X POST http://localhost:3001/api/voice/notify-absence \
 ## Success Metrics
 
 ### Week 1 Goals:
+
 - [ ] 100% of unexcused absences trigger calls
 - [ ] <1% failed call rate
-- [ ] >90% parents respond to DTMF
+- [ ] > 90% parents respond to DTMF
 - [ ] <30 second average call duration
 
 ### Impact Metrics:
+
 - **Before:** Parents notified 1-3 days later via email
 - **After:** Parents notified within 90 minutes via call
 - **Result:** Parents aware same-day, can intervene immediately
@@ -538,4 +549,3 @@ curl -X POST http://localhost:3001/api/voice/notify-absence \
 ---
 
 **This is the MVP voice agent - simple, focused, high-impact.** 🎯
-

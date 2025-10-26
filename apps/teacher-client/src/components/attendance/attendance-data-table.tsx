@@ -44,7 +44,7 @@ export function AttendanceDataTable<TData, TValue>({
 }: AttendanceDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -104,7 +104,9 @@ export function AttendanceDataTable<TData, TValue>({
         <div className="flex flex-1 items-center space-x-2">
           <Input
             placeholder="Filtrar por asignatura..."
-            value={(table.getColumn("course")?.getFilterValue() as string) ?? ""}
+            value={
+              (table.getColumn("course")?.getFilterValue() as string) ?? ""
+            }
             onChange={(event) =>
               table.getColumn("course")?.setFilterValue(event.target.value)
             }
@@ -142,7 +144,7 @@ export function AttendanceDataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -161,7 +163,7 @@ export function AttendanceDataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

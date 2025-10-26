@@ -2,10 +2,10 @@
  * Hook for fetching and managing grades/stages metadata using React Query
  */
 
-import { useQueries } from '@tanstack/react-query';
-import { getStages, getGrades } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
-import type { Grade, Stage } from '@/types/grade';
+import { useQueries } from "@tanstack/react-query";
+import { getStages, getGrades } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import type { Grade, Stage } from "@/types/grade";
 
 export interface GradeGroup extends Stage {
   grades: Grade[];
@@ -51,15 +51,19 @@ export function useGrades(): UseGradesReturn {
   // Combine error states
   const error =
     stagesQuery.error || gradesQuery.error
-      ? 'No pudimos cargar la lista de cursos. Intenta nuevamente.'
+      ? "No pudimos cargar la lista de cursos. Intenta nuevamente."
       : null;
 
   // Transform and combine data
   const gradeGroups: GradeGroup[] = (() => {
     if (!stagesQuery.data || !gradesQuery.data) return [];
 
-    const stagesSorted = [...stagesQuery.data].sort((a, b) => a.order - b.order);
-    const gradesSorted = [...gradesQuery.data].sort((a, b) => a.order - b.order);
+    const stagesSorted = [...stagesQuery.data].sort(
+      (a, b) => a.order - b.order,
+    );
+    const gradesSorted = [...gradesQuery.data].sort(
+      (a, b) => a.order - b.order,
+    );
 
     return stagesSorted.map((stage) => ({
       ...stage,

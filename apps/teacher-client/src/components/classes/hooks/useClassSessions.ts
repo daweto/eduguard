@@ -1,5 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getClassSessions, type ClassSessionsResponse } from "@/lib/api/attendance";
+import {
+  getClassSessions,
+  type ClassSessionsResponse,
+} from "@/lib/api/attendance";
 
 export function useClassSessions(classId: string) {
   return useQuery<ClassSessionsResponse>({
@@ -8,4 +11,3 @@ export function useClassSessions(classId: string) {
     enabled: !!classId,
   });
 }
-

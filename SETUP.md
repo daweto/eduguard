@@ -65,23 +65,29 @@ pnpm dev
 ### Development Mode
 
 1. **Terminal 1 - Backend API:**
+
    ```bash
    cd apps/api-v2
    pnpm dev
    ```
+
    API will be available at `http://localhost:8787`
 
 2. **Terminal 2 - Seed the database (first time only):**
+
    ```bash
    curl -X POST http://localhost:8787/api/seed
    ```
+
    This seeds Chilean school grades and stages
 
 3. **Terminal 3 - Frontend:**
+
    ```bash
    cd apps/teacher-client
    pnpm dev
    ```
+
    Frontend will be available at `http://localhost:5173`
 
 4. **Open your browser:**
@@ -90,6 +96,7 @@ pnpm dev
 ### Verify Seeding
 
 Check if the database has been seeded:
+
 ```bash
 curl http://localhost:8787/api/seed/status
 ```
@@ -108,6 +115,7 @@ curl http://localhost:8787/api/seed/status
 ## Technology Stack
 
 ### Backend
+
 - **Hono** - Web framework
 - **Cloudflare Workers** - Serverless compute
 - **Cloudflare D1** - SQLite database
@@ -115,6 +123,7 @@ curl http://localhost:8787/api/seed/status
 - **Drizzle ORM** - Type-safe database queries
 
 ### Frontend
+
 - **React 19** - UI framework
 - **Vite 7** - Build tool
 - **TailwindCSS v4** - Styling
@@ -126,15 +135,18 @@ curl http://localhost:8787/api/seed/status
 The application uses four main tables:
 
 ### `stages`
+
 - Chilean school system stages (Preschool, Elementary, Secondary)
 - Display names in Spanish
 
 ### `grades`
+
 - Chilean grades from Prekinder to 4° Medio
 - 14 grades total with proper ordering
 - Foreign key to stages table
 
 ### `students`
+
 - Student information (name, grade)
 - Guardian contact details (name, phone, email)
 - Enrollment metadata
@@ -142,6 +154,7 @@ The application uses four main tables:
 - Optional foreign key to grades table
 
 ### `student_faces`
+
 - Links students to their face embeddings
 - Stores photo URLs (R2 keys)
 - AWS Rekognition face IDs
@@ -167,6 +180,7 @@ The application uses four main tables:
 ## Troubleshooting
 
 ### D1 Database Not Found
+
 ```bash
 # Recreate database
 wrangler d1 create eduguard-db
@@ -175,24 +189,29 @@ wrangler d1 execute eduguard-db --local --file=./migrations/0000_skinny_maestro.
 ```
 
 ### R2 Bucket Not Found
+
 ```bash
 wrangler r2 bucket create eduguard-photos
 ```
 
 ### CORS Errors (API)
+
 - Make sure the backend API is running on `localhost:8787`
 - Check `VITE_API_URL` in frontend `.env` file
 
 ### CORS Errors (R2 Photo Uploads)
+
 If you see CORS errors when uploading photos, you need to configure CORS on the R2 bucket.
 
 **Option 1: Using Wrangler (Recommended)**
+
 ```bash
 cd apps/api-v2
 npx wrangler r2 bucket cors set eduguard-photos --file cors.json
 ```
 
 Create `apps/api-v2/cors.json`:
+
 ```json
 {
   "rules": [
@@ -210,6 +229,7 @@ Create `apps/api-v2/cors.json`:
 ```
 
 **Option 2: Using Cloudflare Dashboard**
+
 1. Go to R2 in your Cloudflare dashboard
 2. Select the `eduguard-photos` bucket
 3. Go to Settings → CORS Policy
@@ -217,13 +237,17 @@ Create `apps/api-v2/cors.json`:
 
 **For Production:**
 Update `rules[0].allowed.origins` to include your production domain:
+
 ```json
 {
   "rules": [
     {
       "allowed": {
         "methods": ["GET", "HEAD", "PUT", "POST"],
-        "origins": ["http://localhost:5173", "https://your-production-domain.com"],
+        "origins": [
+          "http://localhost:5173",
+          "https://your-production-domain.com"
+        ],
         "headers": ["*"]
       },
       "exposeHeaders": ["ETag"],
@@ -234,6 +258,7 @@ Update `rules[0].allowed.origins` to include your production domain:
 ```
 
 ### Type Errors
+
 ```bash
 # Regenerate Drizzle types
 cd apps/api-v2
@@ -243,12 +268,14 @@ npx drizzle-kit generate
 ## Deployment
 
 ### Backend
+
 ```bash
 cd apps/api-v2
 pnpm deploy
 ```
 
 ### Frontend
+
 ```bash
 cd apps/teacher-client
 pnpm build

@@ -1,4 +1,7 @@
-import { RekognitionClient, ListFacesCommand } from "@aws-sdk/client-rekognition";
+import {
+  RekognitionClient,
+  ListFacesCommand,
+} from "@aws-sdk/client-rekognition";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
@@ -84,7 +87,8 @@ seedRouter.get("/status", async (c) => {
 seedRouter.post("/sync-faces", async (c) => {
   try {
     const db = drizzle(c.env.DB);
-    const collectionId = c.env.AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default";
+    const collectionId =
+      c.env.AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default";
 
     // Check AWS credentials
     if (!c.env.AWS_ACCESS_KEY_ID || !c.env.AWS_SECRET_ACCESS_KEY) {
@@ -109,7 +113,9 @@ seedRouter.post("/sync-faces", async (c) => {
     const listResult = await rekognition.send(listCommand);
     const awsFaces = listResult.Faces ?? [];
 
-    console.log(`[SYNC] Found ${String(awsFaces.length)} faces in AWS Rekognition`);
+    console.log(
+      `[SYNC] Found ${String(awsFaces.length)} faces in AWS Rekognition`,
+    );
 
     // Create map of externalImageId -> faceId
     const faceMap = new Map<string, string>();
@@ -126,7 +132,9 @@ seedRouter.post("/sync-faces", async (c) => {
       .where(eq(studentFaces.faceId, "placeholder"))
       .all();
 
-    console.log(`[SYNC] Found ${String(dbFaces.length)} faces to sync in database`);
+    console.log(
+      `[SYNC] Found ${String(dbFaces.length)} faces to sync in database`,
+    );
 
     // Update each face with the correct faceId from AWS
     let syncedCount = 0;
@@ -135,17 +143,21 @@ seedRouter.post("/sync-faces", async (c) => {
     for (const dbFace of dbFaces) {
       if (dbFace.externalImageId) {
         const awsFaceId = faceMap.get(dbFace.externalImageId);
-        
+
         if (awsFaceId) {
           await db
             .update(studentFaces)
             .set({ faceId: awsFaceId })
             .where(eq(studentFaces.id, dbFace.id));
-          
-          console.log(`[SYNC] ✓ Updated ${dbFace.externalImageId} -> ${awsFaceId}`);
+
+          console.log(
+            `[SYNC] ✓ Updated ${dbFace.externalImageId} -> ${awsFaceId}`,
+          );
           syncedCount++;
         } else {
-          console.log(`[SYNC] ✗ No AWS face found for ${dbFace.externalImageId}`);
+          console.log(
+            `[SYNC] ✗ No AWS face found for ${dbFace.externalImageId}`,
+          );
           notFoundCount++;
         }
       }

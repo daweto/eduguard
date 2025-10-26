@@ -5,12 +5,15 @@ This document explains how we manage Node.js and pnpm versions across local deve
 ## 🎯 Single Source of Truth
 
 ### Node.js Version
+
 **File:** `.nvmrc` (root)
+
 ```
 v20.18.0
 ```
 
 **Used by:**
+
 - ✅ Local development (via `nvm use` or auto-switching)
 - ✅ GitHub Actions (via `node-version-file: '.nvmrc'`)
 - ✅ All apps and packages in the monorepo
@@ -18,7 +21,9 @@ v20.18.0
 **Also declared in:** `package.json` → `engines.node`
 
 ### pnpm Version
+
 **File:** `package.json` (root)
+
 ```json
 {
   "packageManager": "pnpm@8.15.6",
@@ -29,6 +34,7 @@ v20.18.0
 ```
 
 **Used by:**
+
 - ✅ Corepack (automatically enforces this version)
 - ✅ GitHub Actions (via `pnpm/action-setup@v4` reading `packageManager`)
 - ✅ All apps and packages in the monorepo
@@ -40,11 +46,13 @@ v20.18.0
 #### 1. Node.js (via nvm)
 
 **Install nvm if you haven't:**
+
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 ```
 
 **Using nvm:**
+
 ```bash
 # Manual switch (when entering project directory)
 nvm use
@@ -62,6 +70,7 @@ load-nvmrc
 ```
 
 **Verify:**
+
 ```bash
 node --version
 # Should output: v20.18.0
@@ -70,22 +79,26 @@ node --version
 #### 2. pnpm (via Corepack - Built into Node.js 16.9+)
 
 **Enable Corepack (one-time):**
+
 ```bash
 corepack enable
 ```
 
 **That's it!** Corepack reads `packageManager` from `package.json` and automatically:
+
 - Downloads pnpm@8.15.6 if not installed
 - Uses pnpm@8.15.6 for all commands
 - Prevents using wrong versions
 
 **Verify:**
+
 ```bash
 pnpm --version
 # Should output: 8.15.6
 ```
 
 **Manual installation (alternative if not using Corepack):**
+
 ```bash
 npm install -g pnpm@8.15.6
 ```
@@ -99,7 +112,7 @@ Both versions are **automatically enforced** in CI:
 - name: Setup Node.js
   uses: actions/setup-node@v4
   with:
-    node-version-file: '.nvmrc'
+    node-version-file: ".nvmrc"
 
 # pnpm - reads from package.json's "packageManager" field
 - name: Setup pnpm
@@ -136,11 +149,13 @@ skyward-hackathon/               (ROOT)
 ### To Update Node.js
 
 1. **Update `.nvmrc`:**
+
    ```bash
    echo "v20.21.0" > .nvmrc
    ```
 
 2. **Update `package.json`:**
+
    ```json
    "engines": {
      "node": ">=20.21.0",
@@ -149,6 +164,7 @@ skyward-hackathon/               (ROOT)
    ```
 
 3. **Locally:**
+
    ```bash
    nvm install 20.21.0
    nvm use
@@ -159,6 +175,7 @@ skyward-hackathon/               (ROOT)
 ### To Update pnpm
 
 1. **Update `package.json`:**
+
    ```json
    {
      "packageManager": "pnpm@9.0.0",
@@ -170,6 +187,7 @@ skyward-hackathon/               (ROOT)
    ```
 
 2. **Locally (if using Corepack):**
+
    ```bash
    # Corepack will automatically download new version
    pnpm --version
@@ -177,11 +195,13 @@ skyward-hackathon/               (ROOT)
    ```
 
 3. **Or manually:**
+
    ```bash
    npm install -g pnpm@9.0.0
    ```
 
 4. **Update lockfile:**
+
    ```bash
    pnpm install
    ```
@@ -226,12 +246,14 @@ When GitHub Actions runs, check the logs:
 ## 🎯 Best Practices
 
 ### ✅ DO:
+
 - Keep versions in sync between `.nvmrc`, `package.json`, and `engines`
 - Use Corepack for automatic pnpm version management
 - Update versions via root `package.json` only
 - Test locally before committing version updates
 
 ### ❌ DON'T:
+
 - Hardcode versions in GitHub Actions workflows
 - Add per-app `.nvmrc` or `packageManager` fields (use root)
 - Forget to update `engines` when changing versions
@@ -249,11 +271,13 @@ When GitHub Actions runs, check the logs:
 ### "pnpm: command not found"
 
 **Solution 1 - Enable Corepack:**
+
 ```bash
 corepack enable
 ```
 
 **Solution 2 - Install manually:**
+
 ```bash
 npm install -g pnpm@8.15.6
 ```
@@ -261,12 +285,14 @@ npm install -g pnpm@8.15.6
 ### "Wrong pnpm version"
 
 **If using Corepack:**
+
 ```bash
 corepack enable
 corepack prepare pnpm@8.15.6 --activate
 ```
 
 **If using global install:**
+
 ```bash
 npm install -g pnpm@8.15.6
 ```
@@ -289,6 +315,6 @@ nvm use
 
 **Last Updated:** 2025-10-26  
 **Current Versions:**
+
 - Node.js: `v20.18.0`
 - pnpm: `8.15.6`
-

@@ -2,11 +2,11 @@
  * List/table component for displaying guardians
  */
 
-import { useMemo } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { LegalGuardian } from '@/types/guardian';
-import { GuardiansDataTable } from './guardians-data-table';
-import { createGuardianColumns } from './guardian-columns';
+import { useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { LegalGuardian } from "@/types/guardian";
+import { GuardiansDataTable } from "./guardians-data-table";
+import { createGuardianColumns } from "./guardian-columns";
 
 interface GuardiansListProps {
   guardians: LegalGuardian[];

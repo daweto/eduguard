@@ -22,22 +22,24 @@ Go to your repository → **Settings** → **Secrets and variables** → **Actio
 
 ### Required Secrets:
 
-| Secret Name | Description | How to Get |
-|------------|-------------|------------|
-| `CLOUDFLARE_API_TOKEN` | API token for Cloudflare | See instructions below |
-| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID | See instructions below |
-| `VITE_API_URL` | Production API URL for frontend | `https://api-v2.dweinsteint.workers.dev` |
+| Secret Name             | Description                     | How to Get                               |
+| ----------------------- | ------------------------------- | ---------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | API token for Cloudflare        | See instructions below                   |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID      | See instructions below                   |
+| `VITE_API_URL`          | Production API URL for frontend | `https://api-v2.dweinsteint.workers.dev` |
 
 ### Getting Cloudflare Credentials
 
 #### 1. Get your Account ID
 
 **Option A - From Dashboard:**
+
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. Click on "Workers & Pages" in the left sidebar
 3. Your Account ID is shown in the right sidebar
 
 **Option B - From wrangler:**
+
 ```bash
 pnpm --filter api-v2 exec wrangler whoami
 ```
@@ -94,6 +96,7 @@ You can manually trigger any deployment:
 ### 🔄 Concurrency Control
 
 The CI workflow has concurrency control:
+
 - Only one CI run per branch at a time
 - Newer pushes cancel old runs
 - Saves GitHub Actions minutes
@@ -150,10 +153,12 @@ The GitHub Action uses API tokens, not OAuth. Make sure `CLOUDFLARE_API_TOKEN` i
 ### Deployment fails with "Missing binding"
 
 For `api-v2`, ensure:
+
 - D1 database `eduguard-db` exists
 - R2 bucket `eduguard-photos` exists
 
 Create them manually:
+
 ```bash
 pnpm --filter api-v2 exec wrangler d1 create eduguard-db
 pnpm --filter api-v2 exec wrangler r2 bucket create eduguard-photos
@@ -162,6 +167,7 @@ pnpm --filter api-v2 exec wrangler r2 bucket create eduguard-photos
 ### Lint/Type-check fails
 
 Run locally to see the errors:
+
 ```bash
 pnpm lint
 pnpm check-types
@@ -172,6 +178,7 @@ Fix the errors and commit.
 ### Pages deployment fails
 
 Ensure the Cloudflare Pages project exists:
+
 ```bash
 # Create the project first time
 pnpm --filter teacher-client exec wrangler pages project create teacher-client
@@ -197,8 +204,8 @@ pnpm --filter teacher-client exec wrangler pages project create teacher-client
 ## 🆘 Support
 
 If you encounter issues:
+
 1. Check the workflow logs in GitHub Actions
 2. Check Cloudflare Worker/Pages logs in dashboard
 3. Run commands locally to reproduce
 4. Check this documentation for troubleshooting steps
-

@@ -18,6 +18,7 @@
 #### 1. Get API Keys (30 min)
 
 **OpenAI:**
+
 1. Go to https://platform.openai.com/api-keys
 2. Create new secret key
 3. Copy to `apps/ai-agents/.env`:
@@ -26,6 +27,7 @@
    ```
 
 **ElevenLabs:**
+
 1. Sign up at https://elevenlabs.io/
 2. Go to https://elevenlabs.io/app/conversational-ai
 3. Click "Create Agent"
@@ -50,6 +52,7 @@ pnpm dev
 ```
 
 Should see:
+
 ```
 🤖 AI Agents Server starting on port 3001...
 ✅ AI Agents Server running at http://localhost:3001
@@ -78,6 +81,7 @@ curl -X POST http://localhost:3001/api/reasoning/analyze \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "analysis": {
@@ -117,11 +121,13 @@ Your phone should ring in ~5 seconds!
 #### 5. Add AI Agents URL to Cloudflare Workers (15 min)
 
 **File:** `apps/api-v2/.dev.vars`
+
 ```bash
 AI_AGENTS_URL=http://localhost:3001
 ```
 
 **File:** `apps/api-v2/wrangler.jsonc`
+
 ```json
 {
   "vars": {
@@ -138,7 +144,7 @@ After line ~620 (after creating attendance session), add:
 
 ```typescript
 // Trigger AI analysis for absent students
-const aiAgentsUrl = c.env.AI_AGENTS_URL || 'http://localhost:3001';
+const aiAgentsUrl = c.env.AI_AGENTS_URL || "http://localhost:3001";
 
 if (absentStudents.length > 0) {
   // Fire-and-forget AI analysis
@@ -155,7 +161,10 @@ if (absentStudents.length > 0) {
               className: coursesTable.name,
             })
             .from(attendanceTable)
-            .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
+            .innerJoin(
+              sessionsTable,
+              eq(attendanceTable.sessionId, sessionsTable.id),
+            )
             .innerJoin(classesTable, eq(sessionsTable.classId, classesTable.id))
             .innerJoin(coursesTable, eq(classesTable.courseId, coursesTable.id))
             .where(eq(attendanceTable.studentId, student.studentId))
@@ -163,13 +172,13 @@ if (absentStudents.length > 0) {
             .limit(50);
 
           // Get today's attendance
-          const today = new Date().toISOString().split('T')[0];
-          const todayRecords = history.filter(h => h.date.startsWith(today));
+          const today = new Date().toISOString().split("T")[0];
+          const todayRecords = history.filter((h) => h.date.startsWith(today));
 
           // Call Reasoning Agent
           const response = await fetch(`${aiAgentsUrl}/api/reasoning/analyze`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               student_id: student.studentId,
               student_name: student.name,
@@ -181,21 +190,24 @@ if (absentStudents.length > 0) {
 
           if (response.ok) {
             const analysis = await response.json();
-            
+
             // Store risk info in metadata or separate table
             // For now, log it
-            console.log(`🧠 AI Analysis for ${student.name}:`, analysis.analysis);
-            
+            console.log(
+              `🧠 AI Analysis for ${student.name}:`,
+              analysis.analysis,
+            );
+
             // Attach to response if high risk
-            if (analysis.analysis.risk_level === 'high') {
+            if (analysis.analysis.risk_level === "high") {
               student.risk_flag = analysis.analysis;
             }
           }
         }
       } catch (err) {
-        console.error('AI analysis failed:', err);
+        console.error("AI analysis failed:", err);
       }
-    })()
+    })(),
   );
 }
 ```
@@ -203,6 +215,7 @@ if (absentStudents.length > 0) {
 #### 7. Test End-to-End Flow (1 hour)
 
 1. Start both servers:
+
    ```bash
    # Terminal 1: Cloudflare Workers
    cd apps/api-v2
@@ -276,11 +289,11 @@ interface CallParentButtonProps {
   riskInfo: any;
 }
 
-export function CallParentButton({ 
-  studentId, 
-  studentName, 
-  guardianPhone, 
-  riskInfo 
+export function CallParentButton({
+  studentId,
+  studentName,
+  guardianPhone,
+  riskInfo
 }: CallParentButtonProps) {
   const [calling, setCalling] = useState(false);
 
@@ -301,7 +314,7 @@ export function CallParentButton({
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         toast.success(`Llamando a apoderado de ${studentName}...`);
         // Poll for call status
@@ -317,8 +330,8 @@ export function CallParentButton({
   };
 
   return (
-    <Button 
-      onClick={handleCall} 
+    <Button
+      onClick={handleCall}
       disabled={calling}
       variant="destructive"
       size="sm"
@@ -356,21 +369,21 @@ import { CallParentButton } from "@/components/attendance/CallParentButton";
     <div className="text-sm text-muted-foreground">
       RUT: {student.identification}
     </div>
-    
+
     {/* Add risk badge */}
     {student.risk_flag && (
       <div className="mt-2">
-        <RiskBadge 
+        <RiskBadge
           level={student.risk_flag.risk_level}
           pattern={student.risk_flag.pattern_type}
         />
         <p className="text-xs text-gray-600 mt-1">
           {student.risk_flag.reasoning}
         </p>
-        
+
         {/* Add call button for high risk */}
         {student.risk_flag.risk_level === 'high' && (
-          <CallParentButton 
+          <CallParentButton
             studentId={student.student_id}
             studentName={student.name}
             guardianPhone={student.guardian_phone}
@@ -416,6 +429,7 @@ import { CallParentButton } from "@/components/attendance/CallParentButton";
 #### 12. Create Demo Data (1 hour)
 
 Update `apps/api-v2/src/db/seed.ts`:
+
 - Add student "Sofia Martinez"
 - Use real phone number for guardian
 - Pre-create attendance history showing sneak-out pattern
@@ -423,6 +437,7 @@ Update `apps/api-v2/src/db/seed.ts`:
 #### 13. Practice Demo (1 hour)
 
 Practice 5 times:
+
 1. Opening (30s)
 2. Vision Agent demo (1 min)
 3. Reasoning Agent demo (1.5 min)
@@ -436,17 +451,20 @@ Practice 5 times:
 ### Hour 14-15 (10:30 AM - 11:30 AM): Backup & Buffer
 
 #### 14. Record Backup Video (30 min)
+
 - Screen record successful flow
 - Edit to 5-minute presentation
 - Have ready to play if APIs fail
 
 #### 15. Take Screenshots (15 min)
+
 - Vision Agent results
 - Reasoning Agent analysis
 - Voice call UI
 - Call completed status
 
 #### 16. Final Buffer (45 min)
+
 - Fix any last bugs
 - Test on mobile
 - Charge phone to 100%
@@ -475,15 +493,18 @@ Before 3 PM:
 ## 🚨 IF BEHIND SCHEDULE
 
 **Priority 1 (Must Have):**
+
 - Vision Agent (✅ Already done)
 - Reasoning Agent backend (✅ Already done)
 - Risk badge in UI
 
 **Priority 2 (Should Have):**
+
 - Call Parent button
 - Test call to your phone
 
 **Priority 3 (Nice to Have):**
+
 - Call status tracking
 - Webhook integration
 - Call history
@@ -511,4 +532,3 @@ curl -X POST http://localhost:3001/api/voice/call -H "Content-Type: application/
 ---
 
 **YOU'VE GOT THIS! The hard part (AI agents code) is done. Now just connect the pieces! 🚀**
-

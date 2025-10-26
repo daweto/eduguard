@@ -44,7 +44,7 @@ export function SessionDataTable<TData, TValue>({
 }: SessionDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -105,7 +105,9 @@ export function SessionDataTable<TData, TValue>({
           {/* Student name filter */}
           <Input
             placeholder="Filtrar por nombre..."
-            value={(table.getColumn("student")?.getFilterValue() as string) ?? ""}
+            value={
+              (table.getColumn("student")?.getFilterValue() as string) ?? ""
+            }
             onChange={(event) =>
               table.getColumn("student")?.setFilterValue(event.target.value)
             }
@@ -153,7 +155,7 @@ export function SessionDataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -172,7 +174,7 @@ export function SessionDataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

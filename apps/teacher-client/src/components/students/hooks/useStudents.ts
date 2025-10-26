@@ -2,11 +2,11 @@
  * Hook for fetching and managing students using React Query
  */
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getStudents, deleteStudent, ApiError } from '@/lib/api';
-import { queryKeys } from '@/lib/queryKeys';
-import type { Student } from '@/types/student';
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getStudents, deleteStudent, ApiError } from "@/lib/api";
+import { queryKeys } from "@/lib/queryKeys";
+import type { Student } from "@/types/student";
+import { useState } from "react";
 
 export interface UseStudentsReturn {
   students: Student[];
@@ -49,7 +49,7 @@ export function useStudents(): UseStudentsReturn {
       queryClient.invalidateQueries({ queryKey: queryKeys.students });
     },
     onError: (err: unknown) => {
-      console.error('Failed to delete student:', err);
+      console.error("Failed to delete student:", err);
     },
     onSettled: () => {
       setDeleting(null);
@@ -58,14 +58,18 @@ export function useStudents(): UseStudentsReturn {
 
   // Delete handler with confirmation
   const remove = async (id: string): Promise<void> => {
-    const confirmed = confirm('¿Estás seguro que deseas eliminar este estudiante? Esta acción no se puede deshacer.');
+    const confirmed = confirm(
+      "¿Estás seguro que deseas eliminar este estudiante? Esta acción no se puede deshacer.",
+    );
     if (!confirmed) return;
 
     try {
       await deleteMutation.mutateAsync(id);
     } catch (err) {
       const message =
-        err instanceof ApiError ? err.message : 'No pudimos eliminar el estudiante. Intenta nuevamente.';
+        err instanceof ApiError
+          ? err.message
+          : "No pudimos eliminar el estudiante. Intenta nuevamente.";
       throw new Error(message);
     }
   };
@@ -76,7 +80,7 @@ export function useStudents(): UseStudentsReturn {
     error: queryError
       ? queryError instanceof ApiError
         ? queryError.message
-        : 'No pudimos cargar los estudiantes. Intenta nuevamente.'
+        : "No pudimos cargar los estudiantes. Intenta nuevamente."
       : null,
     deleting,
     refetch: () => {

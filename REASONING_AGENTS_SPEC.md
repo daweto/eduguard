@@ -36,14 +36,17 @@ Instead of a single monolithic reasoning agent, EduGuard uses **4 specialized re
 ## Agent 2.1: Truancy Detector 🔍
 
 ### Purpose
+
 Detect chronic absenteeism and unauthorized absence patterns over time.
 
 ### Detection Logic
+
 - **Chronic Truancy**: Absent 3+ full days in past 7 days
 - **Severe Truancy**: Absent 5+ days in past 14 days
 - **Pattern Truancy**: Absent every Monday/Friday (pattern avoidance)
 
 ### Input Data
+
 ```typescript
 {
   student_id: string;
@@ -58,6 +61,7 @@ Detect chronic absenteeism and unauthorized absence patterns over time.
 ```
 
 ### Output Schema
+
 ```typescript
 {
   is_truant: boolean;
@@ -72,6 +76,7 @@ Detect chronic absenteeism and unauthorized absence patterns over time.
 ```
 
 ### Example Prompt
+
 ```
 You are a truancy detection specialist. Analyze this student's attendance:
 
@@ -102,14 +107,17 @@ Assess truancy risk and recommend action.
 ## Agent 2.2: Sneak-Out Detector 🏃
 
 ### Purpose
+
 Detect mid-day departures where student is present early, then disappears.
 
 ### Detection Logic
+
 - **Classic Sneak-Out**: Present Period 1, absent Periods 2-3+
 - **Lunch Departure**: Present morning, absent afternoon
 - **Late Arrival Skip**: Absent Period 1, present Periods 2-3
 
 ### Input Data
+
 ```typescript
 {
   student_id: string;
@@ -126,6 +134,7 @@ Detect mid-day departures where student is present early, then disappears.
 ```
 
 ### Output Schema
+
 ```typescript
 {
   is_sneakout: boolean;
@@ -140,6 +149,7 @@ Detect mid-day departures where student is present early, then disappears.
 ```
 
 ### Example Prompt
+
 ```
 You are a sneak-out detection specialist. Analyze TODAY's attendance:
 
@@ -168,14 +178,17 @@ Determine if this is a sneak-out and assess urgency.
 ## Agent 2.3: Class-Cutting Detector ✂️
 
 ### Purpose
+
 Detect selective absence where student skips specific classes but attends others.
 
 ### Detection Logic
+
 - **Targeted Cutting**: High absence rate for 1-2 specific classes
 - **Subject Avoidance**: Skips all Math or all Science classes
 - **Teacher Avoidance**: Skips classes with specific teacher
 
 ### Input Data
+
 ```typescript
 {
   student_id: string;
@@ -194,6 +207,7 @@ Detect selective absence where student skips specific classes but attends others
 ```
 
 ### Output Schema
+
 ```typescript
 {
   is_cutting: boolean;
@@ -212,6 +226,7 @@ Detect selective absence where student skips specific classes but attends others
 ```
 
 ### Example Prompt
+
 ```
 You are a class-cutting detection specialist. Analyze this student's attendance by class:
 
@@ -239,33 +254,46 @@ Determine if student is cutting specific classes and why.
 ## Agent 2.4: Predictive Risk Agent 🔮
 
 ### Purpose
+
 Predict future truancy risk based on trends and early warning signs.
 
 ### Detection Logic
+
 - **Declining Trend**: Attendance rate dropping over time
 - **Early Warning**: Small changes that predict future problems
 - **Seasonal Patterns**: Attendance changes by month/season
 
 ### Input Data
+
 ```typescript
 {
   student_id: string;
   student_name: string;
   trend_data: {
-    month_1: { rate: number; absences: number };
-    month_2: { rate: number; absences: number };
-    month_3: { rate: number; absences: number };
-  };
+    month_1: {
+      rate: number;
+      absences: number;
+    }
+    month_2: {
+      rate: number;
+      absences: number;
+    }
+    month_3: {
+      rate: number;
+      absences: number;
+    }
+  }
   risk_factors: {
     recent_family_changes: boolean;
     academic_struggles: boolean;
     peer_issues: boolean;
     previous_truancy_history: boolean;
-  };
+  }
 }
 ```
 
 ### Output Schema
+
 ```typescript
 {
   future_risk: "none" | "low" | "medium" | "high";
@@ -280,6 +308,7 @@ Predict future truancy risk based on trends and early warning signs.
 ```
 
 ### Example Prompt
+
 ```
 You are a predictive risk assessment specialist. Analyze attendance trends:
 
@@ -330,21 +359,22 @@ function consolidateRisk(agents: {
   const maxRisk = getHighestRisk(riskLevels);
 
   // Determine notification urgency
-  const urgency = 
+  const urgency =
     agents.sneakout.is_sneakout && agents.sneakout.urgency === "immediate"
       ? "immediate"
       : agents.truancy.severity === "severe"
-      ? "urgent"
-      : maxRisk === "high"
-      ? "high_priority"
-      : "routine";
+        ? "urgent"
+        : maxRisk === "high"
+          ? "high_priority"
+          : "routine";
 
   // Build comprehensive reasoning
   const activePatterns = [];
   if (agents.truancy.is_truant) activePatterns.push("chronic_truancy");
   if (agents.sneakout.is_sneakout) activePatterns.push("sneak_out");
   if (agents.cutting.is_cutting) activePatterns.push("class_cutting");
-  if (agents.predictive.intervention_needed) activePatterns.push("declining_trend");
+  if (agents.predictive.intervention_needed)
+    activePatterns.push("declining_trend");
 
   return {
     overall_risk: maxRisk,
@@ -370,20 +400,28 @@ function consolidateRisk(agents: {
 ```typescript
 // apps/ai-agents/src/routes/reasoning.ts
 
-import { Hono } from 'hono';
-import { generateObject } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
+import { Hono } from "hono";
+import { generateObject } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
 
 const app = new Hono();
 
 // Schemas (defined above)
-const TruancySchema = z.object({ /* ... */ });
-const SneakOutSchema = z.object({ /* ... */ });
-const ClassCuttingSchema = z.object({ /* ... */ });
-const PredictiveSchema = z.object({ /* ... */ });
+const TruancySchema = z.object({
+  /* ... */
+});
+const SneakOutSchema = z.object({
+  /* ... */
+});
+const ClassCuttingSchema = z.object({
+  /* ... */
+});
+const PredictiveSchema = z.object({
+  /* ... */
+});
 
-app.post('/analyze', async (c) => {
+app.post("/analyze", async (c) => {
   const { student_data, attendance_history } = await c.req.json();
 
   console.log(`🧠 Running 4 reasoning agents in parallel...`);
@@ -405,14 +443,16 @@ app.post('/analyze', async (c) => {
   });
 
   console.log(`   ✅ Analysis complete: ${consolidated.overall_risk} risk`);
-  console.log(`   📊 Active patterns: ${consolidated.active_patterns.join(', ')}`);
+  console.log(
+    `   📊 Active patterns: ${consolidated.active_patterns.join(", ")}`,
+  );
 
   return c.json(consolidated);
 });
 
 async function detectTruancy(history: any) {
   return generateObject({
-    model: openai('gpt-4o-mini'),
+    model: openai("gpt-4o-mini"),
     schema: TruancySchema,
     prompt: buildTruancyPrompt(history),
   });
@@ -420,7 +460,7 @@ async function detectTruancy(history: any) {
 
 async function detectSneakOut(todayData: any) {
   return generateObject({
-    model: openai('gpt-4o-mini'),
+    model: openai("gpt-4o-mini"),
     schema: SneakOutSchema,
     prompt: buildSneakOutPrompt(todayData),
   });
@@ -428,7 +468,7 @@ async function detectSneakOut(todayData: any) {
 
 async function detectClassCutting(byClassData: any) {
   return generateObject({
-    model: openai('gpt-4o-mini'),
+    model: openai("gpt-4o-mini"),
     schema: ClassCuttingSchema,
     prompt: buildClassCuttingPrompt(byClassData),
   });
@@ -436,7 +476,7 @@ async function detectClassCutting(byClassData: any) {
 
 async function assessPredictiveRisk(trends: any) {
   return generateObject({
-    model: openai('gpt-4o-mini'),
+    model: openai("gpt-4o-mini"),
     schema: PredictiveSchema,
     prompt: buildPredictivePrompt(trends),
   });
@@ -450,27 +490,34 @@ export default app;
 ## Benefits of Multi-Agent Approach
 
 ### 1. Specialization
+
 Each agent is an expert in ONE pattern type:
+
 - Better prompts (specific, not generic)
 - More accurate detection
 - Clearer reasoning
 
 ### 2. Parallel Execution
+
 - All 4 agents run simultaneously
 - Total time: ~3 seconds (same as single agent)
 - 4x more analysis in same time
 
 ### 3. Comprehensive Coverage
+
 Single agent might miss patterns:
+
 - ❌ "Student has medium risk" (vague)
 - ✅ "High sneak-out risk + declining trend + cutting Math" (specific)
 
 ### 4. Explainability
+
 - Each agent provides specific reasoning
 - Teachers understand WHY student is flagged
 - Easier to dispute false positives
 
 ### 5. Flexibility
+
 - Can disable agents (e.g., turn off predictive for new students)
 - Can adjust thresholds per agent
 - Can add new agents without changing existing ones
@@ -495,4 +542,3 @@ A single agent might miss the trend. Our multi-agent system catches everything."
 ---
 
 **Built for comprehensive student safety monitoring** 🛡️
-

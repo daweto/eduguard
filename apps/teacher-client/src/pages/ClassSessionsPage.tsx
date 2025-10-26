@@ -1,12 +1,21 @@
 import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import { useClassSessions } from "@/components/classes/hooks/useClassSessions";
 import { SessionsListDataTable } from "@/components/attendance/sessions-list-data-table";
-import { createClassSessionColumns, type ClassSessionRecord } from "@/components/attendance/class-sessions-columns";
+import {
+  createClassSessionColumns,
+  type ClassSessionRecord,
+} from "@/components/attendance/class-sessions-columns";
 
 export function ClassSessionsPage() {
   const { classId } = useParams<{ classId: string }>();
@@ -21,7 +30,7 @@ export function ClassSessionsPage() {
           navigate(`/sessions/${sessionId}`);
         },
       }),
-    [navigate]
+    [navigate],
   );
 
   if (isLoading) {
@@ -73,16 +82,21 @@ export function ClassSessionsPage() {
             <div>
               <CardTitle>Todas las Sesiones</CardTitle>
               <CardDescription>
-                {sessions.length} {sessions.length === 1 ? "sesión registrada" : "sesiones registradas"}
+                {sessions.length}{" "}
+                {sessions.length === 1
+                  ? "sesión registrada"
+                  : "sesiones registradas"}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <SessionsListDataTable columns={columns} data={sessions as ClassSessionRecord[]} />
+          <SessionsListDataTable
+            columns={columns}
+            data={sessions as ClassSessionRecord[]}
+          />
         </CardContent>
       </Card>
     </div>
   );
 }
-

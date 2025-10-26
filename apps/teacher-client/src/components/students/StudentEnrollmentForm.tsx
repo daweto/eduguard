@@ -480,9 +480,7 @@ export function StudentEnrollmentForm({
           <form.Field name="student.gradeSectionId">
             {(field) => (
               <Field className="space-y-2">
-                <FieldLabel htmlFor={field.name}>
-                  Sección (opcional)
-                </FieldLabel>
+                <FieldLabel htmlFor={field.name}>Sección (opcional)</FieldLabel>
                 <FieldDescription>
                   Ej: gs-1sec-a para 1° Medio A
                 </FieldDescription>

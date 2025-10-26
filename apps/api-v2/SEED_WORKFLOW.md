@@ -25,6 +25,7 @@ This system uses **predictable `externalImageId`** values for AWS Rekognition fa
 ## Commands
 
 ### Full Reset & Reseed (Recommended)
+
 ```bash
 # In api-v2 directory
 pnpm db:reset        # Reset database and run migrations
@@ -32,6 +33,7 @@ pnpm seed:full       # Seed data + sync faces from AWS
 ```
 
 ### Step-by-Step
+
 ```bash
 # 1. Reset database
 pnpm db:reset
@@ -44,6 +46,7 @@ pnpm sync-faces
 ```
 
 ### Individual Operations
+
 ```bash
 # Just run migrations on fresh DB
 pnpm migrate:local
@@ -68,6 +71,7 @@ This format is predictable and allows us to reconnect database records to AWS Re
 ## Database Schema
 
 The `student_faces` table includes:
+
 - `face_id`: AWS Rekognition's generated UUID (changes are rare)
 - `external_image_id`: Our predictable identifier (NEVER changes)
 - `photo_url`: S3/R2 key for the photo
@@ -84,15 +88,18 @@ The `student_faces` table includes:
 ## Troubleshooting
 
 ### Face sync shows 0 synced
+
 - Check that AWS credentials are configured in `.dev.vars`
 - Verify faces exist in AWS: `aws rekognition list-faces --collection-id eduguard-school-default`
 - Ensure photos were uploaded with the new externalImageId format
 
 ### Attendance not working after reset
+
 - Run `pnpm sync-faces` to update face IDs from AWS
 - Check that student faces have non-placeholder faceId values
 
 ### Photos not found in R2
+
 - Seed data uses generic paths like `students/student-001/photo-1.jpg`
 - You may need to update these paths to match actual uploaded photos
 - Or upload photos with these specific paths
@@ -103,4 +110,3 @@ The `student_faces` table includes:
 - `0001_add_classes_attendance_tables.sql` - Classes and attendance
 - `0002_add_grade_sections_attendance_drilldown.sql` - Grade sections
 - `0003_add_external_image_id.sql` - **NEW**: Adds `external_image_id` column
-

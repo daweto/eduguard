@@ -6,10 +6,7 @@
 import { useForm } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  FieldSet,
-  FieldLegend,
-} from "@/components/ui/field";
+import { FieldSet, FieldLegend } from "@/components/ui/field";
 import type { CreateGuardianRequest } from "@/types/guardian";
 import { zRutString } from "@/lib/helpers/rut";
 import { GuardianFormFields } from "./GuardianFormFields";

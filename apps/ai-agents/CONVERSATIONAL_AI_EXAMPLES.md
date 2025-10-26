@@ -30,7 +30,7 @@ AI: "Perfecto, gracias por confirmar. ¿Algo más que deba saber?"
 
 Parent: "No, solo un resfriado. Volverá mañana."
 
-AI: "Excelente. Registraré la ausencia como justificada. 
+AI: "Excelente. Registraré la ausencia como justificada.
      Que se mejore pronto. Que tenga buen día."
 
 Parent: "Gracias, adiós."
@@ -91,7 +91,7 @@ AI: "Hola, buenos días. Soy el asistente virtual del Colegio San José.
 
 Parent: "Sí... ¿quién es usted?"
 
-AI: "Soy el asistente virtual de asistencia del colegio. 
+AI: "Soy el asistente virtual de asistencia del colegio.
      Le informo que Sofia no asistió a clases hoy."
 
 Parent: "Eso no puede ser. Yo la dejé en la puerta del colegio a las 8."
@@ -170,6 +170,7 @@ ANALYSIS:
 ## Why Natural Conversation > DTMF Menu
 
 ### DTMF Menu (Old School - Robotic):
+
 ```
 ❌ "Press 1 for yes, press 2 for no"
 ❌ Parent needs to find phone keypad
@@ -179,6 +180,7 @@ ANALYSIS:
 ```
 
 ### Natural Conversation (ElevenLabs - Human):
+
 ```
 ✅ Parent just SPEAKS naturally
 ✅ AI understands "Sí, está enfermo" vs "¿Qué? ¡No sabía!"
@@ -193,12 +195,15 @@ ANALYSIS:
 ## Technical Advantages
 
 ### Sentiment Analysis
+
 The AI can detect:
+
 - **Calm:** "Sí, está en casa" → Low urgency
 - **Alarmed:** "¿QUÉ?! ¡No sabía!" → HIGH URGENCY
 - **Skeptical:** "Eso no puede ser..." → Needs verification
 
 ### Context Understanding
+
 ```
 Parent: "Tiene cita con el dentista"
 AI extracts: excuse_type = "medical_appointment"
@@ -211,6 +216,7 @@ AI extracts: parent_aware = false, requires_verification = true
 ```
 
 ### Natural Flow
+
 ```
 DTMF System: 4 interactions minimum
   1. Listen to menu
@@ -232,18 +238,18 @@ Conversational AI: Seamless dialogue
 ### When Demoing the Call:
 
 > "Now watch this carefully. This is NOT a robotic phone tree.
-> 
+>
 > [Start call on speaker]
-> 
+>
 > The AI is speaking naturally in Spanish. The parent will TALK back,
 > not press buttons. Watch how the AI listens and responds..."
-> 
+>
 > [Conversation happens]
-> 
+>
 > "See that? The parent SAID 'No tenía idea' - the AI understood the
 > alarm in their voice, adapted its tone, and even detected that the
 > parent is taking immediate action.
-> 
+>
 > That's the difference between a robocall and conversational AI.
 > This feels human."
 
@@ -256,7 +262,7 @@ After call, system analyzes full transcript:
 ```typescript
 {
   transcript: "¿Qué? ¡No tenía idea! Ella salió esta mañana...",
-  
+
   extracted_info: {
     parent_aware: false,
     excuse_provided: false,
@@ -264,13 +270,13 @@ After call, system analyzes full transcript:
     keywords: ["no tenía idea", "salió esta mañana"],
     parent_action: "will_search_immediately",
   },
-  
+
   risk_assessment: {
     urgency: "high",
     requires_admin_follow_up: true,
     potential_safety_issue: true,
   },
-  
+
   automated_actions_triggered: [
     "Create urgent admin alert",
     "Flag as safety emergency",
@@ -285,11 +291,13 @@ After call, system analyzes full transcript:
 ## Cost Comparison
 
 ### Traditional System:
+
 - Robocall: $0.01/call
 - But: 40% parents ignore it (impersonal)
 - Effectiveness: Low
 
 ### ElevenLabs Conversational AI:
+
 - Cost: $0.10/call
 - But: 90%+ parents engage (feels real)
 - Effectiveness: High
@@ -298,4 +306,3 @@ After call, system analyzes full transcript:
 ---
 
 **This is what makes your demo SPECIAL - it's a real conversation, not a menu!** 🎯
-

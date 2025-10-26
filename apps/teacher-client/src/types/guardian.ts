@@ -32,7 +32,10 @@ export interface GuardianProfileDetails {
 
 export type GuardianProfileInput =
   | ({ id: string } & Partial<
-      Omit<GuardianProfileDetails, "firstName" | "lastName" | "identificationNumber" | "phone">
+      Omit<
+        GuardianProfileDetails,
+        "firstName" | "lastName" | "identificationNumber" | "phone"
+      >
     >)
   | GuardianProfileDetails;
 

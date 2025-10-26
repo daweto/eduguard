@@ -20,6 +20,7 @@ This is a **Turborepo monorepo** using **pnpm** for package management.
 ### Technology Stack
 
 **Backend (api-v2)**:
+
 - Runtime: Cloudflare Workers
 - Framework: Hono (lightweight web framework)
 - Planned infrastructure:
@@ -29,6 +30,7 @@ This is a **Turborepo monorepo** using **pnpm** for package management.
   - Queues for async notifications
 
 **Frontend (teacher-client)**:
+
 - React 19 with TypeScript
 - Vite 7 for build tooling
 - TailwindCSS v4 (using @tailwindcss/vite plugin)
@@ -36,6 +38,7 @@ This is a **Turborepo monorepo** using **pnpm** for package management.
 - Path alias: `@/` → `./src/`
 
 **AI Integration**:
+
 - Face detection: face-api.js (client-side)
 - LLM reasoning: Vercel AI SDK (planned)
 - Voice calls: ElevenLabs Conversational AI (planned)
@@ -94,6 +97,7 @@ pnpm cf-typegen
 ### Monorepo Workspace References
 
 Packages reference each other using workspace protocol:
+
 ```json
 "@repo/eslint-config": "workspace:*",
 ```
@@ -101,6 +105,7 @@ Packages reference each other using workspace protocol:
 ### Turborepo Task Dependencies
 
 Tasks are orchestrated via `turbo.json`:
+
 - `build` depends on `^build` (dependencies build first)
 - `dev` depends on `^build` but runs persistently
 - `lint` and `check-types` depend on upstream builds
@@ -108,10 +113,11 @@ Tasks are orchestrated via `turbo.json`:
 ### API Development (Hono)
 
 The api-v2 app uses Hono framework patterns:
+
 ```typescript
-const app = new Hono()
-app.get('/route', (c) => c.json({ data }))
-export default app
+const app = new Hono();
+app.get("/route", (c) => c.json({ data }));
+export default app;
 ```
 
 When adding Cloudflare bindings (D1, R2, Vectorize, etc.), uncomment and configure them in `wrangler.jsonc`.
@@ -125,6 +131,7 @@ When adding Cloudflare bindings (D1, R2, Vectorize, etc.), uncomment and configu
 ## Product Context
 
 Refer to `spec.md` for complete product specification including:
+
 - AI agent workflows (Vision, Reasoning, Voice)
 - API endpoint specifications
 - Database schemas (D1, Vectorize)

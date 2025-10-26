@@ -10,8 +10,8 @@
 
 **[Slide: Problem Statement]**
 
-> "Imagine this: It's 9 AM. Sofia Martinez was in English class first period. By math class second period, she's gone. She's snuck off campus. 
-> 
+> "Imagine this: It's 9 AM. Sofia Martinez was in English class first period. By math class second period, she's gone. She's snuck off campus.
+>
 > With traditional systems, her teachers won't notice. Her parents won't find out for days.
 >
 > We built EduGuard to solve this in **under 10 seconds**."
@@ -61,6 +61,7 @@
 **[Click on Sofia's card to expand details]**
 
 **[Shows risk analysis panel:]**
+
 ```
 ⚠️ HIGH RISK DETECTED
 Pattern: Sneak-Out
@@ -71,13 +72,14 @@ Today's Pattern:
 ❌ Period 2 (Math): ABSENT
 
 AI Analysis:
-"Student was present in first period but absent in 
-subsequent period. This pattern indicates possible 
-unauthorized mid-day departure. Immediate parent 
+"Student was present in first period but absent in
+subsequent period. This pattern indicates possible
+unauthorized mid-day departure. Immediate parent
 notification recommended."
 ```
 
 > "Our Reasoning Agent is GPT-4. It analyzed Sofia's attendance:
+>
 > - Present Period 1
 > - Absent Period 2
 >
@@ -108,19 +110,20 @@ notification recommended."
 **[Phone rings on speaker]**
 
 **[Natural Conversational AI speaks in Spanish:]**
+
 ```
-AI Agent (natural voice): 
+AI Agent (natural voice):
   "Hola, buenos días. Soy el asistente virtual del Colegio San José.
    ¿Hablo con María, la mamá de Sofia Martinez?"
 
-Parent (SPEAKING naturally): 
+Parent (SPEAKING naturally):
   "Sí, soy yo."
 
-AI Agent: 
+AI Agent:
   "Le llamo para informarle que Sofia no ha asistido a clases hoy.
    ¿Está usted al tanto de esta ausencia?"
 
-Parent (SPEAKING): 
+Parent (SPEAKING):
   "¿Qué? ¡No tenía idea! Ella salió esta mañana para el colegio."
 
 AI Agent (adapts to alarmed tone):
@@ -128,10 +131,10 @@ AI Agent (adapts to alarmed tone):
    Un administrador del colegio se pondrá en contacto con usted
    inmediatamente. ¿Hay algo más que pueda ayudarle?"
 
-Parent (SPEAKING): 
+Parent (SPEAKING):
   "No, voy a buscarla ahora. Gracias por avisar."
 
-AI Agent: 
+AI Agent:
   "Por favor manténganos informados. Que encuentre a Sofia pronto.
    Que tenga buen día."
 
@@ -139,6 +142,7 @@ AI Agent:
 ```
 
 **[Call ends - UI updates with AI analysis:]**
+
 ```
 ✅ Call Completed
 Duration: 72 seconds
@@ -156,6 +160,7 @@ Urgency: HIGH - Administrator alerted
 > From classroom photo to parent's phone: **8 seconds**.
 >
 > That's three AI agents working together:
+>
 > 1. Vision Agent identified faces
 > 2. Reasoning Agent detected the pattern
 > 3. Voice Agent called the parent
@@ -173,6 +178,7 @@ Urgency: HIGH - Administrator alerted
 > 30% of truancy happens mid-day. Parents find out days later. By then, the student could be anywhere.
 >
 > With EduGuard:
+>
 > - **2 seconds** for attendance vs 10 minutes
 > - **Real-time** sneak-out detection
 > - **Immediate** parent notification in their language
@@ -186,11 +192,13 @@ Urgency: HIGH - Administrator alerted
 ## 🎬 Backup Plan (If APIs Fail)
 
 ### Option A: Pre-recorded Video
+
 **[Have a full successful run recorded]**
 
 > "We have a live demo video showing the full pipeline. Let me walk you through it..."
 
 ### Option B: Code Walkthrough
+
 **[Show code on screen]**
 
 > "Let me show you the architecture. Here's the Vision Agent calling AWS Rekognition...
@@ -198,6 +206,7 @@ Urgency: HIGH - Administrator alerted
 > And here's the Voice Agent with ElevenLabs..."
 
 ### Option C: Screenshots + Explanation
+
 **[Prepared slide deck with screenshots]**
 
 > "I'll walk you through the flow with screenshots from earlier testing..."
@@ -209,30 +218,39 @@ Urgency: HIGH - Administrator alerted
 ### Expected Questions & Answers
 
 **Q: What if the photo is blurry?**
+
 > "AWS Rekognition has built-in quality filtering. If it can't get a confident match (below 95%), it flags for manual review. Teachers can always override."
 
 **Q: What about privacy concerns?**
+
 > "Great question. We only store facial embeddings, not raw photos. Parents opt-in during enrollment. And teachers can see exactly what data is being sent."
 
 **Q: How much does this cost?**
+
 > "AWS Rekognition: $5-10/month for a typical school. GPT-4: ~$20/month. ElevenLabs: $0.10/call. Total: under $50/month for a 500-student school. Compare that to one security incident prevented."
 
 **Q: What if a student doesn't have enrollment photos?**
+
 > "The system shows them as 'unable to verify' and the teacher manually marks them, just like traditional attendance. But 95% of students will have photos within the first week."
 
 **Q: Why use conversational AI instead of a recorded message?**
+
 > "Great question! ElevenLabs Conversational AI lets parents SPEAK naturally, not press buttons. If a parent is driving, cooking, or stressed, they can just talk. The AI understands 'Sí, está enfermo' or '¿Qué? ¡No sabía!' - it's empathetic and adapts. That's crucial for parents in crisis."
 
 **Q: Can students trick the system with photos?**
+
 > "AWS Rekognition includes liveness detection. And realistically, if a student goes through that effort, the teacher would notice. This isn't airport security - it's assistance for teachers."
 
 **Q: Why three separate agents instead of one big model?**
+
 > "Separation of concerns. Vision needs to be fast (2s). Reasoning can take longer (3s). Voice needs to be conversational. Each agent is optimized for its job. Plus it's more debuggable and maintainable."
 
 **Q: What if parents don't answer the call?**
+
 > "The system leaves a voicemail and sends an SMS. Then flags for the administrator to follow up. We're building redundancy into the notification pipeline."
 
 **Q: Can this work in other languages besides Spanish?**
+
 > "Absolutely. ElevenLabs supports 29 languages. We started with Spanish because that's the primary language at our pilot school, but it's configurable."
 
 ---
@@ -240,16 +258,19 @@ Urgency: HIGH - Administrator alerted
 ## 🎯 Key Talking Points to Emphasize
 
 ### Technical Innovation
+
 - "Three specialized AI agents working together like a relay race"
 - "Provider-agnostic with Vercel AI SDK - we can swap GPT-4 for Claude tomorrow"
 - "Edge computing with Cloudflare - 0ms latency for Chilean schools"
 
 ### Real-World Impact
+
 - "30% of truancy is mid-day departures - never caught by traditional systems"
 - "Parents notified in seconds, not days"
 - "Teachers save 50-100 minutes per day on attendance"
 
 ### Why This Matters
+
 - "Student safety is a school's #1 priority"
 - "Every minute a parent doesn't know their child is missing is a risk"
 - "AI should augment teachers, not replace them"
@@ -259,6 +280,7 @@ Urgency: HIGH - Administrator alerted
 ## 🔧 Technical Demo Checklist
 
 ### Before Demo (Setup)
+
 - [ ] Seed database with realistic students
 - [ ] Enroll 3-5 students with photos
 - [ ] Create test guardian with demo phone number
@@ -270,6 +292,7 @@ Urgency: HIGH - Administrator alerted
 - [ ] Charge phone to 100%
 
 ### During Demo
+
 - [ ] Close all other apps
 - [ ] Enable "Do Not Disturb"
 - [ ] Connect to strong WiFi
@@ -278,6 +301,7 @@ Urgency: HIGH - Administrator alerted
 - [ ] Screen brightness at 100%
 
 ### Backup Materials
+
 - [ ] Pre-recorded success video (MP4)
 - [ ] Screenshot deck (PDF)
 - [ ] Code walkthrough slides (ready to show)
@@ -288,21 +312,25 @@ Urgency: HIGH - Administrator alerted
 ## 🎤 Speaker Notes
 
 ### Tone & Energy
+
 - Start calm, build excitement at Reasoning Agent reveal
 - Peak energy at Voice Agent phone call
 - Reflective/thoughtful at closing
 
 ### Body Language
+
 - Face the audience during AI processing times
 - Point to screen for key moments
 - Step back during phone call so everyone can hear
 
 ### Pacing
+
 - Slow down for technical explanations
 - Let the AI do the talking during voice call
 - Pause after key reveals for impact
 
 ### If Something Goes Wrong
+
 - Stay calm - "Let me show you our backup"
 - Turn technical failure into teaching moment
 - Focus on the architecture and vision
@@ -328,6 +356,7 @@ Urgency: HIGH - Administrator alerted
 ### Judge Psychology
 
 **What judges want to see:**
+
 - Novel use of AI (✓ three agents working together)
 - Technical depth (✓ AWS, GPT-4, ElevenLabs, Cloudflare)
 - Real-world impact (✓ student safety)
@@ -335,6 +364,7 @@ Urgency: HIGH - Administrator alerted
 - Scalability (✓ cloud-native architecture)
 
 **What impresses:**
+
 - Confidence in live demo
 - Handling edge cases
 - Clear business case
@@ -345,10 +375,10 @@ Urgency: HIGH - Administrator alerted
 ## 🎬 Final Words
 
 **Remember:**
+
 - You built something real
 - It solves a real problem
 - The tech is impressive
 - The demo is powerful
 
 **You've got this. Go win. 🚀**
-

@@ -19,6 +19,7 @@
 ### Current Pain Points
 
 **For Teachers:**
+
 - Manual attendance wastes 5-10 minutes per class (50-100 minutes/day for 10 classes)
 - No visibility across different periods to detect same-day truancy
 - Reactive rather than proactive approach to student safety
@@ -26,16 +27,19 @@
 - Mobile accessibility is critical for quick in-classroom attendance capture
 
 **For Schools:**
+
 - Students sneak out between periods without detection
 - Chronic absenteeism patterns discovered weeks too late
 - No systematic parent communication about daily absences
 
 **For Parents:**
+
 - Learn about attendance issues days or weeks after occurrence
 - Miss early intervention opportunities
 - No real-time notification when student leaves campus mid-day
 
 ### Impact Statistics
+
 - Average 8-10 minutes lost per class to manual attendance
 - 30% of truancy cases involve mid-day departures
 - Parents notified 3-7 days after chronic absence begins
@@ -68,11 +72,13 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 ### Architecture Philosophy
 
 **Hybrid Cloud**: Combines Cloudflare's edge computing with AWS's specialized AI services:
+
 - Cloudflare: Application hosting, database, queues
 - AWS Rekognition: Facial recognition (purpose-built, managed service)
 - Leverages best-in-class services for each domain
 
 **AI-SDK Powered**: Vercel AI SDK v5 orchestrates all AI interactions for:
+
 - Unified LLM provider abstraction
 - Streaming responses
 - Structured output generation
@@ -80,28 +86,29 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 
 ### Infrastructure Stack
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Compute** | Cloudflare Workers | Serverless API endpoints |
-| **Database** | Cloudflare D1 (SQLite) | Relational data storage |
-| **Face Recognition** | AWS Rekognition | Face detection & matching |
-| **Face Collection** | AWS Rekognition Collections | Face storage & indexing |
-| **Object Storage** | Cloudflare R2 | Student photo storage |
-| **Job Queue** | Cloudflare Queues | Async notification processing |
-| **CDN** | Cloudflare CDN | Static asset delivery |
+| Component            | Technology                  | Purpose                       |
+| -------------------- | --------------------------- | ----------------------------- |
+| **Compute**          | Cloudflare Workers          | Serverless API endpoints      |
+| **Database**         | Cloudflare D1 (SQLite)      | Relational data storage       |
+| **Face Recognition** | AWS Rekognition             | Face detection & matching     |
+| **Face Collection**  | AWS Rekognition Collections | Face storage & indexing       |
+| **Object Storage**   | Cloudflare R2               | Student photo storage         |
+| **Job Queue**        | Cloudflare Queues           | Async notification processing |
+| **CDN**              | Cloudflare CDN              | Static asset delivery         |
 
 ### Frontend Stack
 
-| Technology | Purpose |
-|-----------|---------|
-| **React 18** | UI framework |
-| **Vite** | Build tool & dev server |
-| **TypeScript** | Type safety |
-| **TailwindCSS** | Utility-first styling |
-| **ShadCN UI** | Component library |
+| Technology           | Purpose                     |
+| -------------------- | --------------------------- |
+| **React 18**         | UI framework                |
+| **Vite**             | Build tool & dev server     |
+| **TypeScript**       | Type safety                 |
+| **TailwindCSS**      | Utility-first styling       |
+| **ShadCN UI**        | Component library           |
 | **Vercel AI SDK v5** | AI interactions & streaming |
 
 **Mobile-First Design**:
+
 - Teachers will primarily access the app through their **smartphones** for quick attendance capture in classrooms
 - Responsive design with touch-optimized UI elements
 - Native camera access for photo capture
@@ -111,13 +118,13 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 
 ### AI & External Services
 
-| Service | Purpose |
-|---------|---------|
-| **AWS Rekognition** | Face detection & recognition |
-| **ElevenLabs Conversational AI** | Outbound voice calls |
-| **ElevenLabs Voice API** | Text-to-speech |
-| **OpenAI GPT-4** | Reasoning agent |
-| **~~Twilio / MessageBird~~** | ~~SMS follow-up~~ **(OPTIONAL - Skip for hackathon)** |
+| Service                          | Purpose                                               |
+| -------------------------------- | ----------------------------------------------------- |
+| **AWS Rekognition**              | Face detection & recognition                          |
+| **ElevenLabs Conversational AI** | Outbound voice calls                                  |
+| **ElevenLabs Voice API**         | Text-to-speech                                        |
+| **OpenAI GPT-4**                 | Reasoning agent                                       |
+| **~~Twilio / MessageBird~~**     | ~~SMS follow-up~~ **(OPTIONAL - Skip for hackathon)** |
 
 ---
 
@@ -128,11 +135,13 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 **Purpose**: Identify students from classroom photos
 
 **Technology Stack**:
+
 - Face detection & recognition: AWS Rekognition
 - Face storage: AWS Rekognition Collections
 - API integration: AWS SDK via Cloudflare Workers
 
 **AWS Rekognition Features Used**:
+
 - **IndexFaces**: Store student faces during enrollment
 - **SearchFacesByImage**: Match faces in classroom photos
 - **DetectFaces**: Find all faces in an image
@@ -141,6 +150,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 **Workflow**:
 
 **Enrollment Phase:**
+
 1. Frontend uploads student portrait photos to backend
 2. Backend stores photos in R2
 3. Backend calls AWS Rekognition `IndexFaces` API
@@ -148,6 +158,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 5. Face ID linked to student record in D1 database
 
 **Attendance Phase:**
+
 1. Frontend uploads classroom photo to backend
 2. Backend calls AWS Rekognition `DetectFaces` to find all faces
 3. For each detected face, call `SearchFacesByImage`
@@ -156,10 +167,12 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 6. Returns present/absent list
 
 **Input**:
+
 - Image: JPEG/PNG, max 15MB (AWS limit)
 - Class context: class_id, session_id, timestamp
 
 **Output**:
+
 ```json
 {
   "detected_students": [
@@ -183,6 +196,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 ```
 
 **AWS Rekognition Configuration**:
+
 ```json
 {
   "collection_id": "eduguard-school-[school_id]",
@@ -194,11 +208,13 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 ```
 
 **Performance Targets**:
+
 - Detection time: <2 seconds for 30 students
 - Accuracy: >98% (AWS Rekognition standard)
 - False positive rate: <1%
 
 **Key Advantages of AWS Rekognition**:
+
 - No client-side processing needed
 - Managed face collection (no vector DB maintenance)
 - Enterprise-grade accuracy
@@ -213,20 +229,22 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 **Purpose**: Analyze attendance patterns and flag at-risk students
 
 **Technology Stack**:
+
 - LLM: OpenAI GPT-4 via Vercel AI SDK
 - Framework: generateObject() with Zod schemas
 - Context: Last 30 days of attendance data
 
 **Detection Rules**:
 
-| Pattern | Logic | Urgency |
-|---------|-------|---------|
-| **Sneak-out** | Present period 1, absent periods 2-3+ same day | High |
-| **Weekly chronic** | Absent 3+ days in past 7 days | Medium |
-| **Academic risk** | Absent 20%+ of classes in past 30 days | High |
-| **Irregular pattern** | Random absences with no clear pattern | Low |
+| Pattern               | Logic                                          | Urgency |
+| --------------------- | ---------------------------------------------- | ------- |
+| **Sneak-out**         | Present period 1, absent periods 2-3+ same day | High    |
+| **Weekly chronic**    | Absent 3+ days in past 7 days                  | Medium  |
+| **Academic risk**     | Absent 20%+ of classes in past 30 days         | High    |
+| **Irregular pattern** | Random absences with no clear pattern          | Low     |
 
 **Workflow**:
+
 1. Triggered after each attendance capture
 2. Retrieves student attendance history (7-30 days)
 3. Analyzes patterns using LLM reasoning
@@ -234,6 +252,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 5. Recommends notification action
 
 **Input**:
+
 ```json
 {
   "student_id": "123",
@@ -251,6 +270,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 ```
 
 **Output**:
+
 ```json
 {
   "risk_level": "high",
@@ -264,6 +284,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 ```
 
 **LLM Prompt Strategy**:
+
 - System: Expert school attendance analyst
 - Context: School policies, absence thresholds
 - Task: Pattern detection and risk assessment
@@ -276,6 +297,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 **Purpose**: Contact parents with natural language voice calls in Spanish
 
 **Technology Stack**:
+
 - Platform: ElevenLabs Conversational AI
 - Voice: Spanish (Spain/Latin America variant)
 - DTMF: Touch-tone response capture
@@ -285,7 +307,7 @@ EduGuard automates the entire attendance-to-notification pipeline using three sp
 
 ```
 [Agent initiates call]
-Agent: "Hola, buenos días/tardes. Soy el asistente virtual del Colegio [Name]. 
+Agent: "Hola, buenos días/tardes. Soy el asistente virtual del Colegio [Name].
         ¿Hablo con el apoderado de [Student Name]?"
 
 Parent: "Sí" / "No" / Hangs up
@@ -307,15 +329,16 @@ Agent: "Gracias por confirmar. [Response-specific message]
 
 **Response Handling**:
 
-| DTMF Code | Meaning | Follow-up Action |
-|-----------|---------|------------------|
-| **1** | Justified absence (home sick, appointment) | Mark as excused in system |
-| **2** | Parent unaware, needs follow-up | Flag for admin review |
-| **3** | Running late, will arrive | Mark as expected arrival |
-| **No answer** | Voicemail or unavailable | Leave voicemail + retry later |
-| **Wrong number** | Not parent/guardian | Update contact info needed |
+| DTMF Code        | Meaning                                    | Follow-up Action              |
+| ---------------- | ------------------------------------------ | ----------------------------- |
+| **1**            | Justified absence (home sick, appointment) | Mark as excused in system     |
+| **2**            | Parent unaware, needs follow-up            | Flag for admin review         |
+| **3**            | Running late, will arrive                  | Mark as expected arrival      |
+| **No answer**    | Voicemail or unavailable                   | Leave voicemail + retry later |
+| **Wrong number** | Not parent/guardian                        | Update contact info needed    |
 
 **ElevenLabs Agent Configuration**:
+
 ```json
 {
   "agent_id": "edu_guard_spanish",
@@ -337,6 +360,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 ```
 
 **Call Lifecycle**:
+
 1. **Initiate**: POST to ElevenLabs with student context
 2. **In Progress**: Track via conversation_id
 3. **Complete**: Webhook receives outcome + recording
@@ -351,12 +375,14 @@ Agent: "Gracias por confirmar. [Response-specific message]
 #### ⭐ TIER 1: Core Features (Must Build)
 
 **F1: Student Enrollment**
+
 - Upload student portrait photos (2-3 per student)
 - Backend sends photos to AWS Rekognition for indexing
 - Store Face IDs in D1 database linked to student records
 - Preview enrolled students roster
 
 **F2: Photo-Based Attendance**
+
 - Capture classroom photo via webcam/upload
 - Backend processes via AWS Rekognition
 - Automatic present/absent marking
@@ -364,24 +390,28 @@ Agent: "Gracias por confirmar. [Response-specific message]
 - Manual override capability
 
 **F3: AI Reasoning & Flagging**
+
 - Automatic pattern detection after each attendance
 - Visual flags for at-risk students
 - Reasoning explanation display
 - Teacher confirmation before notification
 
 **F4: AI Voice Parent Notification**
+
 - One-click call initiation
 - Real-time call status tracking
 - DTMF response capture
 - Call outcome display
 
 **F5: Basic Dashboard**
+
 - Today's attendance overview
 - Present/absent student list
 - Recent call logs with outcomes
 - Flagged students section
 
 **Mobile-First UI Requirements**:
+
 - Responsive design for smartphones (primary use case)
 - Touch-optimized buttons (minimum 44x44px tap targets)
 - Portrait orientation support for camera capture
@@ -398,24 +428,28 @@ Agent: "Gracias por confirmar. [Response-specific message]
 #### ⚡ TIER 2: Enhanced Features (Should Build If Time)
 
 **F6: Multi-Day History**
+
 - 7-day attendance calendar view
 - Individual student drill-down
 - Absence count by student
 - Sparkline attendance trends
 
 **F7: Enhanced Reasoning**
+
 - Multiple risk pattern detection
 - Configurable absence thresholds
 - Weekly summary analysis
 - Trend prediction
 
 **F8: Notification Preferences**
+
 - Parent contact preferences
 - Language preference (Spanish/English)
 - Preferred contact times
 - Emergency contact fallback
 
 **F9: Voicemail Handling**
+
 - Automatic voicemail detection
 - Pre-recorded message drop
 - Retry scheduling
@@ -425,27 +459,32 @@ Agent: "Gracias por confirmar. [Response-specific message]
 #### 🎨 TIER 3: Nice-to-Have (Skip for Hackathon)
 
 **F10: SMS Follow-Up** **(OPTIONAL - FINAL BIT)**
+
 - Automatic SMS after voice call
 - Custom message based on DTMF response
 - Delivery status tracking
 - SMS template management
 
 **F11: Year-Long Analytics**
+
 - Semester/year attendance aggregation
 - Academic risk correlation
 - School-wide statistics
 - Export reports
 
 **F12: Teacher Feedback Loop**
+
 - Correct AI mistakes
 - Flag false positives
 - Improve model over time
 
 **F13: Multi-Class Aggregation**
+
 - Cross-class absence patterns
 - Teacher collaboration features
 
 **F14: Email Notifications**
+
 - Formal absence reports
 - Weekly summaries for parents
 
@@ -458,6 +497,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 **Actors**: Admin, System, AWS Rekognition
 
 **Steps**:
+
 1. Admin logs into dashboard
 2. Navigates to "Enroll Students" page
 3. Uploads CSV with student roster (name, guardian name, phone, email)
@@ -471,6 +511,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 7. System shows confirmation with preview of all enrolled students
 
 **AWS Rekognition API Call**:
+
 ```json
 {
   "CollectionId": "eduguard-school-123",
@@ -497,6 +538,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 **Device Context**: Teacher opens app on smartphone in classroom at start of class period
 
 **Steps**:
+
 1. Teacher opens app on their smartphone (mobile browser or PWA)
 2. Quick login (saved credentials or biometric auth)
 3. Dashboard shows today's classes with "Take Attendance" buttons
@@ -542,6 +584,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 23. Success confirmation shown on mobile screen
 
 **AWS Rekognition API Calls**:
+
 ```json
 // Step 1: Detect faces
 {
@@ -579,6 +622,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 **Steps**:
 
 **Phase A: Risk Detection**
+
 1. Reasoning Agent analyzes newly captured attendance
 2. Retrieves student's attendance history (7 days)
 3. Detects pattern: "Sofia present Period 1, absent Periods 2-3"
@@ -586,36 +630,22 @@ Agent: "Gracias por confirmar. [Response-specific message]
 5. Dashboard shows warning badge on Sofia's card
 6. Teacher clicks on warning to see details
 
-**Phase B: Teacher Review**
-7. Modal opens with:
-   - Risk explanation
-   - Today's attendance timeline
-   - 7-day history chart
-   - Suggested action
+**Phase B: Teacher Review** 7. Modal opens with:
+
+- Risk explanation
+- Today's attendance timeline
+- 7-day history chart
+- Suggested action
+
 8. Teacher has options:
    - "Notify Parent Now" (immediate call)
    - "False Alarm" (dismiss)
    - "Mark Excused" (justified absence)
 9. Teacher selects "Notify Parent Now"
 
-**Phase C: Voice Call**
-10. System enqueues notification job
-11. Cloudflare Queue worker picks up job
-12. Worker calls ElevenLabs API with:
-    - Parent phone number
-    - Student name
-    - Class missed
-    - Time
-13. ElevenLabs initiates call
-14. Conversation happens (see Agent 3 flow)
-15. Parent presses "2" (didn't know)
-16. Call ends, ElevenLabs sends webhook
+**Phase C: Voice Call** 10. System enqueues notification job 11. Cloudflare Queue worker picks up job 12. Worker calls ElevenLabs API with: - Parent phone number - Student name - Class missed - Time 13. ElevenLabs initiates call 14. Conversation happens (see Agent 3 flow) 15. Parent presses "2" (didn't know) 16. Call ends, ElevenLabs sends webhook
 
-**Phase D: System Update**
-17. Webhook received at /webhooks/call-completed
-18. System logs call outcome in D1
-19. Dashboard updates with call result
-20. Sofia's card shows "Parent Notified - Unaware (Code 2)"
+**Phase D: System Update** 17. Webhook received at /webhooks/call-completed 18. System logs call outcome in D1 19. Dashboard updates with call result 20. Sofia's card shows "Parent Notified - Unaware (Code 2)"
 
 **~~Phase E: SMS Follow-up (OPTIONAL - Skip for hackathon)~~**
 ~~21. System sends SMS via Twilio~~
@@ -632,27 +662,32 @@ Agent: "Gracias por confirmar. [Response-specific message]
 **Views**:
 
 **Today's Overview**
+
 - Total students expected: 30
 - Present: 24 (80%)
 - Absent: 6 (20%)
 - Flagged for review: 2
 
 **Student List**
+
 - Sortable/filterable table
 - Columns: Name, Status, Time Marked, Confidence, Actions
 - Color coding: Green (present), Red (absent), Yellow (flagged)
 
 **Recent Calls**
+
 - Call log table
 - Columns: Student, Time, Outcome, Parent Response, Recording Link
 - Last 20 calls shown
 
 **Flagged Students**
+
 - Cards showing at-risk students
 - Pattern type, risk level, recommendation
 - Quick action buttons
 
 **Individual Student View**
+
 - 7-day attendance calendar
 - Sparkline chart
 - Call history
@@ -667,6 +702,7 @@ Agent: "Gracias por confirmar. [Response-specific message]
 #### 1. Student Management
 
 **POST /api/students**
+
 ```
 Purpose: Create new student enrollment with AWS Rekognition
 Auth: Teacher JWT
@@ -710,6 +746,7 @@ Backend Processing:
 ```
 
 **GET /api/students/:id**
+
 ```
 Purpose: Retrieve student details
 Auth: Teacher JWT
@@ -732,6 +769,7 @@ Response:
 ```
 
 **GET /api/students**
+
 ```
 Purpose: List all students
 Auth: Teacher JWT
@@ -747,6 +785,7 @@ Response:
 ```
 
 **DELETE /api/students/:id**
+
 ```
 Purpose: Unenroll student and remove from AWS Rekognition
 Auth: Teacher JWT
@@ -770,6 +809,7 @@ Response:
 #### 2. Course & Class Management
 
 **POST /api/courses**
+
 ```
 Purpose: Create a new course template
 Auth: Admin JWT
@@ -794,6 +834,7 @@ Response:
 ```
 
 **GET /api/courses**
+
 ```
 Purpose: List all courses
 Auth: Teacher JWT
@@ -821,6 +862,7 @@ Response:
 #### 3. Class & Classroom Management
 
 **POST /api/classrooms**
+
 ```
 Purpose: Create a new classroom
 Auth: Admin JWT
@@ -844,6 +886,7 @@ Response:
 ```
 
 **GET /api/classrooms**
+
 ```
 Purpose: List all classrooms
 Auth: Teacher JWT
@@ -866,6 +909,7 @@ Response:
 ```
 
 **POST /api/classes**
+
 ```
 Purpose: Create a new class section with teacher and classroom assignment
 Auth: Admin JWT
@@ -894,6 +938,7 @@ Response:
 ```
 
 **GET /api/classes/:course_id/sections**
+
 ```
 Purpose: Get all sections of a course
 Auth: Teacher JWT
@@ -929,6 +974,7 @@ Response:
 ```
 
 **POST /api/classes/:class_id/enroll**
+
 ```
 Purpose: Enroll a student in a class
 Auth: Teacher JWT
@@ -949,6 +995,7 @@ Response:
 ```
 
 **GET /api/classes/:class_id/students**
+
 ```
 Purpose: Get all students enrolled in a class
 Auth: Teacher JWT
@@ -974,6 +1021,7 @@ Response:
 #### 3. Attendance Operations
 
 **POST /api/attendance/capture**
+
 ```
 Purpose: Submit classroom photo for attendance via AWS Rekognition
 Auth: Teacher JWT
@@ -1046,6 +1094,7 @@ Response:
 ```
 
 **GET /api/attendance/session/:session_id**
+
 ```
 Purpose: Retrieve specific attendance session
 Auth: Teacher JWT
@@ -1064,6 +1113,7 @@ Response:
 ```
 
 **GET /api/attendance/student/:student_id**
+
 ```
 Purpose: Get attendance history for student
 Auth: Teacher JWT
@@ -1095,6 +1145,7 @@ Response:
 ```
 
 **PATCH /api/attendance/:attendance_id**
+
 ```
 Purpose: Manual correction by teacher
 Auth: Teacher JWT
@@ -1120,6 +1171,7 @@ Response:
 #### 4. AI Reasoning
 
 **POST /api/reasoning/analyze**
+
 ```
 Purpose: Trigger reasoning agent analysis
 Auth: System (internal) or Teacher JWT
@@ -1161,6 +1213,7 @@ Response:
 ```
 
 **GET /api/reasoning/flags**
+
 ```
 Purpose: Get all currently flagged students
 Auth: Teacher JWT
@@ -1188,6 +1241,7 @@ Response:
 #### 5. Notifications
 
 **POST /api/notifications/call**
+
 ```
 Purpose: Initiate voice call to parent
 Auth: Teacher JWT
@@ -1214,6 +1268,7 @@ Response:
 ```
 
 **GET /api/notifications/call/:call_id**
+
 ```
 Purpose: Get call status and outcome
 Auth: Teacher JWT
@@ -1235,6 +1290,7 @@ Response:
 ```
 
 **GET /api/notifications/history/:student_id**
+
 ```
 Purpose: Get all notifications sent for student
 Auth: Teacher JWT
@@ -1261,6 +1317,7 @@ Response:
 #### 6. SMS Endpoints (OPTIONAL - Skip for Hackathon)
 
 **~~POST /api/notifications/sms~~** **(FINAL BIT - NOT ESSENTIAL)**
+
 ```
 Purpose: Send SMS to parent
 Auth: System (internal) or Teacher JWT
@@ -1269,6 +1326,7 @@ Auth: System (internal) or Teacher JWT
 ```
 
 **~~GET /api/notifications/sms/:sms_id~~** **(FINAL BIT - NOT ESSENTIAL)**
+
 ```
 Purpose: Check SMS delivery status
 
@@ -1280,6 +1338,7 @@ Purpose: Check SMS delivery status
 #### 7. Webhooks (Incoming)
 
 **POST /api/webhooks/elevenlabs/call-completed**
+
 ```
 Purpose: Receive call outcome from ElevenLabs
 Auth: ElevenLabs signature verification
@@ -1307,6 +1366,7 @@ Response:
 ```
 
 **~~POST /api/webhooks/twilio/sms-status~~** **(OPTIONAL - Skip for hackathon)**
+
 ```
 Purpose: Receive SMS delivery status
 Auth: Twilio signature verification
@@ -1319,6 +1379,7 @@ Auth: Twilio signature verification
 #### 8. Analytics & Reporting
 
 **GET /api/analytics/dashboard**
+
 ```
 Purpose: Get today's overview stats
 Auth: Teacher JWT
@@ -1347,6 +1408,7 @@ Response:
 ```
 
 **GET /api/analytics/trends**
+
 ```
 Purpose: Get attendance trends
 Auth: Teacher JWT
@@ -1376,6 +1438,7 @@ Response:
 ### Database Schema (D1 - SQLite)
 
 **students**
+
 ```sql
 CREATE TABLE students (
   id TEXT PRIMARY KEY,
@@ -1394,6 +1457,7 @@ CREATE TABLE students (
 ```
 
 **classrooms**
+
 ```sql
 CREATE TABLE classrooms (
   id TEXT PRIMARY KEY,
@@ -1408,6 +1472,7 @@ CREATE TABLE classrooms (
 ```
 
 **teachers**
+
 ```sql
 CREATE TABLE teachers (
   id TEXT PRIMARY KEY,
@@ -1422,6 +1487,7 @@ CREATE TABLE teachers (
 ```
 
 **courses**
+
 ```sql
 CREATE TABLE courses (
   id TEXT PRIMARY KEY,
@@ -1443,6 +1509,7 @@ CREATE INDEX idx_courses_grade ON courses(grade_level);
 ```
 
 **classes**
+
 ```sql
 CREATE TABLE classes (
   id TEXT PRIMARY KEY,
@@ -1472,6 +1539,7 @@ CREATE INDEX idx_classes_year ON classes(academic_year);
 ```
 
 **class_enrollments**
+
 ```sql
 CREATE TABLE class_enrollments (
   id TEXT PRIMARY KEY,
@@ -1489,6 +1557,7 @@ CREATE INDEX idx_enrollments_student ON class_enrollments(student_id);
 ```
 
 **student_faces**
+
 ```sql
 CREATE TABLE student_faces (
   id TEXT PRIMARY KEY,
@@ -1505,6 +1574,7 @@ CREATE INDEX idx_faces_faceid ON student_faces(face_id);
 ```
 
 **sessions**
+
 ```sql
 CREATE TABLE sessions (
   id TEXT PRIMARY KEY,
@@ -1530,6 +1600,7 @@ CREATE INDEX idx_sessions_teacher ON sessions(teacher_id);
 ```
 
 **attendance**
+
 ```sql
 CREATE TABLE attendance (
   id TEXT PRIMARY KEY,
@@ -1556,6 +1627,7 @@ CREATE INDEX idx_attendance_date ON attendance(marked_at);
 ```
 
 **calls**
+
 ```sql
 CREATE TABLE calls (
   id TEXT PRIMARY KEY,
@@ -1578,12 +1650,14 @@ CREATE INDEX idx_calls_date ON calls(initiated_at);
 ```
 
 **~~sms_notifications~~ (OPTIONAL - Skip for hackathon)**
+
 ```sql
 -- Not needed for core demo
 -- Can add post-hackathon if SMS follow-up is implemented
 ```
 
 **reasoning_analyses**
+
 ```sql
 CREATE TABLE reasoning_analyses (
   id TEXT PRIMARY KEY,
@@ -1610,35 +1684,39 @@ CREATE INDEX idx_analyses_risk ON reasoning_analyses(risk_level);
 ### Key Design Decisions
 
 **Courses vs Classes**:
+
 - **`courses`** = Template/master definition (e.g., "MATH101 - Introduction to Algebra")
   - Defines the curriculum, subject, grade level, credits
   - Created once and reused across multiple academic years
   - Example: "MATH101" is defined once but taught every semester
-  
 - **`classes`** = Specific section instance (e.g., "MATH101 - Section A")
   - References a course template via `course_id`
   - Has specific teacher, classroom, period, semester
   - Multiple sections can share the same course (e.g., Section A, B, C)
   - Example: Three teachers teaching three sections of MATH101
 
-**Multi-Classroom Support**: 
+**Multi-Classroom Support**:
+
 - Students attend different classes in different rooms (e.g., Math in A1, English in C2, Science in B3)
 - The `attendance` table stores `classroom_id` to track physical location
 - The `sessions` table links each attendance session to both a class and its classroom
 - Allows tracking of student movement between classrooms throughout the day
 
 **Dynamic Class Rosters**:
+
 - The `classes` table defines a specific class section (course + section + teacher + classroom + period)
 - The `class_enrollments` table creates the many-to-many relationship between students and class sections
 - Teachers don't always have the same students; enrollment is per-section basis
 - A student can be enrolled in multiple class sections with different teachers
 
 **Teacher-Class Relationships**:
+
 - One teacher can teach multiple classes (different courses, sections, periods)
 - Each class section has one primary teacher assigned
 - The `sessions` table captures the teacher who conducted each attendance session
 
 **Attendance Tracking**:
+
 - Attendance is recorded per-session, where each session represents one class section meeting in one location
 - The `attendance` table denormalizes `class_id` and `classroom_id` for efficient querying
 - This allows queries like "Show all students absent from Room A1 today" or "Show student's attendance across all their classes"
@@ -1646,27 +1724,32 @@ CREATE INDEX idx_analyses_risk ON reasoning_analyses(risk_level);
 ### Example Scenario
 
 **Course Definitions** (Master Templates):
+
 - **ENG201**: "American Literature" (English, 10th grade, 1.0 credit)
 - **MATH101**: "Introduction to Algebra" (Math, 10th grade, 1.0 credit)
 - **CHEM201**: "Chemistry Lab" (Science, 10th grade, 1.0 credit)
 - **HIST201**: "World History" (Social Studies, 10th grade, 1.0 credit)
 
 **Class Sections** (Specific Instances):
+
 - **ENG201-A**: Section A, Teacher: Mrs. Smith, Room C2, Period 1
 - **MATH101-A**: Section A, Teacher: Mr. Johnson, Room A1, Period 2
 - **CHEM201-B**: Section B, Teacher: Dr. Lee, Room B3, Period 3
 - **HIST201-A**: Section A, Teacher: Ms. Garcia, Room D1, Period 4
 
 **Student Profile**: Sofia Martinez (Grade 10)
+
 - Enrolled in: ENG201-A, MATH101-A, CHEM201-B, HIST201-A
 
 **Monday Schedule**:
+
 - Period 1: ENG201-A (Mrs. Smith) in Room C2
 - Period 2: MATH101-A (Mr. Johnson) in Room A1
 - Period 3: CHEM201-B (Dr. Lee) in Room B3
 - Period 4: HIST201-A (Ms. Garcia) in Room D1
 
 **Attendance Tracking**:
+
 ```
 Session 1 (08:00): ENG201-A in C2 - Sofia is PRESENT
 Session 2 (09:00): MATH101-A in A1 - Sofia is ABSENT (not in photo)
@@ -1675,6 +1758,7 @@ Session 4 (11:00): HIST201-A in D1 - Sofia is ABSENT
 ```
 
 **AI Reasoning Analysis**:
+
 - Pattern detected: Present in C2 (ENG201-A), then absent from A1, B3, D1
 - Classification: "sneak_out" - likely left campus after first period
 - Action: Immediate parent notification
@@ -1684,6 +1768,7 @@ Session 4 (11:00): HIST201-A in D1 - Sofia is ABSENT
 ### AWS Rekognition Data Structure
 
 **Collections**
+
 ```
 Collection ID format: "eduguard-school-[school_id]"
 Example: "eduguard-school-12345"
@@ -1692,6 +1777,7 @@ One collection per school containing all student faces
 ```
 
 **Face Records**
+
 ```json
 {
   "FaceId": "aws-face-abc123",
@@ -1712,6 +1798,7 @@ One collection per school containing all student faces
 ```
 
 **Linking Strategy**:
+
 - ExternalImageId contains student_id for reverse lookup
 - Face ID stored in D1 `student_faces` table
 - Enables bidirectional mapping between AWS and local database
@@ -1723,6 +1810,7 @@ One collection per school containing all student faces
 ### Required AWS Setup
 
 **IAM Permissions**:
+
 ```json
 {
   "Version": "2012-10-17",
@@ -1742,10 +1830,7 @@ One collection per school containing all student faces
     },
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:PutObject"
-      ],
+      "Action": ["s3:GetObject", "s3:PutObject"],
       "Resource": "arn:aws:s3:::eduguard-photos/*"
     }
   ]
@@ -1753,6 +1838,7 @@ One collection per school containing all student faces
 ```
 
 **Environment Variables in Cloudflare Workers**:
+
 ```
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
@@ -1765,7 +1851,11 @@ R2_BUCKET_NAME=eduguard-photos
 
 ```typescript
 // Cloudflare Worker with AWS SDK
-import { RekognitionClient, IndexFacesCommand, SearchFacesByImageCommand } from "@aws-sdk/client-rekognition";
+import {
+  RekognitionClient,
+  IndexFacesCommand,
+  SearchFacesByImageCommand,
+} from "@aws-sdk/client-rekognition";
 
 export default {
   async fetch(request, env) {
@@ -1773,13 +1863,13 @@ export default {
       region: env.AWS_REGION,
       credentials: {
         accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_ACCESS_KEY
-      }
+        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      },
     });
-    
+
     // Use rekognition client for face operations
-  }
-}
+  },
+};
 ```
 
 ---
@@ -1787,6 +1877,7 @@ export default {
 ## 🚀 Implementation Roadmap
 
 ### Phase 1: Foundation (Hours 0-3)
+
 - [ ] Set up Cloudflare Workers project
 - [ ] Initialize D1 database with schema (including student_faces table)
 - [ ] Set up AWS account and Rekognition collection
@@ -1798,6 +1889,7 @@ export default {
 - [ ] **Touch-optimized component library integration**
 
 ### Phase 2: Vision Agent with AWS Rekognition (Hours 3-6)
+
 - [ ] Build student enrollment page
 - [ ] Implement photo upload to R2
 - [ ] Integrate AWS Rekognition IndexFaces API
@@ -1811,6 +1903,7 @@ export default {
 - [ ] **Responsive attendance results display for mobile screens**
 
 ### Phase 3: Voice Agent (Hours 6-9)
+
 - [ ] Integrate ElevenLabs API
 - [ ] Build call initiation endpoint
 - [ ] Configure Spanish conversation flow
@@ -1818,6 +1911,7 @@ export default {
 - [ ] Test call flow end-to-end
 
 ### Phase 4: Reasoning Agent (Hours 9-11)
+
 - [ ] Implement Vercel AI SDK integration
 - [ ] Build pattern detection logic
 - [ ] Create risk assessment endpoint
@@ -1825,6 +1919,7 @@ export default {
 - [ ] Test flagging system
 
 ### Phase 5: Dashboard & Polish (Hours 11-12)
+
 - [ ] Build main dashboard
 - [ ] Add call logs view
 - [ ] Create student history view
@@ -1836,6 +1931,7 @@ export default {
 - [ ] **PWA manifest for app-like experience**
 
 ### ~~Phase 6: SMS Integration (OPTIONAL - POST-HACKATHON)~~
+
 - ~~[ ] Integrate Twilio~~
 - ~~[ ] Build SMS templates~~
 - ~~[ ] Implement delivery tracking~~
@@ -1845,18 +1941,21 @@ export default {
 ## 🎯 Success Metrics
 
 **Technical Performance**:
+
 - Attendance capture: <2 seconds (AWS Rekognition standard)
 - Face recognition accuracy: >98% (AWS Rekognition guarantee)
 - Call connection rate: >90%
 - System uptime: 99.9%
 
 **User Impact**:
+
 - Time saved: 8-10 minutes per class
 - Parent notification speed: <5 minutes from absence
 - False positive rate: <2% (AWS Rekognition)
 - Teacher satisfaction: >4.5/5
 
 **Business Value**:
+
 - Reduced chronic absenteeism by 30%
 - Same-day truancy detection: 100% of sneak-out attempts
 - Parent engagement increase: 60%
@@ -1869,20 +1968,24 @@ export default {
 ### AWS Rekognition Pricing (Estimated)
 
 **Face Indexing (Enrollment)**:
+
 - $1.00 per 1,000 faces indexed
 - 200 students × 3 photos = 600 faces = $0.60
 
 **Face Search (Attendance)**:
+
 - $1.00 per 1,000 searches
 - 8 periods/day × 30 students × 20 days = 4,800 searches/month = $4.80/month
 
 **Storage**:
+
 - $0.01 per 1,000 faces/month
 - 600 faces = $0.01/month
 
 **Total Monthly Cost**: ~$5-10 for typical school
 
 ### Cloudflare Costs
+
 - Workers: Free tier sufficient for hackathon
 - D1: Free tier sufficient
 - R2: $0.015/GB storage

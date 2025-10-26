@@ -23,6 +23,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 **File**: `apps/teacher-client/src/pages/EditStudentPage.tsx`
 
 **Features**:
+
 - Displays current student information (name, RUT, course, current photos, faces indexed)
 - Shows current photos in a grid
 - Upload interface for 1-5 new photos
@@ -34,6 +35,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 **Route**: `/students/:studentId/edit`
 
 **Screenshot of features**:
+
 - Student info card showing enrollment status
 - Current photos grid (if any exist)
 - Upload section with drag-and-drop or file selection
@@ -47,12 +49,14 @@ Added functionality to edit existing students and upload portrait photos to stud
 **File**: `apps/teacher-client/src/components/students/StudentCard.tsx`
 
 **Changes**:
+
 - Added "Edit" button with pencil icon
 - Button labeled "Editar / Subir Fotos"
 - Placed before the delete button
 - Links to `/students/:studentId/edit`
 
 **Visual**:
+
 ```
 [Editar / Subir Fotos]  (outline button)
 [Eliminar Estudiante]    (red button)
@@ -67,6 +71,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 **Endpoint**: `POST /api/students/:id/photos`
 
 **Request Body**:
+
 ```json
 {
   "photos": [
@@ -78,6 +83,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -101,6 +107,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 ```
 
 **What it does**:
+
 1. Validates student exists
 2. Converts base64 photos to bytes
 3. Uploads each photo to R2 storage
@@ -109,6 +116,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 6. Returns success with indexed face information
 
 **Error Handling**:
+
 - Continues processing even if one photo fails
 - Logs errors but doesn't stop the entire upload
 - Returns partial success if some photos succeed
@@ -120,6 +128,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 **File**: `apps/teacher-client/src/routes.tsx`
 
 **Added Route**:
+
 ```typescript
 {
   path: ":studentId/edit",
@@ -140,6 +149,7 @@ Added functionality to edit existing students and upload portrait photos to stud
 **File**: `apps/teacher-client/src/i18n/locales/es/navigation.json`
 
 **Added**:
+
 - `breadcrumbs.editStudent`: "Editar"
 
 ---
@@ -153,6 +163,7 @@ curl -X POST http://localhost:8787/api/seed
 ```
 
 This creates students like:
+
 - Sofía Valentina Muñoz Fernández
 - Diego Matías Fernández López
 - Catalina Isidora Castro Silva
@@ -216,17 +227,20 @@ This creates students like:
 ### Database Changes
 
 **No schema changes required!** Uses existing tables:
+
 - `students` - Already exists
 - `student_faces` - Already exists (stores face IDs)
 
 ### File Storage
 
 **Photos stored in R2**:
+
 ```
 students/{studentId}/photo-{timestamp}-{index}.jpg
 ```
 
 **Example**:
+
 ```
 students/student-001/photo-1730000000000-0.jpg
 students/student-001/photo-1730000000000-1.jpg
@@ -240,7 +254,7 @@ students/student-001/photo-1730000000000-2.jpg
 - **Minimum photos**: 1 per upload
 - **Maximum photos**: 5 per upload
 - **Maximum file size**: 10MB per photo
-- **Allowed formats**: image/* (jpg, png, etc.)
+- **Allowed formats**: image/\* (jpg, png, etc.)
 - **Total photos per student**: No hard limit (can upload multiple times)
 
 ---
@@ -248,6 +262,7 @@ students/student-001/photo-1730000000000-2.jpg
 ## Error Messages
 
 **Spanish (User-Facing)**:
+
 - "Por favor, selecciona al menos una foto"
 - "{filename} no es una imagen válida"
 - "{filename} es demasiado grande (máx. 10MB)"
@@ -257,6 +272,7 @@ students/student-001/photo-1730000000000-2.jpg
 - "{count} foto(s) subida(s) correctamente"
 
 **English (Console Logs)**:
+
 - `[PHOTO-UPLOAD] ✓ Uploaded to R2: {key}`
 - `[PHOTO-UPLOAD] ❌ Failed to upload to R2`
 - `[FACE-INDEX] ✓ Indexed face {faceId} for student {studentId}`
@@ -290,6 +306,7 @@ curl http://localhost:8787/api/students/student-001
 ```
 
 **Response should include**:
+
 ```json
 {
   "id": "student-001",
@@ -327,12 +344,14 @@ curl http://localhost:8787/api/students/student-001
 ## Files Modified
 
 ### Frontend
+
 - ✅ `apps/teacher-client/src/pages/EditStudentPage.tsx` (NEW)
 - ✅ `apps/teacher-client/src/components/students/StudentCard.tsx`
 - ✅ `apps/teacher-client/src/routes.tsx`
 - ✅ `apps/teacher-client/src/i18n/locales/es/navigation.json`
 
 ### Backend
+
 - ✅ `apps/api-v2/src/routes/students.ts`
 
 **Total Lines**: ~350 new lines of code
@@ -361,9 +380,9 @@ curl http://localhost:8787/api/students/student-001
 ## Conclusion
 
 This feature completes the enrollment workflow by allowing photos to be added to students after they've been created. This is essential for schools that want to:
+
 1. Import student data from CSV/database
 2. Add photos later during registration/photo day
 3. Update photos throughout the year
 
 The student is now fully prepared for facial recognition-based attendance! 🎓📸
-

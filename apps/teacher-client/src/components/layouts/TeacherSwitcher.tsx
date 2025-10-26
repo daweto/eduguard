@@ -55,9 +55,7 @@ export function TeacherSwitcher({ className }: TeacherSwitcherProps) {
       aria-expanded={open}
       className={cn(
         "border-sidebar-border justify-center bg-sidebar text-sidebar-foreground gap-2 text-left shadow-none transition",
-        isCollapsed
-          ? "size-11 px-0"
-          : "w-full px-2",
+        isCollapsed ? "size-11 px-0" : "w-full px-2",
         className,
       )}
     >

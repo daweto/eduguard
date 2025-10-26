@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Phone, Clock, User, AlertCircle } from "lucide-react";
@@ -37,7 +43,13 @@ export default function CallsHistoryPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    const statusConfig: Record<
+      string,
+      {
+        label: string;
+        variant: "default" | "secondary" | "destructive" | "outline";
+      }
+    > = {
       initiated: { label: "Iniciada", variant: "secondary" },
       ringing: { label: "Timbrando", variant: "default" },
       answered: { label: "Contestada", variant: "default" },
@@ -46,7 +58,10 @@ export default function CallsHistoryPage() {
       completed: { label: "Completada", variant: "default" },
     };
 
-    const config = statusConfig[status] || { label: status, variant: "outline" };
+    const config = statusConfig[status] || {
+      label: status,
+      variant: "outline",
+    };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
@@ -90,9 +105,7 @@ export default function CallsHistoryPage() {
               <AlertCircle className="h-5 w-5" />
               Error
             </CardTitle>
-            <CardDescription className="text-red-700">
-              {error}
-            </CardDescription>
+            <CardDescription className="text-red-700">{error}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -113,7 +126,9 @@ export default function CallsHistoryPage() {
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <Phone className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No hay llamadas registradas</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No hay llamadas registradas
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Las llamadas a apoderados aparecerán aquí
               </p>
@@ -133,7 +148,10 @@ export default function CallsHistoryPage() {
                     </CardTitle>
                     <CardDescription>
                       {call.guardian_name ? (
-                        <span>Apoderado: {call.guardian_name} ({call.guardian_phone})</span>
+                        <span>
+                          Apoderado: {call.guardian_name} ({call.guardian_phone}
+                          )
+                        </span>
                       ) : (
                         <span>{call.guardian_phone}</span>
                       )}
@@ -159,19 +177,24 @@ export default function CallsHistoryPage() {
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Duración:</span>
-                    <span className="font-medium">{formatDuration(call.duration)}</span>
+                    <span className="font-medium">
+                      {formatDuration(call.duration)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">Fecha:</span>
-                    <span className="font-medium">{formatDate(call.created_at)}</span>
+                    <span className="font-medium">
+                      {formatDate(call.created_at)}
+                    </span>
                   </div>
                 </div>
 
                 {call.dtmf_response && (
                   <div className="mt-4 p-3 bg-muted rounded-lg">
                     <div className="text-sm">
-                      <span className="font-semibold">Respuesta DTMF:</span> {call.dtmf_response}
+                      <span className="font-semibold">Respuesta DTMF:</span>{" "}
+                      {call.dtmf_response}
                     </div>
                   </div>
                 )}

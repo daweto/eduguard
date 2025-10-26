@@ -1,8 +1,8 @@
-import { StudentCard } from './StudentCard';
-import { Button } from '@/components/ui/button';
-import { useStudents } from './hooks/useStudents';
-import { Loader2, Users, RefreshCw } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { StudentCard } from "./StudentCard";
+import { Button } from "@/components/ui/button";
+import { useStudents } from "./hooks/useStudents";
+import { Loader2, Users, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function StudentRoster() {
   const { students, loading, error, deleting, refetch, remove } = useStudents();
@@ -77,10 +77,7 @@ export function StudentRoster() {
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             )}
-            <StudentCard
-              student={student}
-              onDelete={remove}
-            />
+            <StudentCard student={student} onDelete={remove} />
           </div>
         ))}
       </div>

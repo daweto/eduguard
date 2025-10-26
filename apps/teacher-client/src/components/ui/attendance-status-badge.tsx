@@ -6,7 +6,10 @@ interface AttendanceStatusBadgeProps {
   corrected?: boolean;
 }
 
-export function AttendanceStatusBadge({ status, corrected }: AttendanceStatusBadgeProps) {
+export function AttendanceStatusBadge({
+  status,
+  corrected,
+}: AttendanceStatusBadgeProps) {
   const config = {
     present: {
       label: "Presente",
@@ -44,4 +47,3 @@ export function AttendanceStatusBadge({ status, corrected }: AttendanceStatusBad
     </Badge>
   );
 }
-
