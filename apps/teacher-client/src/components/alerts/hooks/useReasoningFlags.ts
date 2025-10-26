@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { getReasoningFlags } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ReasoningFlagsResponse } from "@repo/shared-types";
 import {
   getMockReasoningFlags,
-  USE_MOCK_ALARM_DATA,
 } from "@/lib/mockAlarmData";
 
 interface UseReasoningFlagsParams {
