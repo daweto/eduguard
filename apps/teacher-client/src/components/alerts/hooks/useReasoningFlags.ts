@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getReasoningFlags } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import type { ReasoningFlagsResponse } from "@repo/shared-types";
-import { getMockReasoningFlags, USE_MOCK_ALARM_DATA } from "@/lib/mockAlarmData";
+import {
+  getMockReasoningFlags,
+  USE_MOCK_ALARM_DATA,
+} from "@/lib/mockAlarmData";
 
 interface UseReasoningFlagsParams {
   from?: string;
@@ -20,7 +23,7 @@ export function useReasoningFlags(params?: UseReasoningFlagsParams) {
     queryKey: queryKeys.reasoningFlags(from, to),
     queryFn: () => {
       // Use mock data for demo if enabled
-        return getMockReasoningFlags(from, to);
+      return getMockReasoningFlags(from, to);
       // Otherwise use real API
     },
   });
