@@ -32,6 +32,32 @@ export class AIAgentsContainer extends Container {
       console.error("Error stack:", error.stack);
     }
   }
+
+  // Durable Object alarm handler (invoked by Cloudflare for scheduled wake/sleep)
+  // Ensures we observe any exceptions happening during alarm ticks
+  override async alarm(alarmProps: { isRetry: boolean; retryCount: number }): Promise<void> {
+    await super.alarm(alarmProps);
+
+    interface IdObj {
+      toString(): string;
+    }
+    interface StateObj {
+      id?: IdObj;
+    }
+    const state = (this as unknown as { state?: StateObj }).state;
+    const id = state?.id?.toString();
+    const now = new Date().toISOString();
+    try {
+      console.log("[ai-agents] DO alarm fired", { id, now });
+    } catch (err) {
+      console.error("[ai-agents] DO alarm error", {
+        id,
+        now,
+        error: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      });
+    }
+  }
 }
 
 // Worker fetch handler
