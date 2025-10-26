@@ -1,7 +1,5 @@
 /* eslint-disable import-x/order */
-import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
-import type { LanguageModel } from "ai";
 import { Hono } from "hono";
 import { z } from "zod";
 import type {
@@ -11,6 +9,7 @@ import type {
   ReasoningBatchAnalyzeResponse,
   RiskAssessmentObject,
 } from "@repo/shared-types";
+import { openai } from "@ai-sdk/openai";
 
 // Route handlers defined inline following Hono best practices
 const app = new Hono();
@@ -181,11 +180,9 @@ app.post("/analyze", async (c) => {
       `   History: ${String(totalRecords)} records, ${String(absentCount)} absences (${absentRate.toFixed(1)}%)`,
     );
 
-    // Call GPT-4 for pattern analysis
-    // Type assertion needed due to version mismatch between ai and @ai-sdk/openai
-    const model = openai("gpt-4o-mini") as unknown as LanguageModel;
     const result = await generateObject({
-      model,
+      model: openai("gpt-5-nano"),
+      output: "object",
       schema: RiskAssessmentSchema,
       prompt: `You are an expert school attendance analyst. Analyze this student's attendance pattern and assess risk.
 

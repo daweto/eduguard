@@ -25,6 +25,8 @@ app.post("/call", async (c) => {
       student_name,
       guardian_name,
       guardian_phone,
+      guardian_id,
+      call_id,
       risk_level,
       pattern_type,
       reasoning,
@@ -96,10 +98,14 @@ app.post("/call", async (c) => {
         agentPhoneNumberId: phoneNumberId,
         toNumber: guardian_phone,
         conversationInitiationClientData: {
+          userId: guardian_id,
           sourceInfo: { source: "node_js_sdk" },
           dynamicVariables: {
             student_name,
             guardian_name,
+            guardian_phone,
+            guardian_id,
+            call_id,
             class_name,
             absence_date: new Date().toISOString().slice(0, 10),
             school_name: schoolName,
@@ -111,8 +117,11 @@ app.post("/call", async (c) => {
       });
 
       const callId =
-        resp.conversationId ??
-        resp.callSid ??
+        call_id ??
+        (typeof resp.conversationId === "string"
+          ? resp.conversationId
+          : null) ??
+        (typeof resp.callSid === "string" ? resp.callSid : null) ??
         `call_${String(Date.now())}_${Math.random().toString(36).slice(2)}`;
 
       // Log agent decision (manual call)
