@@ -44,8 +44,12 @@ USER hono
 # Expose port (Cloudflare will map this)
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+# Health check - more lenient to allow for startup time
+# - start-period: Give 30s for app to start before health checks count
+# - interval: Check every 30s once started
+# - timeout: Wait up to 10s for response
+# - retries: Try 5 times before marking as unhealthy
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=5 \
   CMD node -e "require('http').get('http://localhost:3001/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-CMD ["node", "/app/dist/index.js"]
+CMD ["node", "/app/dist/src/index.js"]

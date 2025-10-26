@@ -16,7 +16,7 @@ export class AIAgentsContainer extends Container {
   sleepAfter = "10m";
 
   // Environment variables passed to the container
-  // These will be available in the Node.js app via process.env
+  // NOTE: Secrets must be set via Cloudflare dashboard or wrangler CLI
   envVars = {
     PORT: "3001",
     NODE_ENV: "production",
@@ -32,6 +32,12 @@ export class AIAgentsContainer extends Container {
 
   override onError(error: unknown) {
     console.error("❌ AI Agents Container error:", error);
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
   }
 }
 
@@ -92,13 +98,44 @@ export default {
 
     try {
       // Forward the request to the container
-      return await container.fetch(request);
+      const response = await container.fetch(request);
+
+      // Log unsuccessful responses for debugging
+      if (!response.ok) {
+        console.warn(
+          `Container returned ${response.status.toString()} for ${url.pathname}`,
+        );
+      }
+
+      return response;
     } catch (error) {
-      console.error("Error routing to container:", error);
+      console.error("❌ Error routing to container:", error);
+
+      // Provide more helpful error messages
+      let errorMessage = "Unknown error";
+      let errorDetails = "";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        errorDetails = error.stack ?? "";
+
+        // Check for specific error types
+        if (errorMessage.includes("not running")) {
+          errorDetails =
+            "The container has not been started. Try accessing any endpoint to trigger container startup.";
+        } else if (errorMessage.includes("exit code")) {
+          errorDetails =
+            "The container crashed during startup. Check Cloudflare logs with: wrangler tail";
+        }
+      }
+
       return Response.json(
         {
           error: "Container unavailable",
-          message: error instanceof Error ? error.message : "Unknown error",
+          message: errorMessage,
+          details: errorDetails,
+          timestamp: new Date().toISOString(),
+          tip: "Check container logs with: wrangler tail --config apps/ai-agents/wrangler.jsonc",
         },
         { status: 503 },
       );
