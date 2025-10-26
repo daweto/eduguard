@@ -5,7 +5,7 @@
 Your AI Agents service uses **Cloudflare Containers**, which combines:
 
 1. **Worker** (`src/worker.ts`) - Routes requests to containers
-2. **Durable Object** (`AIAgentsContainer`) - Manages container lifecycle  
+2. **Durable Object** (`AIAgentsContainer`) - Manages container lifecycle
 3. **Container** (Docker image) - Runs your Node.js server
 
 ```
@@ -13,6 +13,7 @@ Request → Worker → Durable Object → Container (Node.js + Hono + AI SDKs)
 ```
 
 This architecture gives you:
+
 - ✅ Full Node.js runtime in containers
 - ✅ Automatic container lifecycle management
 - ✅ Global edge deployment
@@ -28,6 +29,7 @@ bash scripts/set-production-secrets.sh
 ```
 
 Enter your:
+
 - OpenAI API key
 - ElevenLabs credentials
 - Cloudflare API URL (your api-v2 worker URL)
@@ -40,6 +42,7 @@ pnpm deploy
 ```
 
 First deployment takes ~5-10 minutes as Cloudflare:
+
 - Builds your Docker image
 - Pushes to Cloudflare Registry
 - Deploys the Worker
@@ -71,7 +74,7 @@ Routes all incoming requests to your container:
 
 ```typescript
 // Routes requests to a single container instance
-const container = env.AI_AGENTS_CONTAINER.getByName('ai-agents-primary');
+const container = env.AI_AGENTS_CONTAINER.getByName("ai-agents-primary");
 return await container.fetch(request);
 ```
 
@@ -81,11 +84,12 @@ Manages your Node.js container:
 
 ```typescript
 export class AIAgentsContainer extends Container {
-  defaultPort = 3001;        // Your Node.js server port
-  sleepAfter = '10m';        // Sleep after 10min idle
-  envVars = {                // Passed to container
-    PORT: '3001',
-    NODE_ENV: 'production',
+  defaultPort = 3001; // Your Node.js server port
+  sleepAfter = "10m"; // Sleep after 10min idle
+  envVars = {
+    // Passed to container
+    PORT: "3001",
+    NODE_ENV: "production",
   };
 }
 ```
@@ -93,6 +97,7 @@ export class AIAgentsContainer extends Container {
 ### The Container (Dockerfile)
 
 Runs your full Node.js app:
+
 - Hono server
 - Vercel AI SDK + GPT-4
 - ElevenLabs SDK
@@ -159,6 +164,7 @@ pnpm wrangler tail
 Visit [dash.cloudflare.com](https://dash.cloudflare.com) → Workers & Pages → Containers
 
 View:
+
 - Container health
 - Request metrics
 - Logs and traces
@@ -177,12 +183,14 @@ Your configuration in `wrangler.jsonc`:
 ```
 
 **Scaling behavior:**
+
 - Cloudflare automatically starts containers based on demand
 - Containers sleep after `sleepAfter` duration (10 minutes)
 - Max 5 containers can run simultaneously
 - Cold start: ~1-2 seconds when waking up
 
 **For your use case:**
+
 - `max_instances: 5` is plenty
 - Most requests hit the same container (stateless)
 - Containers auto-scale on demand
@@ -190,11 +198,13 @@ Your configuration in `wrangler.jsonc`:
 ## Cost Estimate
 
 **Cloudflare Containers:**
+
 - Base: $5-10/month
 - Compute: ~$0.50 per million requests
 - Expected: **~$10-15/month** for AI Agents
 
 **External APIs:**
+
 - OpenAI GPT-4o-mini: ~$15/month
 - ElevenLabs: ~$300/month (voice calls)
 
@@ -205,6 +215,7 @@ Your configuration in `wrangler.jsonc`:
 ### "Container unavailable" errors
 
 **After first deploy:**
+
 ```bash
 # Wait 5-10 minutes, then check
 pnpm containers:list
@@ -213,6 +224,7 @@ pnpm containers:list
 Containers need provisioning time on first deploy.
 
 **Ongoing issues:**
+
 ```bash
 # Check container health
 pnpm wrangler tail
@@ -242,6 +254,7 @@ pnpm docker:build
 ### "max_instances exceeded"
 
 Increase in `wrangler.jsonc`:
+
 ```jsonc
 "max_instances": 10  // Up from 5
 ```
@@ -296,6 +309,7 @@ git push origin main
 ```
 
 Required GitHub secrets:
+
 - `CLOUDFLARE_API_TOKEN`
 - `CLOUDFLARE_ACCOUNT_ID`
 
@@ -318,4 +332,3 @@ Required GitHub secrets:
 ---
 
 **You're all set!** 🎉 Deploy with `pnpm deploy` and you'll have AI Agents running on Cloudflare's edge.
-

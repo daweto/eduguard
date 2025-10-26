@@ -113,6 +113,7 @@ bash scripts/set-production-secrets.sh
 ```
 
 This sets 6 secrets in Cloudflare:
+
 - `OPENAI_API_KEY`
 - `ELEVENLABS_API_KEY`
 - `ELEVENLABS_AGENT_ID`
@@ -133,8 +134,9 @@ git push origin main
 ```
 
 **First deploy takes 5-10 minutes:**
+
 - Builds Docker image
-- Pushes to Cloudflare Registry  
+- Pushes to Cloudflare Registry
 - Deploys Worker
 - Provisions containers
 
@@ -247,6 +249,7 @@ pnpm containers:images
 ### Metrics
 
 Cloudflare Dashboard shows:
+
 - Request count
 - Error rate
 - Container health
@@ -255,11 +258,13 @@ Cloudflare Dashboard shows:
 ## Costs
 
 ### Cloudflare Containers
+
 - **Base:** $5-10/month
 - **Compute:** $0.50 per million requests
 - **Storage:** Included for images
 
 ### External APIs
+
 - **OpenAI GPT-4o-mini:** ~$15/month
 - **ElevenLabs:** ~$300/month (voice calls)
 
@@ -270,6 +275,7 @@ Cloudflare Dashboard shows:
 ## GitHub Actions
 
 Auto-deploys on push to `main` when changes in:
+
 - `apps/ai-agents/**`
 - `packages/**`
 - `pnpm-lock.yaml`
@@ -288,15 +294,15 @@ Add to GitHub → Settings → Secrets:
 
 ## Key Differences from Standard Workers
 
-| Feature | Standard Worker | Container Worker |
-|---------|----------------|------------------|
-| Runtime | V8 isolate | Full Node.js |
-| Node APIs | Limited | ✅ All available |
-| npm packages | Most work | ✅ All work |
-| Deployment | Source code | Docker image |
-| Cold start | ~5ms | ~1-2 seconds |
-| Max size | 1MB gzipped | 10MB+ |
-| Use case | Stateless edge logic | Stateful services, AI SDKs |
+| Feature      | Standard Worker      | Container Worker           |
+| ------------ | -------------------- | -------------------------- |
+| Runtime      | V8 isolate           | Full Node.js               |
+| Node APIs    | Limited              | ✅ All available           |
+| npm packages | Most work            | ✅ All work                |
+| Deployment   | Source code          | Docker image               |
+| Cold start   | ~5ms                 | ~1-2 seconds               |
+| Max size     | 1MB gzipped          | 10MB+                      |
+| Use case     | Stateless edge logic | Stateful services, AI SDKs |
 
 ## Troubleshooting
 
@@ -346,7 +352,7 @@ Update `worker.ts`:
 
 ```typescript
 // Instead of:
-const container = env.AI_AGENTS_CONTAINER.getByName('ai-agents-primary');
+const container = env.AI_AGENTS_CONTAINER.getByName("ai-agents-primary");
 
 // Use random load balancing:
 function getRandom(namespace: DurableObjectNamespace, max: number) {
@@ -377,6 +383,7 @@ const container = getRandom(env.AI_AGENTS_CONTAINER, 5);
 ## Support
 
 Questions? Check:
+
 1. Cloudflare Containers Docs: https://developers.cloudflare.com/containers/
 2. Container Package: https://github.com/cloudflare/containers
 3. Durable Objects: https://developers.cloudflare.com/durable-objects/
@@ -404,4 +411,3 @@ curl https://ai-agents.YOUR_SUBDOMAIN.workers.dev/
 ```
 
 **Happy deploying!** 🚀
-

@@ -43,6 +43,7 @@ bash scripts/set-production-secrets.sh
 ```
 
 This will prompt you for:
+
 - `OPENAI_API_KEY` - Your OpenAI API key
 - `ELEVENLABS_API_KEY` - Your ElevenLabs API key
 - `ELEVENLABS_AGENT_ID` - Your ElevenLabs agent ID
@@ -101,11 +102,13 @@ pnpm wrangler deploy --config apps/ai-agents/wrangler.jsonc --dockerfile apps/ai
 ### Automated Deployment (GitHub Actions)
 
 The workflow `.github/workflows/deploy-ai-agents.yml` automatically deploys when you push to `main` with changes in:
+
 - `apps/ai-agents/**`
 - `packages/**`
 - `pnpm-lock.yaml`
 
 **Required GitHub Secrets:**
+
 - `CLOUDFLARE_API_TOKEN` - Your Cloudflare API token
 - `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
 
@@ -162,6 +165,7 @@ curl https://ai-agents.YOUR_SUBDOMAIN.workers.dev/
 ```
 
 Expected response:
+
 ```json
 {
   "status": "ok",
@@ -192,6 +196,7 @@ pnpm wrangler secret delete SECRET_NAME
 ## Scaling
 
 Cloudflare automatically scales your container globally:
+
 - **Auto-scaling**: Based on request load
 - **Global distribution**: Runs on edge network
 - **No configuration needed**: Cloudflare handles it
@@ -199,11 +204,13 @@ Cloudflare automatically scales your container globally:
 ## Pricing
 
 Cloudflare Workers with Containers:
+
 - **Included**: First 100,000 requests/day
 - **Paid**: $5/month + $0.50 per million requests
 - **CPU time**: 10ms free, then $0.02 per million GB-s
 
 Estimated monthly cost for EduGuard:
+
 - ~10,000 reasoning requests/month: **~$5-10/month**
 - OpenAI API: **~$15/month**
 - ElevenLabs calls: **~$300/month** (10 calls/day)
@@ -259,6 +266,7 @@ pnpm docker:test
 ### "Module not found" errors
 
 Ensure all dependencies are in `dependencies`, not `devDependencies`:
+
 ```json
 {
   "dependencies": {
@@ -283,16 +291,16 @@ For the EduGuard use case, these limits are more than sufficient.
 
 ## Comparison: Cloudflare vs AWS ECS
 
-| Feature | Cloudflare Container | AWS ECS |
-|---------|---------------------|---------|
-| Setup complexity | ⭐ Simple | ⭐⭐⭐ Complex |
-| Deployment | Single command | Multi-step |
-| Scaling | Automatic | Configure |
-| Global edge | ✅ Built-in | ❌ Multi-region |
-| Cost | ~$5-10/month | ~$30-50/month |
-| Node.js support | ✅ Full | ✅ Full |
-| Secrets management | Wrangler CLI | AWS Secrets Manager |
-| Platform consistency | ✅ Same as api-v2 | ❌ Different |
+| Feature              | Cloudflare Container | AWS ECS             |
+| -------------------- | -------------------- | ------------------- |
+| Setup complexity     | ⭐ Simple            | ⭐⭐⭐ Complex      |
+| Deployment           | Single command       | Multi-step          |
+| Scaling              | Automatic            | Configure           |
+| Global edge          | ✅ Built-in          | ❌ Multi-region     |
+| Cost                 | ~$5-10/month         | ~$30-50/month       |
+| Node.js support      | ✅ Full              | ✅ Full             |
+| Secrets management   | Wrangler CLI         | AWS Secrets Manager |
+| Platform consistency | ✅ Same as api-v2    | ❌ Different        |
 
 **Verdict**: Cloudflare Container is simpler and more cost-effective for this use case.
 
@@ -312,4 +320,3 @@ For the EduGuard use case, these limits are more than sufficient.
 - [Wrangler CLI Reference](https://developers.cloudflare.com/workers/wrangler/)
 - [Container Support](https://developers.cloudflare.com/workers/runtime-apis/nodejs/)
 - [Pricing Calculator](https://workers.cloudflare.com/pricing)
-

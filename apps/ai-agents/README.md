@@ -358,6 +358,7 @@ The server logs all operations:
 The AI Agents service runs as a **Node.js container on Cloudflare Workers**.
 
 **Why Cloudflare Containers?**
+
 - ✅ Full Node.js runtime support
 - ✅ Same platform as api-v2
 - ✅ Automatic global scaling
@@ -386,6 +387,7 @@ Push to `main` branch triggers automatic deployment via GitHub Actions.
 **Full Documentation:**
 
 See [CLOUDFLARE_CONTAINER_DEPLOYMENT.md](./CLOUDFLARE_CONTAINER_DEPLOYMENT.md) for:
+
 - Complete setup guide
 - Secrets configuration
 - GitHub Actions setup
