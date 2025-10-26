@@ -12,6 +12,7 @@
   // Container configuration
   "containers": [
     {
+      "instance_type": "basic",
       "max_instances": 5,
       "class_name": "AIAgentsContainer",
       "image": "./Dockerfile",
