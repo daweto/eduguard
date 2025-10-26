@@ -121,6 +121,8 @@ app.post("/elevenlabs/call-completed", async (c) => {
         forwardError = e instanceof Error ? e.message : String(e);
         console.warn("[Webhook] forward failed:", forwardError);
       }
+    } else {
+      throw new Error("FORWARD_TO_URL not configured");
     }
 
     return c.json({ received: true, forwarded, forwardStatus, forwardError });
