@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 interface Bindings {
   FORWARD_TO_URL?: string;
@@ -7,6 +8,16 @@ interface Bindings {
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+// Enable CORS similar to api-v2
+app.use(
+  "/*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["*"],
+  }),
+);
 
 app.get("/", (c) =>
   c.json({
