@@ -49,6 +49,42 @@ export default {
       });
     }
 
+    // Comprehensive health check - tests container connectivity
+    if (url.pathname === "/worker-health/full") {
+      const container = env.AI_AGENTS_CONTAINER.getByName("ai-agents-primary");
+      
+      try {
+        // Try to reach the container's health endpoint
+        const healthUrl = new URL(request.url);
+        healthUrl.pathname = "/health";
+        const containerResponse = await container.fetch(healthUrl.toString());
+        const containerHealth = await containerResponse.json();
+        
+        return Response.json({
+          status: "ok",
+          worker: "ai-agents-proxy",
+          container: {
+            reachable: true,
+            health: containerHealth,
+          },
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        return Response.json(
+          {
+            status: "degraded",
+            worker: "ai-agents-proxy",
+            container: {
+              reachable: false,
+              error: error instanceof Error ? error.message : "Unknown error",
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 503 },
+        );
+      }
+    }
+
     // Route all other requests to the container
     // Using getByName with a fixed name ensures we use a single container instance
     // For load balancing across multiple containers, you could use getRandom or other routing logic

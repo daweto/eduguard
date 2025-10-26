@@ -31,6 +31,48 @@ app.get("/", (c) => {
   });
 });
 
+// Comprehensive health check
+app.get("/health", (c) => {
+  const checks = {
+    openai: !!process.env.OPENAI_API_KEY,
+    elevenlabs: !!process.env.ELEVENLABS_API_KEY,
+    elevenlabs_agent: !!process.env.ELEVENLABS_AGENT_ID,
+    elevenlabs_phone: !!process.env.ELEVENLABS_PHONE_NUMBER_ID,
+    cloudflare_api: !!process.env.CLOUDFLARE_API_URL,
+  };
+
+  const allHealthy = Object.values(checks).every((check) => check);
+
+  return c.json(
+    {
+      status: allHealthy ? "healthy" : "degraded",
+      service: "EduGuard AI Agents",
+      timestamp: new Date().toISOString(),
+      checks: {
+        openai_configured: checks.openai,
+        elevenlabs_configured: checks.elevenlabs,
+        elevenlabs_agent_configured: checks.elevenlabs_agent,
+        elevenlabs_phone_configured: checks.elevenlabs_phone,
+        cloudflare_api_configured: checks.cloudflare_api,
+      },
+      agents: {
+        reasoning: {
+          provider: "OpenAI GPT-4",
+          status: checks.openai ? "ready" : "not_configured",
+        },
+        voice: {
+          provider: "ElevenLabs Conversational AI",
+          status:
+            checks.elevenlabs && checks.elevenlabs_agent && checks.elevenlabs_phone
+              ? "ready"
+              : "not_configured",
+        },
+      },
+    },
+    allHealthy ? 200 : 503,
+  );
+});
+
 // Mount sub-apps with app.route() - Hono best practice for larger applications
 app.route("/api/reasoning", reasoningApp);
 app.route("/api/voice", voiceApp);
