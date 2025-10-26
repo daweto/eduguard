@@ -69,7 +69,7 @@ app.post("/elevenlabs/call-completed", async (c) => {
       return c.json({ error: "invalid payload" }, 400);
     }
 
-    console.log("[Webhook] elevenlabs call-completed", bodyText);
+    console.log("[Webhook] webhook-proxy elevenlabs call-completed", bodyText);
 
     let forwarded = false;
     let forwardStatus: number | undefined;
