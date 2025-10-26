@@ -13,12 +13,13 @@ import StudentsPage from "./pages/StudentsPage";
 import GuardiansHomePage from "./pages/GuardiansHomePage";
 import GuardiansCreatePage from "./pages/GuardiansCreatePage";
 import RouteErrorBoundary from "./components/layouts/RouteErrorBoundary";
-import AttendancePage from "./pages/AttendancePage";
 import { TeacherClassesPage } from "./pages/TeacherClassesPage";
 import { ClassAttendancePage } from "./pages/ClassAttendancePage";
 import { ClassSessionsPage } from "./pages/ClassSessionsPage";
 import { SessionDetailPage } from "./pages/SessionDetailPage";
 import EditStudentPage from "./pages/EditStudentPage";
+import CallsHistoryPage from "./pages/CallsHistoryPage";
+import StudentAttendancePage from "./pages/StudentAttendancePage";
 
 export type CrumbHandle = {
   breadcrumb: string | ((match: UIMatch) => string);
@@ -76,11 +77,11 @@ const routes: RouteObject[] = [
         } satisfies CrumbHandle,
       },
       {
-        path: "attendance",
-        element: <AttendancePage />,
+        path: "calls",
+        element: <CallsHistoryPage />,
         handle: {
-          breadcrumb: "Asistencia",
-          breadcrumbKey: "navigation:breadcrumbs.attendance",
+          breadcrumb: "Llamadas",
+          breadcrumbKey: "navigation:breadcrumbs.calls",
         } satisfies CrumbHandle,
       },
       // Students Domain
@@ -118,6 +119,14 @@ const routes: RouteObject[] = [
             handle: {
               breadcrumb: "Editar",
               breadcrumbKey: "navigation:breadcrumbs.editStudent",
+            } satisfies CrumbHandle,
+          },
+          {
+            path: ":studentId/attendance",
+            element: <StudentAttendancePage />,
+            handle: {
+              breadcrumb: "Asistencia",
+              breadcrumbKey: "navigation:breadcrumbs.studentAttendance",
             } satisfies CrumbHandle,
           },
         ],

@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "lint": "eslint .",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "agents:create": "tsx scripts/createAgent.mts"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
@@ -25,4 +26,3 @@
     "typescript": "^5.9.3"
   }
 }
-

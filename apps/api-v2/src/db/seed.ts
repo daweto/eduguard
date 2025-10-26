@@ -1,145 +1,145 @@
 // Seed data for Chilean school stages and grades
-import { drizzle } from 'drizzle-orm/d1';
-import { 
-  stages, 
-  grades, 
+import { drizzle } from "drizzle-orm/d1";
+import {
+  stages,
+  grades,
   gradeSections,
-  teachers, 
-  classrooms, 
-  courses, 
+  teachers,
+  classrooms,
+  courses,
   classes,
   legalGuardians,
   students,
   studentFaces,
   classEnrollments,
-} from './schema';
+} from "./schema";
 
 export const stagesData = [
   {
-    id: 'preschool',
-    name: 'preschool',
-    displayName: 'Educación Parvularia',
+    id: "preschool",
+    name: "preschool",
+    displayName: "Educación Parvularia",
     order: 1,
-    description: 'Preschool education level (Prekinder and Kinder)',
+    description: "Preschool education level (Prekinder and Kinder)",
   },
   {
-    id: 'elementary',
-    name: 'elementary',
-    displayName: 'Enseñanza Básica',
+    id: "elementary",
+    name: "elementary",
+    displayName: "Enseñanza Básica",
     order: 2,
-    description: 'Elementary education from 1st to 8th grade',
+    description: "Elementary education from 1st to 8th grade",
   },
   {
-    id: 'secondary',
-    name: 'secondary',
-    displayName: 'Enseñanza Media',
+    id: "secondary",
+    name: "secondary",
+    displayName: "Enseñanza Media",
     order: 3,
-    description: 'Secondary education from 1st to 4th year',
+    description: "Secondary education from 1st to 4th year",
   },
 ];
 
 export const gradesData = [
   // Preschool
   {
-    id: 'prekinder',
-    name: 'prekinder',
-    displayName: 'Prekinder',
-    stageId: 'preschool',
+    id: "prekinder",
+    name: "prekinder",
+    displayName: "Prekinder",
+    stageId: "preschool",
     order: 1,
   },
   {
-    id: 'kinder',
-    name: 'kinder',
-    displayName: 'Kinder',
-    stageId: 'preschool',
+    id: "kinder",
+    name: "kinder",
+    displayName: "Kinder",
+    stageId: "preschool",
     order: 2,
   },
 
   // Elementary
   {
-    id: '1st-elementary',
-    name: '1st-elementary',
-    displayName: '1° Básico',
-    stageId: 'elementary',
+    id: "1st-elementary",
+    name: "1st-elementary",
+    displayName: "1° Básico",
+    stageId: "elementary",
     order: 3,
   },
   {
-    id: '2nd-elementary',
-    name: '2nd-elementary',
-    displayName: '2° Básico',
-    stageId: 'elementary',
+    id: "2nd-elementary",
+    name: "2nd-elementary",
+    displayName: "2° Básico",
+    stageId: "elementary",
     order: 4,
   },
   {
-    id: '3rd-elementary',
-    name: '3rd-elementary',
-    displayName: '3° Básico',
-    stageId: 'elementary',
+    id: "3rd-elementary",
+    name: "3rd-elementary",
+    displayName: "3° Básico",
+    stageId: "elementary",
     order: 5,
   },
   {
-    id: '4th-elementary',
-    name: '4th-elementary',
-    displayName: '4° Básico',
-    stageId: 'elementary',
+    id: "4th-elementary",
+    name: "4th-elementary",
+    displayName: "4° Básico",
+    stageId: "elementary",
     order: 6,
   },
   {
-    id: '5th-elementary',
-    name: '5th-elementary',
-    displayName: '5° Básico',
-    stageId: 'elementary',
+    id: "5th-elementary",
+    name: "5th-elementary",
+    displayName: "5° Básico",
+    stageId: "elementary",
     order: 7,
   },
   {
-    id: '6th-elementary',
-    name: '6th-elementary',
-    displayName: '6° Básico',
-    stageId: 'elementary',
+    id: "6th-elementary",
+    name: "6th-elementary",
+    displayName: "6° Básico",
+    stageId: "elementary",
     order: 8,
   },
   {
-    id: '7th-elementary',
-    name: '7th-elementary',
-    displayName: '7° Básico',
-    stageId: 'elementary',
+    id: "7th-elementary",
+    name: "7th-elementary",
+    displayName: "7° Básico",
+    stageId: "elementary",
     order: 9,
   },
   {
-    id: '8th-elementary',
-    name: '8th-elementary',
-    displayName: '8° Básico',
-    stageId: 'elementary',
+    id: "8th-elementary",
+    name: "8th-elementary",
+    displayName: "8° Básico",
+    stageId: "elementary",
     order: 10,
   },
 
   // Secondary
   {
-    id: '1st-secondary',
-    name: '1st-secondary',
-    displayName: '1° Medio',
-    stageId: 'secondary',
+    id: "1st-secondary",
+    name: "1st-secondary",
+    displayName: "1° Medio",
+    stageId: "secondary",
     order: 11,
   },
   {
-    id: '2nd-secondary',
-    name: '2nd-secondary',
-    displayName: '2° Medio',
-    stageId: 'secondary',
+    id: "2nd-secondary",
+    name: "2nd-secondary",
+    displayName: "2° Medio",
+    stageId: "secondary",
     order: 12,
   },
   {
-    id: '3rd-secondary',
-    name: '3rd-secondary',
-    displayName: '3° Medio',
-    stageId: 'secondary',
+    id: "3rd-secondary",
+    name: "3rd-secondary",
+    displayName: "3° Medio",
+    stageId: "secondary",
     order: 13,
   },
   {
-    id: '4th-secondary',
-    name: '4th-secondary',
-    displayName: '4° Medio',
-    stageId: 'secondary',
+    id: "4th-secondary",
+    name: "4th-secondary",
+    displayName: "4° Medio",
+    stageId: "secondary",
     order: 14,
   },
 ];
@@ -147,159 +147,288 @@ export const gradesData = [
 // Grade Sections seed data (Homerooms for academic year 2024-2025)
 export const gradeSectionsData = [
   // Preschool sections
-  { id: 'gs-prekinder-a', gradeId: 'prekinder', label: 'A', displayName: 'Prekinder A', academicYear: '2024-2025', maxStudents: 25 },
-  { id: 'gs-kinder-a', gradeId: 'kinder', label: 'A', displayName: 'Kinder A', academicYear: '2024-2025', maxStudents: 25 },
-  
+  {
+    id: "gs-prekinder-a",
+    gradeId: "prekinder",
+    label: "A",
+    displayName: "Prekinder A",
+    academicYear: "2024-2025",
+    maxStudents: 25,
+  },
+  {
+    id: "gs-kinder-a",
+    gradeId: "kinder",
+    label: "A",
+    displayName: "Kinder A",
+    academicYear: "2024-2025",
+    maxStudents: 25,
+  },
+
   // Elementary sections (creating A and B sections for demonstration)
-  { id: 'gs-1elem-a', gradeId: '1st-elementary', label: 'A', displayName: '1° Básico A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-002', maxStudents: 30 },
-  { id: 'gs-1elem-b', gradeId: '1st-elementary', label: 'B', displayName: '1° Básico B', academicYear: '2024-2025', maxStudents: 30 },
-  { id: 'gs-2elem-a', gradeId: '2nd-elementary', label: 'A', displayName: '2° Básico A', academicYear: '2024-2025', maxStudents: 30 },
-  { id: 'gs-3elem-a', gradeId: '3rd-elementary', label: 'A', displayName: '3° Básico A', academicYear: '2024-2025', maxStudents: 30 },
-  { id: 'gs-4elem-a', gradeId: '4th-elementary', label: 'A', displayName: '4° Básico A', academicYear: '2024-2025', maxStudents: 35 },
-  { id: 'gs-4elem-b', gradeId: '4th-elementary', label: 'B', displayName: '4° Básico B', academicYear: '2024-2025', maxStudents: 35 },
-  { id: 'gs-5elem-a', gradeId: '5th-elementary', label: 'A', displayName: '5° Básico A', academicYear: '2024-2025', maxStudents: 35 },
-  { id: 'gs-6elem-a', gradeId: '6th-elementary', label: 'A', displayName: '6° Básico A', academicYear: '2024-2025', maxStudents: 35 },
-  { id: 'gs-7elem-a', gradeId: '7th-elementary', label: 'A', displayName: '7° Básico A', academicYear: '2024-2025', maxStudents: 35 },
-  { id: 'gs-8elem-a', gradeId: '8th-elementary', label: 'A', displayName: '8° Básico A', academicYear: '2024-2025', maxStudents: 35 },
-  
+  {
+    id: "gs-1elem-a",
+    gradeId: "1st-elementary",
+    label: "A",
+    displayName: "1° Básico A",
+    academicYear: "2024-2025",
+    homeroomTeacherId: "teacher-002",
+    maxStudents: 30,
+  },
+  {
+    id: "gs-1elem-b",
+    gradeId: "1st-elementary",
+    label: "B",
+    displayName: "1° Básico B",
+    academicYear: "2024-2025",
+    maxStudents: 30,
+  },
+  {
+    id: "gs-2elem-a",
+    gradeId: "2nd-elementary",
+    label: "A",
+    displayName: "2° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 30,
+  },
+  {
+    id: "gs-3elem-a",
+    gradeId: "3rd-elementary",
+    label: "A",
+    displayName: "3° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 30,
+  },
+  {
+    id: "gs-4elem-a",
+    gradeId: "4th-elementary",
+    label: "A",
+    displayName: "4° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+  {
+    id: "gs-4elem-b",
+    gradeId: "4th-elementary",
+    label: "B",
+    displayName: "4° Básico B",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+  {
+    id: "gs-5elem-a",
+    gradeId: "5th-elementary",
+    label: "A",
+    displayName: "5° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+  {
+    id: "gs-6elem-a",
+    gradeId: "6th-elementary",
+    label: "A",
+    displayName: "6° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+  {
+    id: "gs-7elem-a",
+    gradeId: "7th-elementary",
+    label: "A",
+    displayName: "7° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+  {
+    id: "gs-8elem-a",
+    gradeId: "8th-elementary",
+    label: "A",
+    displayName: "8° Básico A",
+    academicYear: "2024-2025",
+    maxStudents: 35,
+  },
+
   // Secondary sections (1st and 2nd Medio with A/B sections, teacher-001 is homeroom for 1m-a)
-  { id: 'gs-1sec-a', gradeId: '1st-secondary', label: 'A', displayName: '1° Medio A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-001', maxStudents: 40 },
-  { id: 'gs-1sec-b', gradeId: '1st-secondary', label: 'B', displayName: '1° Medio B', academicYear: '2024-2025', maxStudents: 40 },
-  { id: 'gs-2sec-a', gradeId: '2nd-secondary', label: 'A', displayName: '2° Medio A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-003', maxStudents: 40 },
-  { id: 'gs-2sec-b', gradeId: '2nd-secondary', label: 'B', displayName: '2° Medio B', academicYear: '2024-2025', maxStudents: 40 },
-  { id: 'gs-3sec-a', gradeId: '3rd-secondary', label: 'A', displayName: '3° Medio A', academicYear: '2024-2025', maxStudents: 40 },
-  { id: 'gs-4sec-a', gradeId: '4th-secondary', label: 'A', displayName: '4° Medio A', academicYear: '2024-2025', maxStudents: 40 },
+  {
+    id: "gs-1sec-a",
+    gradeId: "1st-secondary",
+    label: "A",
+    displayName: "1° Medio A",
+    academicYear: "2024-2025",
+    homeroomTeacherId: "teacher-001",
+    maxStudents: 40,
+  },
+  {
+    id: "gs-1sec-b",
+    gradeId: "1st-secondary",
+    label: "B",
+    displayName: "1° Medio B",
+    academicYear: "2024-2025",
+    maxStudents: 40,
+  },
+  {
+    id: "gs-2sec-a",
+    gradeId: "2nd-secondary",
+    label: "A",
+    displayName: "2° Medio A",
+    academicYear: "2024-2025",
+    homeroomTeacherId: "teacher-003",
+    maxStudents: 40,
+  },
+  {
+    id: "gs-2sec-b",
+    gradeId: "2nd-secondary",
+    label: "B",
+    displayName: "2° Medio B",
+    academicYear: "2024-2025",
+    maxStudents: 40,
+  },
+  {
+    id: "gs-3sec-a",
+    gradeId: "3rd-secondary",
+    label: "A",
+    displayName: "3° Medio A",
+    academicYear: "2024-2025",
+    maxStudents: 40,
+  },
+  {
+    id: "gs-4sec-a",
+    gradeId: "4th-secondary",
+    label: "A",
+    displayName: "4° Medio A",
+    academicYear: "2024-2025",
+    maxStudents: 40,
+  },
 ];
 
 // Teachers seed data
 export const teachersData = [
   {
-    id: 'teacher-001',
-    firstName: 'María',
-    middleName: 'Isabel',
-    lastName: 'González',
-    secondLastName: 'Pérez',
-    email: 'maria.gonzalez@school.cl',
-    phone: '+56912345001',
-    subjects: 'Matemáticas,Física',
-    department: 'Ciencias',
-    status: 'active',
+    id: "teacher-001",
+    firstName: "María",
+    middleName: "Isabel",
+    lastName: "González",
+    secondLastName: "Pérez",
+    email: "maria.gonzalez@school.cl",
+    phone: "+56968357637",
+    subjects: "Matemáticas,Física",
+    department: "Ciencias",
+    status: "active",
   },
   {
-    id: 'teacher-002',
-    firstName: 'Carlos',
-    middleName: 'Alberto',
-    lastName: 'Rodríguez',
-    secondLastName: 'Silva',
-    email: 'carlos.rodriguez@school.cl',
-    phone: '+56912345002',
-    subjects: 'Lenguaje,Historia',
-    department: 'Humanidades',
-    status: 'active',
+    id: "teacher-002",
+    firstName: "Carlos",
+    middleName: "Alberto",
+    lastName: "Rodríguez",
+    secondLastName: "Silva",
+    email: "carlos.rodriguez@school.cl",
+    phone: "+56968357637",
+    subjects: "Lenguaje,Historia",
+    department: "Humanidades",
+    status: "active",
   },
   {
-    id: 'teacher-003',
-    firstName: 'Ana',
-    middleName: 'Patricia',
-    lastName: 'Martínez',
-    secondLastName: 'López',
-    email: 'ana.martinez@school.cl',
-    phone: '+56912345003',
-    subjects: 'Química,Biología',
-    department: 'Ciencias',
-    status: 'active',
+    id: "teacher-003",
+    firstName: "Ana",
+    middleName: "Patricia",
+    lastName: "Martínez",
+    secondLastName: "López",
+    email: "ana.martinez@school.cl",
+    phone: "+56968357637",
+    subjects: "Química,Biología",
+    department: "Ciencias",
+    status: "active",
   },
 ];
 
 // Classrooms seed data
 export const classroomsData = [
   {
-    id: 'room-a1',
-    name: 'A1',
-    building: 'Edificio A',
-    floor: 'Primer Piso',
+    id: "room-a1",
+    name: "A1",
+    building: "Edificio A",
+    floor: "Primer Piso",
     capacity: 35,
-    roomType: 'classroom',
-    facilities: 'proyector,pizarra,computadores',
+    roomType: "classroom",
+    facilities: "proyector,pizarra,computadores",
   },
   {
-    id: 'room-a2',
-    name: 'A2',
-    building: 'Edificio A',
-    floor: 'Primer Piso',
+    id: "room-a2",
+    name: "A2",
+    building: "Edificio A",
+    floor: "Primer Piso",
     capacity: 30,
-    roomType: 'classroom',
-    facilities: 'proyector,pizarra',
+    roomType: "classroom",
+    facilities: "proyector,pizarra",
   },
   {
-    id: 'room-b1',
-    name: 'B1',
-    building: 'Edificio B',
-    floor: 'Primer Piso',
+    id: "room-b1",
+    name: "B1",
+    building: "Edificio B",
+    floor: "Primer Piso",
     capacity: 25,
-    roomType: 'classroom',
-    facilities: 'pizarra',
+    roomType: "classroom",
+    facilities: "pizarra",
   },
   {
-    id: 'room-lab1',
-    name: 'Lab Ciencias 1',
-    building: 'Edificio C',
-    floor: 'Segundo Piso',
+    id: "room-lab1",
+    name: "Lab Ciencias 1",
+    building: "Edificio C",
+    floor: "Segundo Piso",
     capacity: 30,
-    roomType: 'lab',
-    facilities: 'microscopios,equipamiento_laboratorio,pizarra',
+    roomType: "lab",
+    facilities: "microscopios,equipamiento_laboratorio,pizarra",
   },
 ];
 
 // Courses seed data
 export const coursesData = [
   {
-    id: 'course-math-1m',
-    courseCode: 'MAT101',
-    name: 'Matemática I',
-    subject: 'Matemáticas',
-    gradeLevel: '1st-secondary',
+    id: "course-math-1m",
+    courseCode: "MAT101",
+    name: "Matemática I",
+    subject: "Matemáticas",
+    gradeLevel: "1st-secondary",
     credits: 1.0,
-    description: 'Álgebra y geometría básica',
-    prerequisites: '',
-    department: 'Ciencias',
-    status: 'active',
+    description: "Álgebra y geometría básica",
+    prerequisites: "",
+    department: "Ciencias",
+    status: "active",
   },
   {
-    id: 'course-lang-1m',
-    courseCode: 'LEN101',
-    name: 'Lenguaje y Comunicación I',
-    subject: 'Lenguaje',
-    gradeLevel: '1st-secondary',
+    id: "course-lang-1m",
+    courseCode: "LEN101",
+    name: "Lenguaje y Comunicación I",
+    subject: "Lenguaje",
+    gradeLevel: "1st-secondary",
     credits: 1.0,
-    description: 'Comprensión lectora y expresión escrita',
-    prerequisites: '',
-    department: 'Humanidades',
-    status: 'active',
+    description: "Comprensión lectora y expresión escrita",
+    prerequisites: "",
+    department: "Humanidades",
+    status: "active",
   },
   {
-    id: 'course-chem-1m',
-    courseCode: 'QUI101',
-    name: 'Química I',
-    subject: 'Química',
-    gradeLevel: '1st-secondary',
+    id: "course-chem-1m",
+    courseCode: "QUI101",
+    name: "Química I",
+    subject: "Química",
+    gradeLevel: "1st-secondary",
     credits: 1.0,
-    description: 'Introducción a la química',
-    prerequisites: '',
-    department: 'Ciencias',
-    status: 'active',
+    description: "Introducción a la química",
+    prerequisites: "",
+    department: "Ciencias",
+    status: "active",
   },
   {
-    id: 'course-phys-1m',
-    courseCode: 'FIS101',
-    name: 'Física I',
-    subject: 'Física',
-    gradeLevel: '1st-secondary',
+    id: "course-phys-1m",
+    courseCode: "FIS101",
+    name: "Física I",
+    subject: "Física",
+    gradeLevel: "1st-secondary",
     credits: 1.0,
-    description: 'Mecánica y cinemática',
-    prerequisites: '',
-    department: 'Ciencias',
-    status: 'active',
+    description: "Mecánica y cinemática",
+    prerequisites: "",
+    department: "Ciencias",
+    status: "active",
   },
 ];
 
@@ -307,66 +436,66 @@ export const coursesData = [
 export const classesData = [
   // María González teaches Math and Physics
   {
-    id: 'class-math-1m-a',
-    courseId: 'course-math-1m',
-    section: 'A',
-    teacherId: 'teacher-001',
-    classroomId: 'room-a1',
+    id: "class-math-1m-a",
+    courseId: "course-math-1m",
+    section: "A",
+    teacherId: "teacher-001",
+    classroomId: "room-a1",
     period: 1,
-    scheduleDay: 'daily',
-    startTime: '08:00',
-    endTime: '08:50',
-    academicYear: '2025',
-    semester: 'Anual',
+    scheduleDay: "daily",
+    startTime: "08:00",
+    endTime: "08:50",
+    academicYear: "2025",
+    semester: "Anual",
     maxStudents: 30,
-    status: 'active',
+    status: "active",
   },
   {
-    id: 'class-phys-1m-a',
-    courseId: 'course-phys-1m',
-    section: 'A',
-    teacherId: 'teacher-001',
-    classroomId: 'room-a1',
+    id: "class-phys-1m-a",
+    courseId: "course-phys-1m",
+    section: "A",
+    teacherId: "teacher-001",
+    classroomId: "room-a1",
     period: 3,
-    scheduleDay: 'daily',
-    startTime: '10:00',
-    endTime: '10:50',
-    academicYear: '2025',
-    semester: 'Anual',
+    scheduleDay: "daily",
+    startTime: "10:00",
+    endTime: "10:50",
+    academicYear: "2025",
+    semester: "Anual",
     maxStudents: 30,
-    status: 'active',
+    status: "active",
   },
   // Carlos Rodríguez teaches Language
   {
-    id: 'class-lang-1m-a',
-    courseId: 'course-lang-1m',
-    section: 'A',
-    teacherId: 'teacher-002',
-    classroomId: 'room-a2',
+    id: "class-lang-1m-a",
+    courseId: "course-lang-1m",
+    section: "A",
+    teacherId: "teacher-002",
+    classroomId: "room-a2",
     period: 2,
-    scheduleDay: 'daily',
-    startTime: '09:00',
-    endTime: '09:50',
-    academicYear: '2025',
-    semester: 'Anual',
+    scheduleDay: "daily",
+    startTime: "09:00",
+    endTime: "09:50",
+    academicYear: "2025",
+    semester: "Anual",
     maxStudents: 30,
-    status: 'active',
+    status: "active",
   },
   // Ana Martínez teaches Chemistry
   {
-    id: 'class-chem-1m-a',
-    courseId: 'course-chem-1m',
-    section: 'A',
-    teacherId: 'teacher-003',
-    classroomId: 'room-lab1',
+    id: "class-chem-1m-a",
+    courseId: "course-chem-1m",
+    section: "A",
+    teacherId: "teacher-003",
+    classroomId: "room-lab1",
     period: 4,
-    scheduleDay: 'daily',
-    startTime: '11:00',
-    endTime: '11:50',
-    academicYear: '2025',
-    semester: 'Anual',
+    scheduleDay: "daily",
+    startTime: "11:00",
+    endTime: "11:50",
+    academicYear: "2025",
+    semester: "Anual",
     maxStudents: 25,
-    status: 'active',
+    status: "active",
   },
 ];
 
@@ -381,117 +510,116 @@ export const classesData = [
 // Sample guardians
 export const guardiansData = [
   {
-    id: 'guardian-001',
-    firstName: 'Pedro',
-    middleName: 'José',
-    lastName: 'Muñoz',
-    secondLastName: 'García',
-    identificationNumber: '9677209-2',
-    phone: '+56987654321',
-    email: 'pedro.munoz@email.cl',
-    preferredLanguage: 'es',
-    relation: 'Padre',
-    address: 'Av. Libertador 123, Santiago',
+    id: "guardian-001",
+    firstName: "Pedro",
+    middleName: "José",
+    lastName: "Muñoz",
+    secondLastName: "García",
+    identificationNumber: "9677209-2",
+    phone: "+56968357637",
+    email: "pedro.munoz@email.cl",
+    preferredLanguage: "es",
+    relation: "Padre",
+    address: "Av. Libertador 123, Santiago",
   },
   {
-    id: 'guardian-002',
-    firstName: 'Carmen',
-    middleName: 'Rosa',
-    lastName: 'Fernández',
-    secondLastName: 'Soto',
-    identificationNumber: '17679737-1',
-    phone: '+56987654322',
-    email: 'carmen.fernandez@email.cl',
-    preferredLanguage: 'es',
-    relation: 'Madre',
-    address: 'Calle Principal 456, Santiago',
+    id: "guardian-002",
+    firstName: "Carmen",
+    middleName: "Rosa",
+    lastName: "Fernández",
+    secondLastName: "Soto",
+    identificationNumber: "17679737-1",
+    phone: "+56968357637",
+    email: "carmen.fernandez@email.cl",
+    preferredLanguage: "es",
+    relation: "Madre",
+    address: "Calle Principal 456, Santiago",
   },
   {
-    id: 'guardian-003',
-    firstName: 'Luis',
-    middleName: 'Andrés',
-    lastName: 'Castro',
-    secondLastName: 'Ramírez',
-    identificationNumber: '8274022-8',
-    phone: '+56987654323',
-    email: 'luis.castro@email.cl',
-    preferredLanguage: 'es',
-    relation: 'Padre',
-    address: 'Pasaje Los Robles 789, Santiago',
+    id: "guardian-003",
+    firstName: "Luis",
+    middleName: "Andrés",
+    lastName: "Castro",
+    secondLastName: "Ramírez",
+    identificationNumber: "8274022-8",
+    phone: "+56968357637",
+    email: "luis.castro@email.cl",
+    preferredLanguage: "es",
+    relation: "Padre",
+    address: "Pasaje Los Robles 789, Santiago",
   },
   {
-    id: 'guardian-004',
-    firstName: 'David',
-    middleName: 'Felipe',
-    lastName: 'Weinstein',
-    identificationNumber: '5585167-0',
-    phone: '+56969357637',
-    email: 'dweinsteint@gmail.com',
-    preferredLanguage: 'es',
-    relation: 'Padre',
-    address: 'Av Providencia 1000, Providencia',
+    id: "guardian-004",
+    firstName: "David",
+    middleName: "Felipe",
+    lastName: "Weinstein",
+    identificationNumber: "5585167-0",
+    phone: "+56968357637",
+    email: "dweinsteint@gmail.com",
+    preferredLanguage: "es",
+    relation: "Padre",
+    address: "Av Providencia 1000, Providencia",
   },
-
 ];
 
 // Sample students
 export const studentsData = [
   {
-    id: 'student-001',
-    firstName: 'Joel',
-    lastName: 'Salas',
-    identificationNumber: '4871402-1',
-    gradeId: '1st-secondary',
-    gradeSectionId: 'gs-1sec-a', // 1° Medio A
-    guardianId: 'guardian-001',
-    enrollmentDate: '2025-03-01',
-    academicYear: '2024-2025',
-    status: 'active',
-    awsCollectionId: 'eduguard-school-default',
+    id: "student-001",
+    firstName: "Joel",
+    lastName: "Salas",
+    identificationNumber: "4871402-1",
+    gradeId: "1st-secondary",
+    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    guardianId: "guardian-001",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2024-2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
     metadata: null,
   },
   {
-    id: 'student-002',
-    firstName: 'Sheen',
-    lastName: 'Fernández',
-    identificationNumber: '9878848-4',
-    gradeId: '1st-secondary',
-    gradeSectionId: 'gs-1sec-a', // 1° Medio A
-    guardianId: 'guardian-002',
-    enrollmentDate: '2025-03-01',
-    academicYear: '2024-2025',
-    status: 'active',
-    awsCollectionId: 'eduguard-school-default',
+    id: "student-002",
+    firstName: "Sheen",
+    lastName: "Fernández",
+    identificationNumber: "9878848-4",
+    gradeId: "1st-secondary",
+    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    guardianId: "guardian-002",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2024-2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
     metadata: null,
   },
   {
-    id: 'student-003',
-    firstName: 'Boris',
-    lastName: 'Puentes',
-    identificationNumber: '11794411-5',
-    gradeId: '1st-secondary',
-    gradeSectionId: 'gs-1sec-a', // 1° Medio A
-    guardianId: 'guardian-003',
-    enrollmentDate: '2025-03-01',
-    academicYear: '2024-2025',
-    status: 'active',
-    awsCollectionId: 'eduguard-school-default',
+    id: "student-003",
+    firstName: "Boris",
+    lastName: "Puentes",
+    identificationNumber: "11794411-5",
+    gradeId: "1st-secondary",
+    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    guardianId: "guardian-003",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2024-2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
     metadata: null,
   },
   {
-    id: 'student-004',
-    firstName: 'Felipe',
-    lastName: 'Torres',
-    identificationNumber: '11985894-1',
-    gradeId: '1st-secondary',
-    gradeSectionId: 'gs-1sec-b', // 1° Medio B (different section)
-    guardianId: 'guardian-004',
-    enrollmentDate: '2025-03-01',
-    academicYear: '2024-2025',
-    status: 'active',
-    awsCollectionId: 'eduguard-school-default',
+    id: "student-004",
+    firstName: "Felipe",
+    lastName: "Torres",
+    identificationNumber: "11985894-1",
+    gradeId: "1st-secondary",
+    gradeSectionId: "gs-1sec-b", // 1° Medio B (different section)
+    guardianId: "guardian-004",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2024-2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
     metadata: null,
-  }
+  },
 ];
 
 // Student faces seed data - uses PREDICTABLE externalImageId
@@ -500,117 +628,117 @@ export const studentsData = [
 export const studentFacesData = [
   // Joel Salas (student-001) - 3 photos
   {
-    id: 'face-001-1',
-    studentId: 'student-001',
-    faceId: 'placeholder', // Will be updated by sync script
-    externalImageId: 'student-001-photo-1', // PREDICTABLE - used to find face in AWS
-    photoUrl: 'students/student-001/photo-1.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-001-1",
+    studentId: "student-001",
+    faceId: "placeholder", // Will be updated by sync script
+    externalImageId: "student-001-photo-1", // PREDICTABLE - used to find face in AWS
+    photoUrl: "students/student-001/photo-1.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-001-2',
-    studentId: 'student-001',
-    faceId: 'placeholder',
-    externalImageId: 'student-001-photo-2',
-    photoUrl: 'students/student-001/photo-2.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-001-2",
+    studentId: "student-001",
+    faceId: "placeholder",
+    externalImageId: "student-001-photo-2",
+    photoUrl: "students/student-001/photo-2.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-001-3',
-    studentId: 'student-001',
-    faceId: 'placeholder',
-    externalImageId: 'student-001-photo-3',
-    photoUrl: 'students/student-001/photo-3.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-001-3",
+    studentId: "student-001",
+    faceId: "placeholder",
+    externalImageId: "student-001-photo-3",
+    photoUrl: "students/student-001/photo-3.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
-  
+
   // Sheen Fernández (student-002) - 3 photos
   {
-    id: 'face-002-1',
-    studentId: 'student-002',
-    faceId: 'placeholder',
-    externalImageId: 'student-002-photo-1',
-    photoUrl: 'students/student-002/photo-1.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-002-1",
+    studentId: "student-002",
+    faceId: "placeholder",
+    externalImageId: "student-002-photo-1",
+    photoUrl: "students/student-002/photo-1.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-002-2',
-    studentId: 'student-002',
-    faceId: 'placeholder',
-    externalImageId: 'student-002-photo-2',
-    photoUrl: 'students/student-002/photo-2.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-002-2",
+    studentId: "student-002",
+    faceId: "placeholder",
+    externalImageId: "student-002-photo-2",
+    photoUrl: "students/student-002/photo-2.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-002-3',
-    studentId: 'student-002',
-    faceId: 'placeholder',
-    externalImageId: 'student-002-photo-3',
-    photoUrl: 'students/student-002/photo-3.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-002-3",
+    studentId: "student-002",
+    faceId: "placeholder",
+    externalImageId: "student-002-photo-3",
+    photoUrl: "students/student-002/photo-3.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
-  
+
   // Boris Puentes (student-003) - 3 photos
   {
-    id: 'face-003-1',
-    studentId: 'student-003',
-    faceId: 'placeholder',
-    externalImageId: 'student-003-photo-1',
-    photoUrl: 'students/student-003/photo-1.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-003-1",
+    studentId: "student-003",
+    faceId: "placeholder",
+    externalImageId: "student-003-photo-1",
+    photoUrl: "students/student-003/photo-1.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-003-2',
-    studentId: 'student-003',
-    faceId: 'placeholder',
-    externalImageId: 'student-003-photo-2',
-    photoUrl: 'students/student-003/photo-2.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-003-2",
+    studentId: "student-003",
+    faceId: "placeholder",
+    externalImageId: "student-003-photo-2",
+    photoUrl: "students/student-003/photo-2.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-003-3',
-    studentId: 'student-003',
-    faceId: 'placeholder',
-    externalImageId: 'student-003-photo-3',
-    photoUrl: 'students/student-003/photo-3.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-003-3",
+    studentId: "student-003",
+    faceId: "placeholder",
+    externalImageId: "student-003-photo-3",
+    photoUrl: "students/student-003/photo-3.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
-  
+
   // Felipe Torres (student-004) - 3 photos
   {
-    id: 'face-004-1',
-    studentId: 'student-004',
-    faceId: 'placeholder',
-    externalImageId: 'student-004-photo-1',
-    photoUrl: 'students/student-004/photo-1.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-004-1",
+    studentId: "student-004",
+    faceId: "placeholder",
+    externalImageId: "student-004-photo-1",
+    photoUrl: "students/student-004/photo-1.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-004-2',
-    studentId: 'student-004',
-    faceId: 'placeholder',
-    externalImageId: 'student-004-photo-2',
-    photoUrl: 'students/student-004/photo-2.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-004-2",
+    studentId: "student-004",
+    faceId: "placeholder",
+    externalImageId: "student-004-photo-2",
+    photoUrl: "students/student-004/photo-2.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
   {
-    id: 'face-004-3',
-    studentId: 'student-004',
-    faceId: 'placeholder',
-    externalImageId: 'student-004-photo-3',
-    photoUrl: 'students/student-004/photo-3.jpg',
-    indexedAt: '2024-10-25T10:00:00Z',
+    id: "face-004-3",
+    studentId: "student-004",
+    faceId: "placeholder",
+    externalImageId: "student-004-photo-3",
+    photoUrl: "students/student-004/photo-3.jpg",
+    indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
   },
 ];
@@ -618,87 +746,189 @@ export const studentFacesData = [
 // Class enrollments (students enrolled in classes)
 export const enrollmentsData = [
   // Joel enrolled in all classes
-  { id: 'enroll-001', classId: 'class-math-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-002', classId: 'class-lang-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-003', classId: 'class-phys-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-004', classId: 'class-chem-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
-  
+  {
+    id: "enroll-001",
+    classId: "class-math-1m-a",
+    studentId: "student-001",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-002",
+    classId: "class-lang-1m-a",
+    studentId: "student-001",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-003",
+    classId: "class-phys-1m-a",
+    studentId: "student-001",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-004",
+    classId: "class-chem-1m-a",
+    studentId: "student-001",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+
   // Sheen enrolled in all classes
-  { id: 'enroll-005', classId: 'class-math-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-006', classId: 'class-lang-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-007', classId: 'class-phys-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-008', classId: 'class-chem-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
-  
+  {
+    id: "enroll-005",
+    classId: "class-math-1m-a",
+    studentId: "student-002",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-006",
+    classId: "class-lang-1m-a",
+    studentId: "student-002",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-007",
+    classId: "class-phys-1m-a",
+    studentId: "student-002",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-008",
+    classId: "class-chem-1m-a",
+    studentId: "student-002",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+
   // Boris enrolled in all classes
-  { id: 'enroll-009', classId: 'class-math-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-010', classId: 'class-lang-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-011', classId: 'class-phys-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-012', classId: 'class-chem-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
+  {
+    id: "enroll-009",
+    classId: "class-math-1m-a",
+    studentId: "student-003",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-010",
+    classId: "class-lang-1m-a",
+    studentId: "student-003",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-011",
+    classId: "class-phys-1m-a",
+    studentId: "student-003",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-012",
+    classId: "class-chem-1m-a",
+    studentId: "student-003",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
 
   // Felipe enrolled in all classes
-  { id: 'enroll-013', classId: 'class-math-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-014', classId: 'class-lang-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-015', classId: 'class-phys-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
-  { id: 'enroll-016', classId: 'class-chem-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
+  {
+    id: "enroll-013",
+    classId: "class-math-1m-a",
+    studentId: "student-004",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-014",
+    classId: "class-lang-1m-a",
+    studentId: "student-004",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-015",
+    classId: "class-phys-1m-a",
+    studentId: "student-004",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
+  {
+    id: "enroll-016",
+    classId: "class-chem-1m-a",
+    studentId: "student-004",
+    enrolledDate: "2025-03-01",
+    status: "active",
+  },
 ];
 // Function to seed the database
 export async function seedDatabase(db: D1Database) {
   const drizzleDb = drizzle(db);
 
-  console.log('Seeding stages...');
+  console.log("Seeding stages...");
   for (const stage of stagesData) {
     await drizzleDb.insert(stages).values(stage).onConflictDoNothing();
   }
 
-  console.log('Seeding grades...');
+  console.log("Seeding grades...");
   for (const grade of gradesData) {
     await drizzleDb.insert(grades).values(grade).onConflictDoNothing();
   }
 
-  console.log('Seeding teachers...');
+  console.log("Seeding teachers...");
   for (const teacher of teachersData) {
     await drizzleDb.insert(teachers).values(teacher).onConflictDoNothing();
   }
 
-  console.log('Seeding grade sections...');
+  console.log("Seeding grade sections...");
   for (const gradeSection of gradeSectionsData) {
-    await drizzleDb.insert(gradeSections).values(gradeSection).onConflictDoNothing();
+    await drizzleDb
+      .insert(gradeSections)
+      .values(gradeSection)
+      .onConflictDoNothing();
   }
 
-  console.log('Seeding classrooms...');
+  console.log("Seeding classrooms...");
   for (const classroom of classroomsData) {
     await drizzleDb.insert(classrooms).values(classroom).onConflictDoNothing();
   }
 
-  console.log('Seeding courses...');
+  console.log("Seeding courses...");
   for (const course of coursesData) {
     await drizzleDb.insert(courses).values(course).onConflictDoNothing();
   }
 
-  console.log('Seeding classes...');
+  console.log("Seeding classes...");
   for (const cls of classesData) {
     await drizzleDb.insert(classes).values(cls).onConflictDoNothing();
   }
 
-  console.log('Seeding guardians...');
+  console.log("Seeding guardians...");
   for (const guardian of guardiansData) {
-    await drizzleDb.insert(legalGuardians).values(guardian).onConflictDoNothing();
+    await drizzleDb
+      .insert(legalGuardians)
+      .values(guardian)
+      .onConflictDoNothing();
   }
 
-  console.log('Seeding students...');
+  console.log("Seeding students...");
   for (const student of studentsData) {
     await drizzleDb.insert(students).values(student).onConflictDoNothing();
   }
 
-  console.log('Seeding student faces (reusing existing S3/Rekognition data)...');
-  for (const face of studentFacesData) {
-    await drizzleDb.insert(studentFaces).values(face).onConflictDoNothing();
-  }
+  console.log("Skipping student faces seeding (manual upload flow).");
 
-  console.log('Seeding class enrollments...');
+  console.log("Seeding class enrollments...");
   for (const enrollment of enrollmentsData) {
-    await drizzleDb.insert(classEnrollments).values(enrollment).onConflictDoNothing();
+    await drizzleDb
+      .insert(classEnrollments)
+      .values(enrollment)
+      .onConflictDoNothing();
   }
 
-  console.log('Database seeded successfully!');
+  console.log("Database seeded successfully!");
 }

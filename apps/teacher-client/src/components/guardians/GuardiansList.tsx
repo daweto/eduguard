@@ -2,11 +2,11 @@
  * List/table component for displaying guardians
  */
 
-import { useTranslation } from 'react-i18next';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LegalGuardian } from '@/types/guardian';
-import { formatFullName } from '@/lib/helpers/format';
+import { GuardiansDataTable } from './guardians-data-table';
+import { createGuardianColumns } from './guardian-columns';
 
 interface GuardiansListProps {
   guardians: LegalGuardian[];
@@ -14,7 +14,8 @@ interface GuardiansListProps {
 }
 
 export function GuardiansList({ guardians, loading }: GuardiansListProps) {
-  const { t } = useTranslation('guardians');
+  // Create columns (must be before early returns)
+  const columns = useMemo(() => createGuardianColumns(), []);
 
   if (loading) {
     return (
@@ -27,34 +28,5 @@ export function GuardiansList({ guardians, loading }: GuardiansListProps) {
     );
   }
 
-  if (guardians.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        {t('table.empty')}
-      </div>
-    );
-  }
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t('table.headers.name')}</TableHead>
-          <TableHead>{t('table.headers.identification')}</TableHead>
-          <TableHead>{t('table.headers.phone')}</TableHead>
-          <TableHead>{t('table.headers.email')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {guardians.map((guardian) => (
-          <TableRow key={guardian.id}>
-            <TableCell>{formatFullName(guardian)}</TableCell>
-            <TableCell>{guardian.identificationNumber}</TableCell>
-            <TableCell>{guardian.phone}</TableCell>
-            <TableCell>{guardian.email}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+  return <GuardiansDataTable columns={columns} data={guardians} />;
 }

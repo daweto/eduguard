@@ -111,6 +111,31 @@ Analyze the pattern and provide:
 
     console.log(`   ✅ Analysis complete: ${analysis.risk_level} risk - ${analysis.pattern_type}`);
 
+    // Auto-trigger voice call for high-risk or immediate action recommendations
+    if (analysis.recommended_action === 'immediate_call' || analysis.risk_level === 'high') {
+      console.log(`   📞 Auto-triggering voice call for ${student_name} (high risk)`);
+
+      // Fire-and-forget call to voice agent
+      // In a real implementation, you'd need guardian info from the request body
+      // For now, we'll just log the intent
+      // TODO: Uncomment when guardian info is available in request
+      /*
+      fetch('http://localhost:3001/api/voice/call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id,
+          student_name,
+          guardian_name: 'Guardian Name', // Would come from DB
+          guardian_phone: '+56912345678', // Would come from DB
+          risk_level: analysis.risk_level,
+          pattern_type: analysis.pattern_type,
+          reasoning: analysis.reasoning,
+        }),
+      }).catch(err => console.error('Voice call trigger failed:', err));
+      */
+    }
+
     return c.json({
       student_id,
       student_name,

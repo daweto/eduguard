@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8787";
 
@@ -42,39 +42,26 @@ export interface TeacherClassesResponse {
   total: number;
 }
 
-export function useTeacherClasses(teacherId: string) {
-  const [classes, setClasses] = useState<TeacherClassesResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+async function fetchTeacherClasses(
+  teacherId: string,
+): Promise<TeacherClassesResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/classes/teacher/${teacherId}`,
+  );
 
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
 
-        const response = await fetch(
-          `${API_BASE_URL}/api/classes/teacher/${teacherId}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setClasses(data);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Unknown error"));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (teacherId) {
-      fetchClasses();
-    }
-  }, [teacherId]);
-
-  return { classes, isLoading, error };
+  return response.json();
 }
 
+export function useTeacherClasses(teacherId: string) {
+  const { data, isLoading, error } = useQuery<TeacherClassesResponse>({
+    queryKey: ["teacher", teacherId, "classes"],
+    queryFn: () => fetchTeacherClasses(teacherId),
+    enabled: !!teacherId,
+  });
+
+  return { classes: data, isLoading, error };
+}

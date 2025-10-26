@@ -20,6 +20,8 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { TeacherSwitcher } from "@/components/layouts/TeacherSwitcher";
+import { TeacherProvider } from "@/contexts/teacher-context";
 import {
   GraduationCap,
   Users,
@@ -28,8 +30,8 @@ import {
   List,
   ChevronRight,
   Home,
-  Camera,
   BookOpen,
+  Phone,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -43,7 +45,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
+} from "@/components/ui/collapsible";
 import { Toaster } from "@/components/ui/sonner";
 import type { CrumbHandle } from "@/routes";
 
@@ -89,199 +91,198 @@ export default function AppLayout() {
   const isStudentsActive = location.pathname.startsWith("/students");
   const isGuardiansActive = location.pathname.startsWith("/guardians");
 
-  return (
-    <>
-      <SidebarProvider>
-        <Sidebar collapsible="icon">
-        <SidebarHeader>
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-semibold">{t("common:appName")}</span>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>
-              {t("navigation:sidebar.label")}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {/* My Classes */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === "/classes"}
-                    tooltip={t("navigation:tooltips.classes")}
-                  >
-                    <NavLink to="/classes">
-                      <BookOpen />
-                      <span>{t("navigation:sidebar.classes")}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {/* Attendance */}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname.startsWith("/attendance")}
-                    tooltip={t("navigation:tooltips.attendance")}
-                  >
-                    <NavLink to="/attendance">
-                      <Camera />
-                      <span>{t("navigation:sidebar.attendance")}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                {/* Students Domain */}
-                <Collapsible
-                  asChild
-                  defaultOpen={isStudentsActive}
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={t("navigation:tooltips.students")}
-                        isActive={isStudentsActive}
-                      >
-                        <Users />
-                        <span>{t("navigation:sidebar.students.label")}</span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/students"}
-                          >
-                            <NavLink to="/students">
-                              <Home className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.students.home")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/students/enroll"}
-                          >
-                            <NavLink to="/students/enroll">
-                              <UserPlus className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.students.enroll")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/students/roster"}
-                          >
-                            <NavLink to="/students/roster">
-                              <List className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.students.roster")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
+  const navigation = [
+    {
+      key: "classes",
+      type: "link" as const,
+      to: "/classes",
+      label: t("navigation:sidebar.classes"),
+      icon: BookOpen,
+      tooltip: t("navigation:tooltips.classes"),
+      isActive: location.pathname === "/classes",
+    },
+    {
+      key: "calls",
+      type: "link" as const,
+      to: "/calls",
+      label: "Llamadas",
+      icon: Phone,
+      tooltip: "Historial de llamadas a apoderados",
+      isActive: location.pathname === "/calls",
+    },
+    {
+      key: "students",
+      type: "collapsible" as const,
+      label: t("navigation:sidebar.students.label"),
+      icon: Users,
+      tooltip: t("navigation:tooltips.students"),
+      isActive: isStudentsActive,
+      items: [
+        {
+          key: "students-home",
+          to: "/students",
+          label: t("navigation:sidebar.students.home"),
+          icon: Home,
+          isActive: location.pathname === "/students",
+        },
+        {
+          key: "students-enroll",
+          to: "/students/enroll",
+          label: t("navigation:sidebar.students.enroll"),
+          icon: UserPlus,
+          isActive: location.pathname === "/students/enroll",
+        },
+        {
+          key: "students-roster",
+          to: "/students/roster",
+          label: t("navigation:sidebar.students.roster"),
+          icon: List,
+          isActive: location.pathname === "/students/roster",
+        },
+      ],
+    },
+    {
+      key: "guardians",
+      type: "collapsible" as const,
+      label: t("navigation:sidebar.guardiansSection.label"),
+      icon: Shield,
+      tooltip: t("navigation:tooltips.guardians"),
+      isActive: isGuardiansActive,
+      items: [
+        {
+          key: "guardians-home",
+          to: "/guardians",
+          label: t("navigation:sidebar.guardiansSection.home"),
+          icon: Home,
+          isActive: location.pathname === "/guardians",
+        },
+        {
+          key: "guardians-list",
+          to: "/guardians/list",
+          label: t("navigation:sidebar.guardiansSection.list"),
+          icon: List,
+          isActive: location.pathname === "/guardians/list",
+        },
+        {
+          key: "guardians-create",
+          to: "/guardians/create",
+          label: t("navigation:sidebar.guardiansSection.create"),
+          icon: UserPlus,
+          isActive: location.pathname === "/guardians/create",
+        },
+      ],
+    },
+  ];
 
-                {/* Guardians Domain */}
-                <Collapsible
-                  asChild
-                  defaultOpen={isGuardiansActive}
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={t("navigation:tooltips.guardians")}
-                        isActive={isGuardiansActive}
+  return (
+    <TeacherProvider>
+      <SidebarProvider>
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+          <SidebarHeader className="gap-3">
+            <NavLink
+              to="/"
+              className="group/sidebar-logo grid w-full grid-cols-[auto_1fr] items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group-data-[collapsible=icon]:grid-cols-1 group-data-[collapsible=icon]:justify-items-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+            >
+              <div className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-lg transition-all group-data-[collapsible=icon]:size-9">
+                <GraduationCap className="size-5" />
+              </div>
+              <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
+                <span className="truncate">{t("common:appName")}</span>
+                <span className="text-muted-foreground text-xs font-normal">
+                  {t("common:appTagline", "Empowering teachers")}
+                </span>
+              </div>
+            </NavLink>
+            <TeacherSwitcher className="group-data-[collapsible=icon]:size-9" />
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>
+                {t("navigation:sidebar.label")}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navigation.map((item) => {
+                    if (item.type === "link") {
+                      return (
+                        <SidebarMenuItem key={item.key}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={item.isActive}
+                            tooltip={item.tooltip}
+                          >
+                            <NavLink to={item.to}>
+                              <item.icon className="size-4" />
+                              <span>{item.label}</span>
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    }
+
+                    return (
+                      <Collapsible
+                        key={item.key}
+                        asChild
+                        defaultOpen={item.isActive}
+                        className="group/collapsible"
                       >
-                        <Shield />
-                        <span>{t("navigation:sidebar.guardiansSection.label")}</span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/guardians"}
-                          >
-                            <NavLink to="/guardians">
-                              <Home className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.guardiansSection.home")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/guardians/list"}
-                          >
-                            <NavLink to="/guardians/list">
-                              <List className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.guardiansSection.list")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                        <SidebarMenuSubItem>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={location.pathname === "/guardians/create"}
-                          >
-                            <NavLink to="/guardians/create">
-                              <UserPlus className="h-4 w-4" />
-                              <span>
-                                {t("navigation:sidebar.guardiansSection.create")}
-                              </span>
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter className="px-2 pb-2">
-          <SidebarSeparator />
-          <div className="text-[10px] text-muted-foreground px-2">
-            {t("common:copyright", { year: new Date().getFullYear() })}
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              tooltip={item.tooltip}
+                              isActive={item.isActive}
+                            >
+                              <item.icon className="size-4" />
+                              <span>{item.label}</span>
+                              <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.items.map((subItem) => (
+                                <SidebarMenuSubItem key={subItem.key}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={subItem.isActive}
+                                  >
+                                    <NavLink to={subItem.to}>
+                                      <subItem.icon className="h-4 w-4" />
+                                      <span>{subItem.label}</span>
+                                    </NavLink>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter className="px-2 pb-2">
+            <SidebarSeparator />
+            <div className="text-[10px] text-muted-foreground px-2 group-data-[collapsible=icon]:hidden">
+              {t("common:copyright", { year: new Date().getFullYear() })}
+            </div>
+          </SidebarFooter>
+          <SidebarRail />
+        </Sidebar>
+        <SidebarInset>
+          <div className="border-b bg-card flex items-center gap-2 px-3 py-2">
+            <SidebarTrigger className="md:hidden" />
+            <SidebarTrigger className="hidden md:inline-flex" />
+            <AppBreadcrumb />
           </div>
-        </SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-      <SidebarInset>
-        <div className="border-b bg-card flex items-center gap-2 px-2 py-1">
-          <SidebarTrigger />
-          <AppBreadcrumb />
-        </div>
-        <div className="p-4">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-    <Toaster />
-    </>
+          <div className="p-4">
+            <Outlet />
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+      <Toaster />
+    </TeacherProvider>
   );
 }

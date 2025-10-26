@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Upload, X, Camera, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getStudent, uploadStudentPhotos, type Student } from "@/lib/api/students";
+import { formatRut } from "@/lib/helpers/rut";
 
 type PhotoData = {
   file: File;
@@ -179,7 +180,7 @@ export default function EditStudentPage() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{t("edit.info.rut")}</p>
-              <p className="font-medium">{student.identificationNumber}</p>
+              <p className="font-medium">{formatRut(student.identificationNumber)}</p>
             </div>
             {student.gradeId && (
               <div>

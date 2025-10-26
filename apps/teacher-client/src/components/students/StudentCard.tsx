@@ -19,10 +19,12 @@ import {
   Trash2,
   IdCard,
   Edit,
+  Calendar,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { formatRut } from "@/lib/helpers/rut";
 
 interface StudentCardProps {
   student: Student;
@@ -168,7 +170,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
           <h3 className="text-xl font-semibold truncate">{studentFullName}</h3>
           <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
             <IdCard className="w-4 h-4" />
-            <span>{student.identificationNumber}</span>
+            <span>{formatRut(student.identificationNumber)}</span>
           </div>
           {(student.gradeDisplayName || student.gradeId) && (
             <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
@@ -198,7 +200,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
                   {t("studentCard.identification")}
                 </p>
                 <p className="font-medium">
-                  {guardianSource.identificationNumber}
+                  {formatRut(guardianSource.identificationNumber)}
                 </p>
               </div>
             </div>
@@ -253,6 +255,15 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
 
         {/* Action buttons */}
         <div className="pt-3 border-t space-y-2">
+          <Button asChild size="sm" className="w-full">
+            <Link to={`/students/${student.id}/attendance`}>
+              <Calendar className="w-4 h-4 mr-2" />
+              {t("studentCard.viewAttendance", {
+                defaultValue: "Ver Asistencia",
+              })}
+            </Link>
+          </Button>
+
           <Button asChild variant="outline" size="sm" className="w-full">
             <Link to={`/students/${student.id}/edit`}>
               <Edit className="w-4 h-4 mr-2" />

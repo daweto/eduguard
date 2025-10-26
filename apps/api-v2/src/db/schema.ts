@@ -240,3 +240,50 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type Attendance = typeof attendance.$inferSelect;
 export type NewAttendance = typeof attendance.$inferInsert;
+
+// Calls table (voice calls to guardians)
+export const calls = sqliteTable("calls", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => students.id),
+  guardianId: text("guardian_id")
+    .notNull()
+    .references(() => legalGuardians.id),
+  guardianPhone: text("guardian_phone").notNull(),
+  sessionId: text("session_id").references(() => sessions.id),
+  classId: text("class_id").references(() => classes.id),
+  initiatedBy: text("initiated_by").notNull(), // 'manual' | 'reasoning-auto'
+  riskLevel: text("risk_level"), // 'none' | 'low' | 'medium' | 'high'
+  status: text("status").notNull().default("initiated"), // 'initiated' | 'ringing' | 'answered' | 'voicemail' | 'failed' | 'completed'
+  dtmfResponse: text("dtmf_response"),
+  recordingUrl: text("recording_url"),
+  transcript: text("transcript"),
+  duration: integer("duration"), // in seconds
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Reasoning analyses table (AI risk assessments)
+export const reasoningAnalyses = sqliteTable("reasoning_analyses", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => students.id),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id),
+  riskScore: integer("risk_score").notNull(), // 0-100
+  riskLabel: text("risk_label").notNull(), // 'none' | 'low' | 'medium' | 'high'
+  patternType: text("pattern_type"), // 'normal' | 'sneak_out' | 'chronic' | 'irregular'
+  summary: text("summary").notNull(),
+  recommendation: text("recommendation").notNull(), // 'none' | 'monitor' | 'immediate_call'
+  reasoning: text("reasoning"),
+  confidence: real("confidence"), // 0-1
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type Call = typeof calls.$inferSelect;
+export type NewCall = typeof calls.$inferInsert;
+export type ReasoningAnalysis = typeof reasoningAnalyses.$inferSelect;
+export type NewReasoningAnalysis = typeof reasoningAnalyses.$inferInsert;

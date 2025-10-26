@@ -1,28 +1,28 @@
+import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ArrowLeft, Eye, Calendar, Users } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useClassSessions } from "@/components/classes/hooks/useClassSessions";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { SessionsListDataTable } from "@/components/attendance/sessions-list-data-table";
+import { createClassSessionColumns, type ClassSessionRecord } from "@/components/attendance/class-sessions-columns";
 
 export function ClassSessionsPage() {
   const { classId } = useParams<{ classId: string }>();
   const navigate = useNavigate();
   const { data, isLoading, error } = useClassSessions(classId!);
 
-  const handleViewSession = (sessionId: string) => {
-    navigate(`/sessions/${sessionId}`);
-  };
+  // Create columns with handlers (must be before early returns)
+  const columns = useMemo(
+    () =>
+      createClassSessionColumns({
+        onViewSession: (sessionId: string) => {
+          navigate(`/sessions/${sessionId}`);
+        },
+      }),
+    [navigate]
+  );
 
   if (isLoading) {
     return (
@@ -79,85 +79,7 @@ export function ClassSessionsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          {sessions.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No hay sesiones registradas para esta clase
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha y Hora</TableHead>
-                  <TableHead>Esperados</TableHead>
-                  <TableHead>Presentes</TableHead>
-                  <TableHead>Ausentes</TableHead>
-                  <TableHead>Justificados</TableHead>
-                  <TableHead>Tarde</TableHead>
-                  <TableHead>Tasa</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sessions.map((session) => {
-                  const { present, absent, excused, late, total } = session.attendanceSummary;
-                  const attendanceRate = total > 0 
-                    ? Math.round(((present + late) / total) * 100)
-                    : 0;
-
-                  return (
-                    <TableRow key={session.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <div className="font-medium">
-                              {format(new Date(session.timestamp), "d 'de' MMMM, yyyy", { locale: es })}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {format(new Date(session.timestamp), "HH:mm")}
-                            </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4 text-muted-foreground" />
-                          {session.expectedStudents || total}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium text-green-600">{present}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium text-red-600">{absent}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium text-blue-600">{excused}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-medium text-yellow-600">{late}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className={`font-medium ${attendanceRate >= 90 ? 'text-green-600' : attendanceRate >= 75 ? 'text-yellow-600' : 'text-red-600'}`}>
-                          {attendanceRate}%
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleViewSession(session.id)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver Detalle
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+          <SessionsListDataTable columns={columns} data={sessions as ClassSessionRecord[]} />
         </CardContent>
       </Card>
     </div>

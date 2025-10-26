@@ -1,15 +1,24 @@
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Camera, Users, Clock, MapPin, BookOpen, History } from "lucide-react";
-import { useTeacherClasses, type TeacherClass } from "@/components/classes/hooks/useTeacherClasses";
+import {
+  useTeacherClasses,
+  type TeacherClass,
+} from "@/components/classes/hooks/useTeacherClasses";
+import { useTeacherContext } from "@/contexts/teacher-context";
 
 export function TeacherClassesPage() {
   const navigate = useNavigate();
-  // For demo, use teacher-001 (María González)
-  const teacherId = "teacher-001";
-  const { classes, isLoading, error } = useTeacherClasses(teacherId);
+  const { activeTeacherId, activeTeacher } = useTeacherContext();
+  const { classes, isLoading, error } = useTeacherClasses(activeTeacherId);
 
   const handleTakeAttendance = (classId: string) => {
     navigate(`/attendance/class/${classId}`);
@@ -108,8 +117,8 @@ export function TeacherClassesPage() {
                   {cls.enrolledStudents} / {cls.maxStudents} estudiantes
                 </div>
                 <div className="pt-3 border-t space-y-2">
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleTakeAttendance(cls.id);
@@ -118,9 +127,9 @@ export function TeacherClassesPage() {
                     <Camera className="h-4 w-4 mr-2" />
                     Tomar Asistencia
                   </Button>
-                  <Button 
+                  <Button
                     variant="outline"
-                    className="w-full" 
+                    className="w-full"
                     onClick={(e) => handleViewSessions(cls.id, e)}
                   >
                     <History className="h-4 w-4 mr-2" />
@@ -135,4 +144,3 @@ export function TeacherClassesPage() {
     </div>
   );
 }
-

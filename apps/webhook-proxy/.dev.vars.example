@@ -1,0 +1,4 @@
+# Forward received ElevenLabs webhook payloads to your API webhook
+# Example (local API): http://localhost:8787/api/webhooks/elevenlabs/call-completed
+FORWARD_TO_URL=
+WEBHOOK_SECRET=

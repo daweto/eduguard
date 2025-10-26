@@ -1,5 +1,6 @@
 {
   "appName": "EduGuard",
+  "appTagline": "Potenciando a los profesores",
   "buttons": {
     "submit": "Enviar",
     "cancel": "Cancelar",

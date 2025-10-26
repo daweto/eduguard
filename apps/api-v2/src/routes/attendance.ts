@@ -16,14 +16,15 @@ import {
   classEnrollments as enrollmentsTable,
   sessions as sessionsTable,
   attendance as attendanceTable,
+  legalGuardians,
 } from "../db/schema";
 import type { Bindings } from "../types";
-import { 
-  base64ToArrayBuffer, 
-  fetchFromRemoteR2, 
-  uploadToRemoteR2, 
+import {
+  base64ToArrayBuffer,
+  fetchFromRemoteR2,
+  uploadToRemoteR2,
   deleteFromRemoteR2,
-  generatePresignedUrls
+  generatePresignedUrls,
 } from "../utils/storage";
 
 const attendance = new Hono<{ Bindings: Bindings }>();
@@ -49,10 +50,7 @@ attendance.post("/session", async (c) => {
     }>();
 
     if (!body?.class_id || !body?.teacher_id) {
-      return c.json(
-        { error: "class_id and teacher_id are required" },
-        400,
-      );
+      return c.json({ error: "class_id and teacher_id are required" }, 400);
     }
 
     // Must have either photos or photo_keys
@@ -128,7 +126,12 @@ attendance.post("/session", async (c) => {
         return c.json({ error: "R2 configuration not found" }, 500);
       }
 
-      const r2Config = { accountId, bucketName: bucket, accessKeyId, secretAccessKey };
+      const r2Config = {
+        accountId,
+        bucketName: bucket,
+        accessKeyId,
+        secretAccessKey,
+      };
       const movedKeys: string[] = [];
 
       try {
@@ -150,16 +153,24 @@ attendance.post("/session", async (c) => {
           photoBytesArray.push(bytes);
 
           // Move to final location
-          const ext = key.split('.').pop() || 'jpg';
+          const ext = key.split(".").pop() || "jpg";
           const destKey = `attendance/${sessionId}/photo-${i + 1}.${ext}`;
-          
+
           // Infer content type from extension
-          const contentType = ext === 'png' ? 'image/png' : 
-                              ext === 'webp' ? 'image/webp' : 
-                              ext === 'heic' ? 'image/heic' : 'image/jpeg';
+          const contentType =
+            ext === "png"
+              ? "image/png"
+              : ext === "webp"
+                ? "image/webp"
+                : ext === "heic"
+                  ? "image/heic"
+                  : "image/jpeg";
 
           // Convert Uint8Array to ArrayBuffer
-          const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+          const arrayBuffer = bytes.buffer.slice(
+            bytes.byteOffset,
+            bytes.byteOffset + bytes.byteLength,
+          ) as ArrayBuffer;
           await uploadToRemoteR2(destKey, arrayBuffer, r2Config, contentType);
           movedKeys.push(destKey);
           finalPhotoKeys.push(destKey);
@@ -169,19 +180,27 @@ attendance.post("/session", async (c) => {
         }
       } catch (error) {
         console.error("Error moving photos from temp to final:", error);
-        
+
         // Rollback: delete any moved photos
         for (const key of movedKeys) {
           await deleteFromRemoteR2(key, r2Config).catch(() => {});
         }
-        
-        return c.json({ 
-          error: error instanceof Error ? error.message : "Failed to process photos" 
-        }, 500);
+
+        return c.json(
+          {
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to process photos",
+          },
+          500,
+        );
       }
     } else if (body.photos && body.photos.length > 0) {
       // Legacy: convert base64 photos to bytes
-      photoBytesArray = body.photos.map(photo => new Uint8Array(base64ToArrayBuffer(photo)));
+      photoBytesArray = body.photos.map(
+        (photo) => new Uint8Array(base64ToArrayBuffer(photo)),
+      );
     }
 
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = c.env;
@@ -205,9 +224,11 @@ attendance.post("/session", async (c) => {
 
     const FaceMatchThreshold = body.face_match_threshold ?? 95;
     const MaxFaces = body.max_faces ?? 50;
-    
+
     // Check if debug mode is enabled
-    const debugEnabled = c.env.ENABLE_ATTENDANCE_DEBUG === 'true' || c.env.ENABLE_ATTENDANCE_DEBUG === '1';
+    const debugEnabled =
+      c.env.ENABLE_ATTENDANCE_DEBUG === "true" ||
+      c.env.ENABLE_ATTENDANCE_DEBUG === "1";
 
     // Process all photos and collect all detected students
     const allDetectedFaces = new Map<
@@ -242,19 +263,19 @@ attendance.post("/session", async (c) => {
         noMatchReason?: string;
       }[];
     }[] = [];
-    
+
     // Only collect debug info if enabled
     const collectDebug = debugEnabled;
 
     for (let photoIdx = 0; photoIdx < photoBytesArray.length; photoIdx++) {
       const bytes = photoBytesArray[photoIdx];
-      
-      const photoDebug: typeof debugInfo[0] = {
+
+      const photoDebug: (typeof debugInfo)[0] = {
         photoIndex: photoIdx,
         totalFacesInPhoto: 0,
         faces: [],
       };
-      
+
       // Temporary faces indexed from this photo (for cleanup)
       const tempFaceIds: string[] = [];
 
@@ -262,11 +283,13 @@ attendance.post("/session", async (c) => {
         // Step 1: Index ALL faces from the attendance photo into the student collection
         // Uses temporary external ID so we can delete them later
         const tempExternalId = `temp_attendance_${sessionId}_photo${photoIdx}`;
-        
+
         if (debugEnabled) {
-          console.log(`[ATTENDANCE] Photo ${photoIdx + 1}: Indexing all faces with temp ID: ${tempExternalId}`);
+          console.log(
+            `[ATTENDANCE] Photo ${photoIdx + 1}: Indexing all faces with temp ID: ${tempExternalId}`,
+          );
         }
-        
+
         const indexCommand = new IndexFacesCommand({
           CollectionId: collectionId,
           Image: { Bytes: bytes },
@@ -278,15 +301,21 @@ attendance.post("/session", async (c) => {
 
         const indexResult = await rekognition.send(indexCommand);
         const indexedFaces = indexResult.FaceRecords ?? [];
-        
+
         totalFacesDetected += indexedFaces.length;
         photoDebug.totalFacesInPhoto = indexedFaces.length;
-        
+
         // Store temp face IDs for cleanup
-        tempFaceIds.push(...indexedFaces.map(f => f.Face?.FaceId).filter((id): id is string => Boolean(id)));
-        
+        tempFaceIds.push(
+          ...indexedFaces
+            .map((f) => f.Face?.FaceId)
+            .filter((id): id is string => Boolean(id)),
+        );
+
         if (debugEnabled) {
-          console.log(`[ATTENDANCE] Photo ${photoIdx + 1}: Indexed ${indexedFaces.length} faces`);
+          console.log(
+            `[ATTENDANCE] Photo ${photoIdx + 1}: Indexed ${indexedFaces.length} faces`,
+          );
         }
 
         // Step 2: Search EACH indexed face against the collection
@@ -295,22 +324,26 @@ attendance.post("/session", async (c) => {
           const tempFaceId = faceRecord.Face?.FaceId;
           const boundingBox = faceRecord.Face?.BoundingBox;
           const faceConfidence = faceRecord.FaceDetail?.Confidence ?? 100;
-          
+
           if (!tempFaceId) {
-            console.warn(`[ATTENDANCE] Face ${faceIdx + 1} has no face ID, skipping`);
+            console.warn(
+              `[ATTENDANCE] Face ${faceIdx + 1} has no face ID, skipping`,
+            );
             continue;
           }
-          
-          let matchedStudent: typeof photoDebug.faces[0]['matchedStudent'];
+
+          let matchedStudent: (typeof photoDebug.faces)[0]["matchedStudent"];
           let matchedFaceId: string | undefined;
-          let topMatches: typeof photoDebug.faces[0]['topMatches'] = [];
+          let topMatches: (typeof photoDebug.faces)[0]["topMatches"] = [];
           let noMatchReason: string | undefined;
-          
+
           try {
             if (debugEnabled) {
-              console.log(`[ATTENDANCE] Searching face ${faceIdx + 1}/${indexedFaces.length} (ID: ${tempFaceId})`);
+              console.log(
+                `[ATTENDANCE] Searching face ${faceIdx + 1}/${indexedFaces.length} (ID: ${tempFaceId})`,
+              );
             }
-            
+
             // Search this face against the collection
             const searchCommand = new SearchFacesCommand({
               CollectionId: collectionId,
@@ -321,21 +354,25 @@ attendance.post("/session", async (c) => {
 
             const searchResult = await rekognition.send(searchCommand);
             const allMatches = searchResult.FaceMatches ?? [];
-            
+
             // Filter out the temp face itself (it will match itself!)
-            const realMatches = allMatches.filter(m => m.Face?.FaceId !== tempFaceId);
-            
+            const realMatches = allMatches.filter(
+              (m) => m.Face?.FaceId !== tempFaceId,
+            );
+
             if (debugEnabled) {
-              console.log(`[ATTENDANCE] Face ${faceIdx + 1} matched ${realMatches.length} potential students (excluding self)`);
+              console.log(
+                `[ATTENDANCE] Face ${faceIdx + 1} matched ${realMatches.length} potential students (excluding self)`,
+              );
             }
-            
+
             // Get student info for all matches
             const allFaceIds = realMatches
               .map((m) => m.Face?.FaceId)
               .filter((id): id is string => Boolean(id));
 
             let faceToStudent = new Map<string, string>();
-            
+
             if (allFaceIds.length > 0) {
               const faceRecords = await db
                 .select({
@@ -349,31 +386,38 @@ attendance.post("/session", async (c) => {
                 faceRecords.map((r) => [r.faceId, r.studentId]),
               );
             }
-            
+
             // Process all matches for this face
-            const faceMatches: {student: any; similarity: number; meetsThreshold: boolean; faceId: string}[] = [];
-            
+            const faceMatches: {
+              student: any;
+              similarity: number;
+              meetsThreshold: boolean;
+              faceId: string;
+            }[] = [];
+
             for (const match of realMatches) {
               const fid = match.Face?.FaceId;
               const similarity = match.Similarity ?? 0;
-              
+
               if (!fid) continue;
-              
+
               const studentId = faceToStudent.get(fid);
               if (!studentId) continue;
-              
-              const student = enrolledStudents.find((s) => s.studentId === studentId);
+
+              const student = enrolledStudents.find(
+                (s) => s.studentId === studentId,
+              );
               if (!student) continue;
-              
+
               const meetsThreshold = similarity >= FaceMatchThreshold;
-              
+
               faceMatches.push({
                 student,
                 similarity,
                 meetsThreshold,
                 faceId: fid,
               });
-              
+
               // Add to global matches if meets threshold
               if (meetsThreshold) {
                 const existing = allDetectedFaces.get(studentId);
@@ -388,11 +432,11 @@ attendance.post("/session", async (c) => {
                 }
               }
             }
-            
+
             // Sort matches by similarity and take top 3 for debug
             faceMatches.sort((a, b) => b.similarity - a.similarity);
             const bestMatch = faceMatches[0];
-            
+
             if (bestMatch?.meetsThreshold) {
               matchedStudent = {
                 id: bestMatch.student.id,
@@ -401,31 +445,36 @@ attendance.post("/session", async (c) => {
               };
               matchedFaceId = bestMatch.faceId;
             }
-            
+
             // Only collect detailed debug info if enabled
             if (collectDebug) {
-              topMatches = faceMatches.slice(0, 3).map(m => ({
+              topMatches = faceMatches.slice(0, 3).map((m) => ({
                 studentName: `${m.student.firstName} ${m.student.lastName}`,
                 similarity: m.similarity,
                 belowThreshold: !m.meetsThreshold,
               }));
-              
+
               // Determine why no match if applicable
               if (!matchedStudent) {
                 if (realMatches.length === 0) {
-                  noMatchReason = 'No hay rostros registrados en la colección que coincidan';
+                  noMatchReason =
+                    "No hay rostros registrados en la colección que coincidan";
                 } else if (faceMatches.length === 0) {
-                  noMatchReason = 'Rostro no coincide con ningún estudiante de esta clase';
-                } else if (faceMatches.every(m => !m.meetsThreshold)) {
+                  noMatchReason =
+                    "Rostro no coincide con ningún estudiante de esta clase";
+                } else if (faceMatches.every((m) => !m.meetsThreshold)) {
                   noMatchReason = `Mejor coincidencia: ${bestMatch.student.firstName} ${bestMatch.student.lastName} con ${bestMatch.similarity.toFixed(1)}% (requiere ≥${FaceMatchThreshold}%)`;
                 }
               }
             }
           } catch (searchError) {
-            console.error(`[ATTENDANCE] Error searching face ${faceIdx + 1}:`, searchError);
-            noMatchReason = `Error al buscar rostro: ${searchError instanceof Error ? searchError.message : 'Unknown error'}`;
+            console.error(
+              `[ATTENDANCE] Error searching face ${faceIdx + 1}:`,
+              searchError,
+            );
+            noMatchReason = `Error al buscar rostro: ${searchError instanceof Error ? searchError.message : "Unknown error"}`;
           }
-          
+
           // Only add to debug if enabled
           if (collectDebug) {
             photoDebug.faces.push({
@@ -439,34 +488,46 @@ attendance.post("/session", async (c) => {
           }
         }
       } catch (indexError) {
-        console.error(`[ATTENDANCE] Error indexing faces in photo ${photoIdx + 1}:`, indexError);
+        console.error(
+          `[ATTENDANCE] Error indexing faces in photo ${photoIdx + 1}:`,
+          indexError,
+        );
         photoDebug.totalFacesInPhoto = 0;
-        photoDebug.faces = [{
-          boundingBox: undefined,
-          confidence: 0,
-          noMatchReason: `Error al indexar rostros: ${indexError instanceof Error ? indexError.message : 'Unknown error'}`,
-        }];
+        photoDebug.faces = [
+          {
+            boundingBox: undefined,
+            confidence: 0,
+            noMatchReason: `Error al indexar rostros: ${indexError instanceof Error ? indexError.message : "Unknown error"}`,
+          },
+        ];
       } finally {
         // Step 3: CRITICAL - Delete temporary faces from collection
         if (tempFaceIds.length > 0) {
           try {
             if (debugEnabled) {
-              console.log(`[ATTENDANCE] Cleaning up ${tempFaceIds.length} temporary faces`);
+              console.log(
+                `[ATTENDANCE] Cleaning up ${tempFaceIds.length} temporary faces`,
+              );
             }
-            await rekognition.send(new DeleteFacesCommand({
-              CollectionId: collectionId,
-              FaceIds: tempFaceIds,
-            }));
+            await rekognition.send(
+              new DeleteFacesCommand({
+                CollectionId: collectionId,
+                FaceIds: tempFaceIds,
+              }),
+            );
             if (debugEnabled) {
               console.log(`[ATTENDANCE] ✓ Cleaned up temporary faces`);
             }
           } catch (deleteError) {
-            console.error(`[ATTENDANCE] ❌ Failed to cleanup temp faces:`, deleteError);
+            console.error(
+              `[ATTENDANCE] ❌ Failed to cleanup temp faces:`,
+              deleteError,
+            );
             // Don't fail the request, but log the error
           }
         }
       }
-      
+
       // Only add to debug info if enabled
       if (collectDebug) {
         debugInfo.push(photoDebug);
@@ -485,9 +546,9 @@ attendance.post("/session", async (c) => {
       absentCount: enrolledStudents.length - allDetectedFaces.size,
       photoUrls: JSON.stringify(finalPhotoKeys), // Store photo keys in R2
       awsFacesDetected: totalFacesDetected,
-      metadata: JSON.stringify({ 
+      metadata: JSON.stringify({
         photos_processed: photoBytesArray.length,
-        photo_source: body.photo_keys ? 'presigned' : 'base64'
+        photo_source: body.photo_keys ? "presigned" : "base64",
       }),
     });
 
@@ -526,13 +587,77 @@ attendance.post("/session", async (c) => {
       identification: d.student.identificationNumber,
     }));
 
-    const absentStudents = enrolledStudents
+    // Get guardian info for absent students
+    const absentStudentIds = enrolledStudents
       .filter((s) => !allDetectedFaces.has(s.studentId))
-      .map((s) => ({
+      .map((s) => s.studentId);
+
+    let absentStudentsWithGuardians: Array<{
+      student_id: string;
+      name: string;
+      identification: string;
+      guardian_id?: string;
+      guardian_name?: string;
+      guardian_phone?: string;
+    }> = [];
+
+    if (absentStudentIds.length > 0) {
+      // Fetch full student records with guardian info
+      const studentsWithGuardians = await db
+        .select({
+          studentId: studentsTable.id,
+          firstName: studentsTable.firstName,
+          middleName: studentsTable.middleName,
+          lastName: studentsTable.lastName,
+          secondLastName: studentsTable.secondLastName,
+          identificationNumber: studentsTable.identificationNumber,
+          guardianId: legalGuardians.id,
+          guardianFirstName: legalGuardians.firstName,
+          guardianLastName: legalGuardians.lastName,
+          guardianPhone: legalGuardians.phone,
+        })
+        .from(studentsTable)
+        .innerJoin(
+          legalGuardians,
+          eq(studentsTable.guardianId, legalGuardians.id),
+        )
+        .where(inArray(studentsTable.id, absentStudentIds));
+
+      absentStudentsWithGuardians = studentsWithGuardians.map((s) => ({
         student_id: s.studentId,
         name: `${s.firstName} ${s.middleName || ""} ${s.lastName} ${s.secondLastName || ""}`.trim(),
         identification: s.identificationNumber,
+        guardian_id: s.guardianId,
+        guardian_name: `${s.guardianFirstName} ${s.guardianLastName}`,
+        guardian_phone: s.guardianPhone,
       }));
+    }
+
+    // Fire-and-forget: Trigger reasoning agent for absent students (if configured)
+    const aiAgentsUrl = c.env.AI_AGENTS_URL;
+    if (aiAgentsUrl && absentStudentsWithGuardians.length > 0) {
+      // Don't await - fire and forget to avoid slowing down response
+      c.executionCtx.waitUntil(
+        (async () => {
+          try {
+            // For simplicity in hackathon, we'll just log this
+            // In production, you'd fetch attendance history and call the reasoning agent
+            console.log(
+              `[REASONING] Would analyze ${absentStudentsWithGuardians.length} absent students for session ${sessionId}`,
+            );
+
+            // TODO: Implement batch reasoning analysis
+            // This would:
+            // 1. Fetch 7-day attendance history for each absent student
+            // 2. POST to ${aiAgentsUrl}/api/reasoning/batch-analyze
+            // 3. Store results in reasoning_analyses table
+            // 4. Trigger voice calls for high-risk students
+          } catch (error) {
+            console.error("[REASONING] Auto-trigger failed:", error);
+          }
+        })(),
+      );
+    }
 
     return c.json({
       session_id: sessionId,
@@ -544,7 +669,7 @@ attendance.post("/session", async (c) => {
       present_count: allDetectedFaces.size,
       absent_count: enrolledStudents.length - allDetectedFaces.size,
       present_students: presentStudents,
-      absent_students: absentStudents,
+      absent_students: absentStudentsWithGuardians,
       total_faces_detected: totalFacesDetected,
       ...(debugEnabled && { debug_info: debugInfo }), // Only include debug info if enabled
     });
@@ -808,13 +933,13 @@ attendance.post("/match-face", async (c) => {
 attendance.get("/sessions/:sessionId/photos", async (c) => {
   try {
     const sessionId = c.req.param("sessionId");
-    
+
     if (!sessionId) {
       return c.json({ error: "Session ID is required" }, 400);
     }
 
     const db = drizzle(c.env.DB);
-    
+
     // Get session from database
     const sessionData = await db
       .select({ photoUrls: sessionsTable.photoUrls })
@@ -827,7 +952,7 @@ attendance.get("/sessions/:sessionId/photos", async (c) => {
     }
 
     const photoUrls = sessionData[0].photoUrls;
-    
+
     // Parse photo URLs from JSON
     let photoKeys: string[] = [];
     try {
@@ -911,9 +1036,11 @@ attendance.get("/classes/:classId/sessions", async (c) => {
           .where(eq(attendanceTable.sessionId, session.id));
 
         const summary = {
-          present: attendanceRecords.filter((r) => r.status === "present").length,
+          present: attendanceRecords.filter((r) => r.status === "present")
+            .length,
           absent: attendanceRecords.filter((r) => r.status === "absent").length,
-          excused: attendanceRecords.filter((r) => r.status === "excused").length,
+          excused: attendanceRecords.filter((r) => r.status === "excused")
+            .length,
           late: attendanceRecords.filter((r) => r.status === "late").length,
           total: attendanceRecords.length,
         };
@@ -922,7 +1049,7 @@ attendance.get("/classes/:classId/sessions", async (c) => {
           ...session,
           attendanceSummary: summary,
         };
-      })
+      }),
     );
 
     return c.json({
@@ -956,7 +1083,7 @@ attendance.get("/sessions/:sessionId", async (c) => {
       return c.json({ error: "Session not found" }, 404);
     }
 
-    // Get attendance records with student details
+    // Get attendance records with student and guardian details
     const attendanceRecords = await db
       .select({
         attendance: {
@@ -981,9 +1108,17 @@ attendance.get("/sessions/:sessionId", async (c) => {
           gradeId: studentsTable.gradeId,
           gradeSectionId: studentsTable.gradeSectionId,
         },
+        guardian: {
+          id: legalGuardians.id,
+          firstName: legalGuardians.firstName,
+          lastName: legalGuardians.lastName,
+          phone: legalGuardians.phone,
+          email: legalGuardians.email,
+        },
       })
       .from(attendanceTable)
       .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+      .leftJoin(legalGuardians, eq(studentsTable.guardianId, legalGuardians.id))
       .where(eq(attendanceTable.sessionId, sessionId))
       .all();
 
@@ -1025,9 +1160,9 @@ attendance.patch("/:attendanceId/override", async (c) => {
       })
       .where(eq(attendanceTable.id, attendanceId));
 
-    return c.json({ 
+    return c.json({
       success: true,
-      message: "Attendance record updated successfully" 
+      message: "Attendance record updated successfully",
     });
   } catch (error) {
     console.error("/attendance/:attendanceId/override error", error);

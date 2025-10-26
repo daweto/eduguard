@@ -595,7 +595,7 @@ export function StudentEnrollmentForm({
                     {selected?.identificationNumber && (
                       <div className="text-muted-foreground">
                         {t("fields.guardian.identification")}:{" "}
-                        {selected.identificationNumber}
+                        {formatRut(selected.identificationNumber)}
                       </div>
                     )}
                   </div>

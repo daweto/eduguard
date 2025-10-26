@@ -1,0 +1,81 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/teacher-client/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Lint
+        run: pnpm --filter teacher-client lint
+
+      - name: Type check
+        run: pnpm --filter teacher-client check-types
+
+      - name: Build
+        run: pnpm --filter teacher-client build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://api-v2.dweinsteint.workers.dev' }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/teacher-client/dist --project-name=teacher-client --branch=main
+          packageManager: pnpm
+
+      - name: Deployment Summary
+        run: |
+          echo "### ✅ Frontend Deployed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://teacher-client.pages.dev" >> $GITHUB_STEP_SUMMARY
+          echo "**API URL:** ${{ secrets.VITE_API_URL || 'https://api-v2.dweinsteint.workers.dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+

@@ -1,0 +1,9 @@
+{
+  "name": "webhook-proxy",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-26",
+  "observability": { "enabled": true },
+  "vars": {
+    "FORWARD_TO_URL": "https://api-v2.dweinsteint.workers.dev/api/webhooks/elevenlabs/call-completed"
+  },
+}

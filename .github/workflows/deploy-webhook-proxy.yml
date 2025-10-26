@@ -1,0 +1,77 @@
+name: Deploy Webhook Proxy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/webhook-proxy/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-webhook-proxy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Workers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Lint
+        run: pnpm --filter webhook-proxy lint
+
+      - name: Type check
+        run: pnpm --filter webhook-proxy check-types
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'apps/webhook-proxy'
+          command: deploy --minify
+          packageManager: pnpm
+
+      - name: Deployment Summary
+        run: |
+          echo "### ✅ Webhook Proxy Deployed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://webhook-proxy.dweinsteint.workers.dev" >> $GITHUB_STEP_SUMMARY
+          echo "**Webhook Endpoint:** https://webhook-proxy.dweinsteint.workers.dev/elevenlabs/call-completed" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+

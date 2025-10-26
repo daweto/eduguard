@@ -7,6 +7,9 @@ import guardians from "./routes/guardians";
 import seed from "./routes/seed";
 import students from "./routes/students";
 import uploads from "./routes/uploads";
+import reasoning from "./routes/reasoning";
+import voice from "./routes/voice";
+import webhooks from "./routes/webhooks";
 import type { Bindings } from "./types";
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -38,5 +41,12 @@ app.route("/api/seed", seed);
 app.route("/api/uploads", uploads);
 app.route("/api/attendance", attendance);
 app.route("/api/classes", classes);
+
+// AI Agents proxy routes
+app.route("/api/reasoning", reasoning);
+app.route("/api/voice", voice);
+
+// Webhooks
+app.route("/api/webhooks", webhooks);
 
 export default app;

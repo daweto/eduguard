@@ -7,7 +7,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
-    "migrate:local": "wrangler d1 execute eduguard-db --local --file=./migrations/0000_skinny_maestro.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0001_add_classes_attendance_tables.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0002_add_grade_sections_attendance_drilldown.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0003_add_external_image_id.sql",
+    "migrate:local": "wrangler d1 execute eduguard-db --local --file=./migrations/0000_skinny_maestro.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0001_add_classes_attendance_tables.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0002_add_grade_sections_attendance_drilldown.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0003_add_external_image_id.sql && wrangler d1 execute eduguard-db --local --file=./migrations/0004_add_calls_and_reasoning.sql",
     "migrate:0001": "wrangler d1 execute eduguard-db --local --file=./migrations/0001_add_classes_attendance_tables.sql",
     "migrate:0002": "wrangler d1 execute eduguard-db --local --file=./migrations/0002_add_grade_sections_attendance_drilldown.sql",
     "migrate:0003": "wrangler d1 execute eduguard-db --local --file=./migrations/0003_add_external_image_id.sql",

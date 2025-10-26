@@ -1,0 +1,8 @@
+# Version Reference
+# DO NOT EDIT - These are managed in package.json and .nvmrc
+
+Node.js: v20.18.0 (managed in .nvmrc)
+pnpm: 8.15.6 (managed in package.json → packageManager)
+
+# See VERSION_MANAGEMENT.md for details
+

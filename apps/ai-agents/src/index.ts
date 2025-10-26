@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import reasoningApp from './routes/reasoning.js';
-import voiceApp from './routes/voice.js';
+import voiceApp from './routes/voice.js'
 import 'dotenv/config';
 
 // Main app following Hono best practices

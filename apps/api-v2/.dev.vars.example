@@ -15,3 +15,11 @@ R2_SECRET_ACCESS_KEY=your_r2_secret_key_here
 # REMOVE or set to 'false' in production
 ENABLE_ATTENDANCE_DEBUG=true
 
+# AI Agents Service
+# URL to the AI Agents service (Reasoning + Voice agents)
+AI_AGENTS_URL=http://localhost:3001
+
+# Auto-call threshold for reasoning agent (optional, defaults to 95)
+# Absences with risk score >= this threshold will trigger automatic parent calls
+REASONING_AUTO_CALL_THRESHOLD=95
+

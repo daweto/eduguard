@@ -110,7 +110,7 @@ export interface ClassSessionsResponse {
 }
 
 export async function getClassSessions(
-  classId: string
+  classId: string,
 ): Promise<ClassSessionsResponse> {
   return fetchApi(`/api/attendance/classes/${classId}/sessions`);
 }
@@ -139,6 +139,13 @@ export interface AttendanceRecord {
     gradeId: string | null;
     gradeSectionId: string | null;
   };
+  guardian: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    phone: string | null;
+    email: string;
+  } | null;
 }
 
 export interface SessionDetailResponse {
@@ -161,7 +168,7 @@ export interface SessionDetailResponse {
 }
 
 export async function getSessionDetail(
-  sessionId: string
+  sessionId: string,
 ): Promise<SessionDetailResponse> {
   return fetchApi(`/api/attendance/sessions/${sessionId}`);
 }
@@ -175,7 +182,7 @@ export interface OverrideAttendanceRequest {
 
 export async function overrideAttendance(
   attendanceId: string,
-  data: OverrideAttendanceRequest
+  data: OverrideAttendanceRequest,
 ): Promise<{ success: boolean; message: string }> {
   return fetchApi(`/api/attendance/${attendanceId}/override`, {
     method: "PATCH",

@@ -25,6 +25,9 @@ export interface Bindings {
   R2_SECRET_ACCESS_KEY?: string;
   // Debug flags
   ENABLE_ATTENDANCE_DEBUG?: string; // 'true' or '1' to enable detailed debug info
+  // AI Agents
+  AI_AGENTS_URL?: string; // URL to AI Agents service (e.g., http://localhost:3001)
+  REASONING_AUTO_CALL_THRESHOLD?: string; // Threshold for auto-calling parents (default: 95)
 }
 
 // Re-export DB types
