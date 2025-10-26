@@ -72,12 +72,18 @@ app.post("/analyze", async (c) => {
           detectedBy: ["rule_engine"],
         };
         if (apiUrl) {
-          // Fire-and-forget log
+          // Fire-and-forget log with error handling
           fetch(`${apiUrl}/api/reasoning/log`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
-          }).catch(() => {});
+          }).catch((err: unknown) => {
+            console.error("[reasoning] Failed to log analysis:", {
+              studentId: payload.studentId,
+              sessionId: payload.sessionId,
+              error: err instanceof Error ? err.message : String(err),
+            });
+          });
 
           // Auto-call for high risk if we have guardian
           if (riskLabel === "high" && a.guardian_id && a.guardian_phone) {
@@ -94,7 +100,14 @@ app.post("/analyze", async (c) => {
                 reason: "auto from reasoning",
                 initiated_by: "reasoning-auto",
               }),
-            }).catch(() => {});
+            }).catch((err: unknown) => {
+              console.error("[reasoning] Failed to trigger auto-call:", {
+                studentId: a.student_id,
+                guardianId: a.guardian_id,
+                sessionId: sessionId,
+                error: err instanceof Error ? err.message : String(err),
+              });
+            });
           }
         }
       }
@@ -223,35 +236,8 @@ Analyze the pattern and provide:
       `   ✅ Analysis complete: ${analysis.risk_level} risk - ${analysis.pattern_type}`,
     );
 
-    // Auto-trigger voice call for high-risk or immediate action recommendations
-    if (
-      analysis.recommended_action === "immediate_call" ||
-      analysis.risk_level === "high"
-    ) {
-      console.log(
-        `   📞 Auto-triggering voice call for ${student_name} (high risk)`,
-      );
-
-      // Fire-and-forget call to voice agent
-      // In a real implementation, you'd need guardian info from the request body
-      // For now, we'll just log the intent
-      // TODO: Uncomment when guardian info is available in request
-      /*
-      fetch('http://localhost:3001/api/voice/call', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          student_id,
-          student_name,
-          guardian_name: 'Guardian Name', // Would come from DB
-          guardian_phone: '+56912345678', // Would come from DB
-          risk_level: analysis.risk_level,
-          pattern_type: analysis.pattern_type,
-          reasoning: analysis.reasoning,
-        }),
-      }).catch(err => console.error('Voice call trigger failed:', err));
-      */
-    }
+    // Note: Auto-triggering of voice calls is handled in the bulk analyze endpoint
+    // when guardian info is available from the attendance session
 
     const response: ReasoningAnalyzeSingleResponse = {
       student_id,

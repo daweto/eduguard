@@ -151,7 +151,13 @@ app.post("/call", async (c) => {
             callId,
             details: { guardian_phone, risk_level, pattern_type },
           }),
-        }).catch(() => {});
+        }).catch((err: unknown) => {
+          console.error("[voice] Failed to log agent decision:", {
+            callId,
+            studentId: student_id,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        });
       }
 
       // Track the call
