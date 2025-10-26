@@ -35,7 +35,10 @@ export class AIAgentsContainer extends Container {
 
   // Durable Object alarm handler (invoked by Cloudflare for scheduled wake/sleep)
   // Ensures we observe any exceptions happening during alarm ticks
-  override async alarm(alarmProps: { isRetry: boolean; retryCount: number }): Promise<void> {
+  override async alarm(alarmProps: {
+    isRetry: boolean;
+    retryCount: number;
+  }): Promise<void> {
     await super.alarm(alarmProps);
 
     interface IdObj {
