@@ -326,6 +326,8 @@ export interface VoiceAgentCallRequest {
   student_name: string;
   guardian_name: string;
   guardian_phone: string;
+  guardian_id?: string;
+  call_id?: string;
   risk_level: RiskLevel;
   pattern_type: PatternType | "manual";
   reasoning?: string;

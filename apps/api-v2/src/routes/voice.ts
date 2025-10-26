@@ -210,11 +210,15 @@ voice.post("/call", async (c) => {
     const guardianName =
       payload.guardian_name ?? (guardianCandidate || "Apoderado");
 
+    const callId = crypto.randomUUID();
+
     const agentPayload: VoiceAgentCallRequest = {
       student_id: payload.student_id,
       student_name: studentName,
       guardian_name: guardianName,
       guardian_phone: payload.guardian_phone,
+      guardian_id: guardianId,
+      call_id: callId,
       risk_level: payload.risk_level ?? "medium",
       pattern_type: payload.pattern_type ?? "manual",
       reasoning:
@@ -247,11 +251,6 @@ voice.post("/call", async (c) => {
     }
 
     // Persist minimal call record
-    const callId: string =
-      result.call_id ??
-      result.conversation_id ??
-      result.call_sid ??
-      `call_${String(Date.now())}`;
 
     await db
       .insert(calls)
