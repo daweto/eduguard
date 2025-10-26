@@ -1,5 +1,6 @@
 # 🤖 EduGuard AI Agents Server
 
+## Description
 **Node.js microservice** for AI-powered attendance analysis and parent notifications.
 
 ## Architecture

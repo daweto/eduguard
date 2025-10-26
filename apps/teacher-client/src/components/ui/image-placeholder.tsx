@@ -32,7 +32,7 @@ export function ImagePlaceholder({
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5",
+        "flex items-center justify-center bg-linear-to-br from-primary/20 to-primary/5",
         className,
       )}
     >
