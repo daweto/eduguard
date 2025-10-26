@@ -1,31 +1,16 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import type {
+  VoiceAgentCallRequest,
+  VoiceAgentCallData,
+  WebhookCallCompletedPayload,
+} from "@repo/shared-types";
 import { Hono } from "hono";
 
 // Route handlers defined inline following Hono best practices
 const app = new Hono();
 
 // In-memory call tracking (use database in production)
-interface CallData {
-  call_id: string;
-  conversation_id: string | null;
-  call_sid: string | null;
-  student_id: string;
-  student_name: string;
-  guardian_name: string;
-  guardian_phone: string;
-  risk_level: string;
-  pattern_type: string;
-  status: string;
-  initiated_at: string;
-  updated_at?: string;
-  completed_at?: string;
-  duration?: number;
-  dtmf_response?: string;
-  transcript?: string;
-  outcome?: string;
-}
-
-const activeCalls = new Map<string, CallData>();
+const activeCalls = new Map<string, VoiceAgentCallData>();
 
 /**
  * POST /call
@@ -33,17 +18,7 @@ const activeCalls = new Map<string, CallData>();
  */
 app.post("/call", async (c) => {
   try {
-    const body = await c.req.json<{
-      student_id: string;
-      student_name: string;
-      guardian_name: string;
-      guardian_phone: string;
-      risk_level: string;
-      pattern_type: string;
-      reasoning: string;
-      class_name?: string;
-      time?: string;
-    }>();
+    const body = await c.req.json<VoiceAgentCallRequest>();
 
     const {
       student_id,
@@ -52,6 +27,7 @@ app.post("/call", async (c) => {
       guardian_phone,
       risk_level,
       pattern_type,
+      reasoning,
       class_name = "clase",
     } = body;
 
@@ -120,10 +96,6 @@ app.post("/call", async (c) => {
         agentPhoneNumberId: phoneNumberId,
         toNumber: guardian_phone,
         conversationInitiationClientData: {
-          // Avoid overriding restricted fields like first_message; rely on agent config
-          // If prompt overrides are also restricted in your agent, remove the next block
-          // and keep only dynamicVariables
-          // conversationConfigOverride: { agent: { prompt: { prompt: systemPrompt } } },
           sourceInfo: { source: "node_js_sdk" },
           dynamicVariables: {
             student_name,
@@ -133,6 +105,7 @@ app.post("/call", async (c) => {
             school_name: schoolName,
             risk_level,
             pattern_type,
+            reasoning,
           },
         },
       });
@@ -142,8 +115,25 @@ app.post("/call", async (c) => {
         resp.callSid ??
         `call_${String(Date.now())}_${Math.random().toString(36).slice(2)}`;
 
+      // Log agent decision (manual call)
+      const apiUrl = process.env.API_BASE_URL ?? process.env.API_URL;
+      if (apiUrl) {
+        fetch(`${apiUrl}/api/agents/log`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent: "voice",
+            decisionType:
+              pattern_type === "manual" ? "manual_call" : "auto_call",
+            studentId: student_id,
+            callId,
+            details: { guardian_phone, risk_level, pattern_type },
+          }),
+        }).catch(() => {});
+      }
+
       // Track the call
-      const callData: CallData = {
+      const callData: VoiceAgentCallData = {
         call_id: callId,
         conversation_id: resp.conversationId ?? null,
         call_sid: resp.callSid ?? null,
@@ -254,25 +244,17 @@ app.get("/call/:call_id", (c) => {
  */
 app.post("/webhook/call-completed", async (c) => {
   try {
-    const payload = await c.req.json<{
-      call_id?: string;
-      conversation_id?: string;
-      status?: string;
-      duration?: number;
-      dtmf_input?: string;
-      transcript?: string;
-    }>();
+    const payload = (await c.req.json()) as unknown;
 
     console.log("📥 Call completed webhook:", JSON.stringify(payload, null, 2));
 
-    const {
-      call_id,
-      conversation_id,
-      status,
-      duration,
-      dtmf_input,
-      transcript,
-    } = payload;
+    const data = payload as Partial<WebhookCallCompletedPayload>;
+    const call_id = data.call_id;
+    const conversation_id = data.conversation_id;
+    const status = data.status;
+    const duration = data.duration;
+    const dtmf_input = data.dtmf_input;
+    const transcript = data.transcript;
 
     // Update tracked call
     if (call_id) {

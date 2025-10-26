@@ -16,4 +16,12 @@ export const queryKeys = {
   stages: ["stages"] as const,
   grades: ["grades"] as const,
   gradeGroups: ["grade-groups"] as const,
+
+  // Reasoning / Alerts
+  reasoningFlags: (from?: string, to?: string) =>
+    ["reasoning", "flags", { from, to }] as const,
+
+  // Voice Calls
+  voiceCalls: ["voice", "calls"] as const,
+  voiceCall: (id: string) => ["voice", "calls", id] as const,
 } as const;

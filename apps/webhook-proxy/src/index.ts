@@ -22,10 +22,10 @@ app.post("/elevenlabs/call-completed", async (c) => {
 
     // Verify HMAC signature
     const header =
-      c.req.header("ElevenLabs-Signature") ||
+      c.req.header("ElevenLabs-Signature") ??
       c.req.header("elevenlabs-signature");
     const secret =
-      c.env.WEBHOOK_SECRET || c.env.ELEVENLABS_CONVAI_WEBHOOK_SECRET;
+      c.env.WEBHOOK_SECRET ?? c.env.ELEVENLABS_CONVAI_WEBHOOK_SECRET;
 
     if (!secret || !header) {
       return c.json({ error: "unauthorized" }, 401);
@@ -63,9 +63,8 @@ app.post("/elevenlabs/call-completed", async (c) => {
     if (expected !== v0) return c.json({ error: "invalid signature" }, 401);
 
     // Parse JSON now that signature is valid
-    let payload: unknown;
     try {
-      payload = JSON.parse(bodyText);
+      JSON.parse(bodyText);
     } catch {
       return c.json({ error: "invalid payload" }, 400);
     }

@@ -26,9 +26,11 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Users, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { useSessionDetail } from "@/components/classes/hooks/useSessionDetail";
 import { useOverrideAttendance } from "@/components/classes/hooks/useOverrideAttendance";
+import { useReasoningFlags } from "@/components/alerts/hooks/useReasoningFlags";
+import { RiskBadge } from "@/components/attendance/RiskBadge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { SessionDataTable } from "@/components/attendance/session-data-table";
@@ -52,6 +54,15 @@ export function SessionDetailPage() {
   const { data, isLoading, error } = useSessionDetail(sessionId!);
   const overrideMutation = useOverrideAttendance();
 
+  // Fetch reasoning flags for the session date
+  const sessionDate = data?.session?.timestamp
+    ? format(new Date(data.session.timestamp), "yyyy-MM-dd")
+    : undefined;
+  const { data: flagsData } = useReasoningFlags({
+    from: sessionDate,
+    to: sessionDate,
+  });
+
   const [overrideDialog, setOverrideDialog] = useState<OverrideDialogState>({
     open: false,
     attendanceId: null,
@@ -60,6 +71,17 @@ export function SessionDetailPage() {
   });
   const [newStatus, setNewStatus] = useState<string>("");
   const [notes, setNotes] = useState("");
+
+  // Create a map of student risk assessments (must be before columns)
+  const riskMap = useMemo(() => {
+    const map = new Map();
+    if (flagsData?.flags) {
+      flagsData.flags.forEach((flag) => {
+        map.set(flag.studentId, flag);
+      });
+    }
+    return map;
+  }, [flagsData]);
 
   // Create columns with handlers (must be before early returns)
   const columns = useMemo(
@@ -80,8 +102,9 @@ export function SessionDetailPage() {
           setNotes("");
         },
         sessionId: sessionId!,
+        riskMap,
       }),
-    [sessionId],
+    [sessionId, riskMap],
   );
 
   const handleCloseOverrideDialog = () => {
@@ -139,12 +162,24 @@ export function SessionDetailPage() {
   }
 
   const { session, attendance } = data;
+
+  // Calculate summaries
   const summary = {
     present: attendance.filter((a) => a.attendance.status === "present").length,
     absent: attendance.filter((a) => a.attendance.status === "absent").length,
     excused: attendance.filter((a) => a.attendance.status === "excused").length,
     late: attendance.filter((a) => a.attendance.status === "late").length,
     total: attendance.length,
+  };
+
+  const riskSummary = {
+    high: Array.from(riskMap.values()).filter((f) => f.riskLabel === "high")
+      .length,
+    medium: Array.from(riskMap.values()).filter((f) => f.riskLabel === "medium")
+      .length,
+    low: Array.from(riskMap.values()).filter((f) => f.riskLabel === "low")
+      .length,
+    total: riskMap.size,
   };
 
   return (
@@ -233,6 +268,50 @@ export function SessionDetailPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Risk Summary Card */}
+        {riskSummary.total > 0 && (
+          <Card className="mb-6 border-amber-200 bg-amber-50">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-700" />
+                Alertas de Riesgo en esta Sesión
+              </CardTitle>
+              <CardDescription>
+                {riskSummary.total} estudiante
+                {riskSummary.total !== 1 ? "s" : ""} con evaluación de riesgo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4">
+                {riskSummary.high > 0 && (
+                  <div className="flex items-center gap-2">
+                    <RiskBadge riskLevel="high" />
+                    <span className="text-sm font-medium">
+                      {riskSummary.high}
+                    </span>
+                  </div>
+                )}
+                {riskSummary.medium > 0 && (
+                  <div className="flex items-center gap-2">
+                    <RiskBadge riskLevel="medium" />
+                    <span className="text-sm font-medium">
+                      {riskSummary.medium}
+                    </span>
+                  </div>
+                )}
+                {riskSummary.low > 0 && (
+                  <div className="flex items-center gap-2">
+                    <RiskBadge riskLevel="low" />
+                    <span className="text-sm font-medium">
+                      {riskSummary.low}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Attendance Roster */}
         <Card>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -8,39 +8,78 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Phone, Clock, User, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Phone,
+  Clock,
+  User,
+  AlertCircle,
+  Filter,
+  Download,
+  RefreshCw,
+} from "lucide-react";
+import { useTeacherContext } from "@/contexts/teacher-context";
 import { RiskBadge } from "@/components/attendance/RiskBadge";
-import { type Call as CallType } from "@repo/shared-types";
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8787";
+import { useVoiceCalls } from "@/components/calls/hooks/useVoiceCalls";
+import type { CallStatus } from "@repo/shared-types";
 
 export default function CallsHistoryPage() {
-  const [calls, setCalls] = useState<CallType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { activeTeacher } = useTeacherContext();
+  const { data, isLoading, error, refetch } = useVoiceCalls();
 
-  useEffect(() => {
-    fetchCalls();
-  }, []);
+  // Filter states
+  const [statusFilter, setStatusFilter] = useState<CallStatus | "all">("all");
+  const [initiatedByFilter, setInitiatedByFilter] = useState<
+    "all" | "manual" | "reasoning-auto"
+  >("all");
+  const [riskFilter, setRiskFilter] = useState<string>("all");
 
-  const fetchCalls = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/voice/calls`);
+  // Memoize calls to prevent dependency issues
+  const calls = useMemo(() => data?.calls || [], [data?.calls]);
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch calls");
+  // Apply filters
+  const filteredCalls = useMemo(() => {
+    return calls.filter((call) => {
+      // Status filter
+      if (statusFilter !== "all" && call.status !== statusFilter) {
+        return false;
       }
 
-      const data = await response.json();
-      setCalls(data.calls || []);
-    } catch (err) {
-      console.error("Error fetching calls:", err);
-      setError(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setIsLoading(false);
-    }
+      // Initiated by filter
+      if (
+        initiatedByFilter !== "all" &&
+        call.initiated_by !== initiatedByFilter
+      ) {
+        return false;
+      }
+
+      // Risk filter
+      if (riskFilter !== "all" && call.risk_level !== riskFilter) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [calls, statusFilter, initiatedByFilter, riskFilter]);
+
+  const handleClearFilters = () => {
+    setStatusFilter("all");
+    setInitiatedByFilter("all");
+    setRiskFilter("all");
   };
+
+  const hasActiveFilters =
+    statusFilter !== "all" ||
+    initiatedByFilter !== "all" ||
+    riskFilter !== "all";
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<
@@ -105,8 +144,16 @@ export default function CallsHistoryPage() {
               <AlertCircle className="h-5 w-5" />
               Error
             </CardTitle>
-            <CardDescription className="text-red-700">{error}</CardDescription>
+            <CardDescription className="text-red-700">
+              No se pudieron cargar las llamadas. Por favor, intenta nuevamente.
+            </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Button onClick={() => refetch()} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reintentar
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -117,44 +164,128 @@ export default function CallsHistoryPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Historial de Llamadas</h1>
         <p className="text-muted-foreground">
-          Registro de todas las llamadas realizadas a apoderados
+          Registro de todas las llamadas realizadas a apoderados (
+          {filteredCalls.length} de {calls.length})
         </p>
       </div>
 
-      {calls.length === 0 ? (
+      {/* Filters Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filtros
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="status-filter">Estado</Label>
+              <Select
+                value={statusFilter}
+                onValueChange={(value) => setStatusFilter(value as CallStatus | "all")}
+              >
+                <SelectTrigger id="status-filter">
+                  <SelectValue placeholder="Todos los estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="initiated">Iniciada</SelectItem>
+                  <SelectItem value="ringing">Timbrando</SelectItem>
+                  <SelectItem value="answered">Contestada</SelectItem>
+                  <SelectItem value="voicemail">Buzón</SelectItem>
+                  <SelectItem value="failed">Fallida</SelectItem>
+                  <SelectItem value="completed">Completada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="initiated-filter">Iniciada Por</Label>
+              <Select
+                value={initiatedByFilter}
+                onValueChange={(value) =>
+                  setInitiatedByFilter(
+                    value as "all" | "manual" | "reasoning-auto",
+                  )
+                }
+              >
+                <SelectTrigger id="initiated-filter">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="manual">Manual (Docente)</SelectItem>
+                  <SelectItem value="reasoning-auto">Automática (IA)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="risk-filter">Nivel de Riesgo</Label>
+              <Select
+                value={riskFilter}
+                onValueChange={setRiskFilter}
+              >
+                <SelectTrigger id="risk-filter">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="high">Alto</SelectItem>
+                  <SelectItem value="medium">Medio</SelectItem>
+                  <SelectItem value="low">Bajo</SelectItem>
+                  <SelectItem value="none">Ninguno</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {hasActiveFilters && (
+              <Button onClick={handleClearFilters} variant="outline">
+                Limpiar Filtros
+              </Button>
+            )}
+            <Button onClick={() => refetch()} variant="outline" size="icon">
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {filteredCalls.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-12">
               <Phone className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-semibold mb-2">
-                No hay llamadas registradas
+                {calls.length === 0
+                  ? "No hay llamadas registradas"
+                  : "No se encontraron llamadas con los filtros seleccionados"}
               </h3>
               <p className="text-sm text-muted-foreground">
-                Las llamadas a apoderados aparecerán aquí
+                {calls.length === 0
+                  ? "Las llamadas a apoderados aparecerán aquí"
+                  : "Intenta ajustar los filtros para ver más resultados"}
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {calls.map((call) => (
+          {filteredCalls.map((call) => (
             <Card key={call.call_id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="flex items-center gap-2 mb-2">
                       <Phone className="h-5 w-5" />
-                      {call.student_name || "Estudiante"}
+                      {call.guardian_name || call.guardian_phone}
                     </CardTitle>
                     <CardDescription>
-                      {call.guardian_name ? (
-                        <span>
-                          Apoderado: {call.guardian_name} ({call.guardian_phone}
-                          )
-                        </span>
-                      ) : (
-                        <span>{call.guardian_phone}</span>
-                      )}
+                      <span>
+                        Estudiante: {call.student_name || "Estudiante"}
+                        {call.guardian_phone ? ` (${call.guardian_phone})` : ""}
+                      </span>
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
@@ -169,10 +300,19 @@ export default function CallsHistoryPage() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="flex items-center gap-2 text-sm">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Iniciada por:</span>
-                    <span className="font-medium">
-                      {call.initiated_by === "manual" ? "Manual" : "Automática"}
+                    <span className="text-muted-foreground">
+                      Gatillada por:
                     </span>
+                    {call.initiated_by === "manual" ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="font-medium">
+                          {activeTeacher?.fullName || "Docente"}
+                        </span>
+                        <Badge variant="secondary">Docente</Badge>
+                      </span>
+                    ) : (
+                      <span className="font-medium">Automática</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -211,15 +351,25 @@ export default function CallsHistoryPage() {
                 )}
 
                 {call.recording_url && (
-                  <div className="mt-4">
-                    <a
-                      href={call.recording_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold">Grabación:</span>
+                      <a
+                        href={call.recording_url}
+                        download
+                        className="text-sm text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Download className="h-3 w-3" />
+                        Descargar
+                      </a>
+                    </div>
+                    <audio
+                      controls
+                      className="w-full h-10"
+                      src={call.recording_url}
                     >
-                      Escuchar grabación →
-                    </a>
+                      Tu navegador no soporta el elemento de audio.
+                    </audio>
                   </div>
                 )}
               </CardContent>

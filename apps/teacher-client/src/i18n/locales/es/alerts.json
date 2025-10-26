@@ -1,0 +1,58 @@
+{
+  "title": "Alertas de Riesgo",
+  "subtitle": "Estudiantes con patrones de asistencia que requieren atención",
+  "filters": {
+    "title": "Filtros de Fecha",
+    "from": "Desde",
+    "to": "Hasta",
+    "today": "Hoy",
+    "thisWeek": "Esta Semana",
+    "refresh": "Actualizar"
+  },
+  "summary": {
+    "total": "Total de Alertas",
+    "high": "Riesgo Alto",
+    "medium": "Riesgo Medio",
+    "low": "Riesgo Bajo",
+    "highAction": "Acción inmediata",
+    "mediumAction": "Monitorear",
+    "lowAction": "Seguimiento"
+  },
+  "table": {
+    "title": "Lista de Alertas",
+    "noAlerts": "No hay alertas para el rango de fechas seleccionado",
+    "alertsCount": "{{count}} estudiante con alertas de riesgo",
+    "alertsCount_plural": "{{count}} estudiantes con alertas de riesgo",
+    "columns": {
+      "student": "Estudiante",
+      "risk": "Riesgo",
+      "pattern": "Patrón",
+      "summary": "Resumen",
+      "recommendation": "Recomendación",
+      "guardian": "Apoderado",
+      "actions": "Acciones"
+    }
+  },
+  "riskLevels": {
+    "none": "Sin Riesgo",
+    "low": "Riesgo Bajo",
+    "medium": "Riesgo Medio",
+    "high": "Riesgo Alto"
+  },
+  "patterns": {
+    "normal": "Normal",
+    "sneak_out": "Salida Temprana",
+    "chronic": "Ausencias Crónicas",
+    "irregular": "Irregular",
+    "cutting": "Fuga de Clases"
+  },
+  "recommendations": {
+    "none": "Ninguna",
+    "monitor": "Monitorear",
+    "immediate_call": "Llamar Inmediatamente"
+  },
+  "errors": {
+    "loadFailed": "No se pudieron cargar las alertas. Por favor, intenta nuevamente.",
+    "retry": "Reintentar"
+  }
+}

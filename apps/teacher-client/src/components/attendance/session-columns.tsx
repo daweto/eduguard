@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Edit2 } from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { AttendanceStatusBadge } from "@/components/ui/attendance-status-badge";
+import { RiskBadge } from "./RiskBadge";
 import { CallParentButton } from "./CallParentButton";
 import { formatRut } from "@/lib/helpers/rut";
+import type { ReasoningFlagView } from "@repo/shared-types";
 
 // Type for session detail attendance records
 export interface SessionAttendanceRecord {
@@ -41,11 +43,13 @@ interface SessionColumnsParams {
     studentName: string,
   ) => void;
   sessionId: string;
+  riskMap?: Map<string, ReasoningFlagView>;
 }
 
 export function createSessionColumns({
   onEdit,
   sessionId,
+  riskMap,
 }: SessionColumnsParams): ColumnDef<SessionAttendanceRecord>[] {
   return [
     {
@@ -98,6 +102,22 @@ export function createSessionColumns({
       },
       filterFn: (row, _id, value) => {
         return value.includes(row.original.attendance.status);
+      },
+    },
+    {
+      id: "risk",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Riesgo" />
+      ),
+      cell: ({ row }) => {
+        const studentId = row.original.student.id;
+        const riskFlag = riskMap?.get(studentId);
+
+        if (!riskFlag) {
+          return <span className="text-xs text-muted-foreground">-</span>;
+        }
+
+        return <RiskBadge riskLevel={riskFlag.riskLabel} />;
       },
     },
     {

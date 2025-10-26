@@ -32,6 +32,9 @@ importers:
       '@hono/node-server':
         specifier: ^1.14.1
         version: 1.19.5(hono@4.10.3)
+      '@repo/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       ai:
         specifier: ^5.0.79
         version: 5.0.79(zod@3.25.76)

@@ -1,4 +1,4 @@
-// Seed data for Chilean school stages and grades
+// Seed data for a small Chilean public school (escuela municipal)
 import { drizzle } from "drizzle-orm/d1";
 import {
   courses,
@@ -143,159 +143,86 @@ export const gradesData = [
   },
 ];
 
-// Grade Sections seed data (Homerooms for academic year 2024-2025)
+// Grade Sections seed data (Homerooms for academic year 2025)
+// Small municipal schools typically have a single section per grade
 export const gradeSectionsData = [
-  // Preschool sections
+  // Parvularia
   {
-    id: "gs-prekinder-a",
+    id: "gs-prekinder",
     gradeId: "prekinder",
-    label: "A",
-    displayName: "Prekinder A",
-    academicYear: "2024-2025",
-    maxStudents: 25,
+    label: "Única",
+    displayName: "Prekinder",
+    academicYear: "2025",
+    maxStudents: 20,
   },
   {
-    id: "gs-kinder-a",
+    id: "gs-kinder",
     gradeId: "kinder",
-    label: "A",
-    displayName: "Kinder A",
-    academicYear: "2024-2025",
-    maxStudents: 25,
+    label: "Única",
+    displayName: "Kinder",
+    academicYear: "2025",
+    maxStudents: 22,
   },
 
-  // Elementary sections (creating A and B sections for demonstration)
+  // Básica (selected examples)
   {
-    id: "gs-1elem-a",
+    id: "gs-1basico",
     gradeId: "1st-elementary",
-    label: "A",
-    displayName: "1° Básico A",
-    academicYear: "2024-2025",
-    homeroomTeacherId: "teacher-002",
-    maxStudents: 30,
+    label: "Única",
+    displayName: "1° Básico",
+    academicYear: "2025",
+    maxStudents: 28,
   },
   {
-    id: "gs-1elem-b",
-    gradeId: "1st-elementary",
-    label: "B",
-    displayName: "1° Básico B",
-    academicYear: "2024-2025",
-    maxStudents: 30,
-  },
-  {
-    id: "gs-2elem-a",
-    gradeId: "2nd-elementary",
-    label: "A",
-    displayName: "2° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 30,
-  },
-  {
-    id: "gs-3elem-a",
-    gradeId: "3rd-elementary",
-    label: "A",
-    displayName: "3° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 30,
-  },
-  {
-    id: "gs-4elem-a",
+    id: "gs-4basico",
     gradeId: "4th-elementary",
-    label: "A",
-    displayName: "4° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 35,
+    label: "Única",
+    displayName: "4° Básico",
+    academicYear: "2025",
+    maxStudents: 30,
   },
   {
-    id: "gs-4elem-b",
-    gradeId: "4th-elementary",
-    label: "B",
-    displayName: "4° Básico B",
-    academicYear: "2024-2025",
-    maxStudents: 35,
-  },
-  {
-    id: "gs-5elem-a",
-    gradeId: "5th-elementary",
-    label: "A",
-    displayName: "5° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 35,
-  },
-  {
-    id: "gs-6elem-a",
-    gradeId: "6th-elementary",
-    label: "A",
-    displayName: "6° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 35,
-  },
-  {
-    id: "gs-7elem-a",
-    gradeId: "7th-elementary",
-    label: "A",
-    displayName: "7° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 35,
-  },
-  {
-    id: "gs-8elem-a",
+    id: "gs-8basico",
     gradeId: "8th-elementary",
-    label: "A",
-    displayName: "8° Básico A",
-    academicYear: "2024-2025",
-    maxStudents: 35,
+    label: "Única",
+    displayName: "8° Básico",
+    academicYear: "2025",
+    maxStudents: 30,
   },
 
-  // Secondary sections (1st and 2nd Medio with A/B sections, teacher-001 is homeroom for 1m-a)
+  // Media
   {
-    id: "gs-1sec-a",
+    id: "gs-1medio",
     gradeId: "1st-secondary",
-    label: "A",
-    displayName: "1° Medio A",
-    academicYear: "2024-2025",
+    label: "Única",
+    displayName: "1° Medio",
+    academicYear: "2025",
     homeroomTeacherId: "teacher-001",
-    maxStudents: 40,
+    maxStudents: 35,
   },
   {
-    id: "gs-1sec-b",
-    gradeId: "1st-secondary",
-    label: "B",
-    displayName: "1° Medio B",
-    academicYear: "2024-2025",
-    maxStudents: 40,
-  },
-  {
-    id: "gs-2sec-a",
+    id: "gs-2medio",
     gradeId: "2nd-secondary",
-    label: "A",
-    displayName: "2° Medio A",
-    academicYear: "2024-2025",
-    homeroomTeacherId: "teacher-003",
-    maxStudents: 40,
+    label: "Única",
+    displayName: "2° Medio",
+    academicYear: "2025",
+    maxStudents: 35,
   },
   {
-    id: "gs-2sec-b",
-    gradeId: "2nd-secondary",
-    label: "B",
-    displayName: "2° Medio B",
-    academicYear: "2024-2025",
-    maxStudents: 40,
-  },
-  {
-    id: "gs-3sec-a",
-    gradeId: "3rd-secondary",
-    label: "A",
-    displayName: "3° Medio A",
-    academicYear: "2024-2025",
-    maxStudents: 40,
-  },
-  {
-    id: "gs-4sec-a",
+    id: "gs-4medio-a",
     gradeId: "4th-secondary",
     label: "A",
     displayName: "4° Medio A",
-    academicYear: "2024-2025",
-    maxStudents: 40,
+    academicYear: "2025",
+    maxStudents: 38,
+  },
+  {
+    id: "gs-4medio-b",
+    gradeId: "4th-secondary",
+    label: "B",
+    displayName: "4° Medio B",
+    academicYear: "2025",
+    maxStudents: 38,
   },
 ];
 
@@ -339,43 +266,34 @@ export const teachersData = [
   },
 ];
 
-// Classrooms seed data
+// Classrooms seed data (no fancy buildings; one main site)
 export const classroomsData = [
   {
-    id: "room-a1",
-    name: "A1",
-    building: "Edificio A",
-    floor: "Primer Piso",
-    capacity: 35,
-    roomType: "classroom",
-    facilities: "proyector,pizarra,computadores",
-  },
-  {
-    id: "room-a2",
-    name: "A2",
-    building: "Edificio A",
+    id: "room-1",
+    name: "Sala 1",
+    building: "Sede Principal",
     floor: "Primer Piso",
     capacity: 30,
-    roomType: "classroom",
-    facilities: "proyector,pizarra",
-  },
-  {
-    id: "room-b1",
-    name: "B1",
-    building: "Edificio B",
-    floor: "Primer Piso",
-    capacity: 25,
     roomType: "classroom",
     facilities: "pizarra",
   },
   {
-    id: "room-lab1",
-    name: "Lab Ciencias 1",
-    building: "Edificio C",
-    floor: "Segundo Piso",
-    capacity: 30,
-    roomType: "lab",
-    facilities: "microscopios,equipamiento_laboratorio,pizarra",
+    id: "room-2",
+    name: "Sala 2",
+    building: "Sede Principal",
+    floor: "Primer Piso",
+    capacity: 28,
+    roomType: "classroom",
+    facilities: "pizarra",
+  },
+  {
+    id: "room-multiuso",
+    name: "Sala Multiuso",
+    building: "Sede Principal",
+    floor: "Primer Piso",
+    capacity: 25,
+    roomType: "classroom",
+    facilities: "pizarra",
   },
 ];
 
@@ -431,15 +349,15 @@ export const coursesData = [
   },
 ];
 
-// Classes seed data (specific sections taught by teachers)
+// Classes seed data (single section "Única")
 export const classesData = [
   // María González teaches Math and Physics
   {
-    id: "class-math-1m-a",
+    id: "class-math-1m-u",
     courseId: "course-math-1m",
-    section: "A",
+    section: "Única",
     teacherId: "teacher-001",
-    classroomId: "room-a1",
+    classroomId: "room-1",
     period: 1,
     scheduleDay: "daily",
     startTime: "08:00",
@@ -450,11 +368,11 @@ export const classesData = [
     status: "active",
   },
   {
-    id: "class-phys-1m-a",
+    id: "class-phys-1m-u",
     courseId: "course-phys-1m",
-    section: "A",
+    section: "Única",
     teacherId: "teacher-001",
-    classroomId: "room-a1",
+    classroomId: "room-1",
     period: 3,
     scheduleDay: "daily",
     startTime: "10:00",
@@ -466,11 +384,11 @@ export const classesData = [
   },
   // Carlos Rodríguez teaches Language
   {
-    id: "class-lang-1m-a",
+    id: "class-lang-1m-u",
     courseId: "course-lang-1m",
-    section: "A",
+    section: "Única",
     teacherId: "teacher-002",
-    classroomId: "room-a2",
+    classroomId: "room-2",
     period: 2,
     scheduleDay: "daily",
     startTime: "09:00",
@@ -480,13 +398,13 @@ export const classesData = [
     maxStudents: 30,
     status: "active",
   },
-  // Ana Martínez teaches Chemistry
+  // Ana Martínez teaches Chemistry (in multiuse room)
   {
-    id: "class-chem-1m-a",
+    id: "class-chem-1m-u",
     courseId: "course-chem-1m",
-    section: "A",
+    section: "Única",
     teacherId: "teacher-003",
-    classroomId: "room-lab1",
+    classroomId: "room-multiuso",
     period: 4,
     scheduleDay: "daily",
     startTime: "11:00",
@@ -559,6 +477,30 @@ export const guardiansData = [
     relation: "Padre",
     address: "Av Providencia 1000, Providencia",
   },
+  {
+    id: "guardian-005",
+    firstName: "Marcela",
+    lastName: "Ortiz",
+    secondLastName: "Rojas",
+    identificationNumber: "17778813-9",
+    phone: "+56968357637",
+    email: "marcela.ortiz@email.cl",
+    preferredLanguage: "es",
+    relation: "Madre",
+    address: "Villa Los Alamos, San Bernardo",
+  },
+  {
+    id: "guardian-006",
+    firstName: "Jorge",
+    lastName: "Álvarez",
+    secondLastName: "Muñoz",
+    identificationNumber: "7136662-6",
+    phone: "+56968357637",
+    email: "jorge.alvarez@email.cl",
+    preferredLanguage: "es",
+    relation: "Padre",
+    address: "Población Santa Elena, Maipú",
+  },
 ];
 
 // Sample students
@@ -569,10 +511,10 @@ export const studentsData = [
     lastName: "Salas",
     identificationNumber: "4871402-1",
     gradeId: "1st-secondary",
-    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    gradeSectionId: "gs-1medio", // 1° Medio (Única)
     guardianId: "guardian-001",
     enrollmentDate: "2025-03-01",
-    academicYear: "2024-2025",
+    academicYear: "2025",
     status: "active",
     awsCollectionId: "eduguard-school-default",
     metadata: null,
@@ -583,10 +525,10 @@ export const studentsData = [
     lastName: "Fernández",
     identificationNumber: "9878848-4",
     gradeId: "1st-secondary",
-    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    gradeSectionId: "gs-1medio", // 1° Medio (Única)
     guardianId: "guardian-002",
     enrollmentDate: "2025-03-01",
-    academicYear: "2024-2025",
+    academicYear: "2025",
     status: "active",
     awsCollectionId: "eduguard-school-default",
     metadata: null,
@@ -597,10 +539,10 @@ export const studentsData = [
     lastName: "Puentes",
     identificationNumber: "11794411-5",
     gradeId: "1st-secondary",
-    gradeSectionId: "gs-1sec-a", // 1° Medio A
+    gradeSectionId: "gs-1medio", // 1° Medio (Única)
     guardianId: "guardian-003",
     enrollmentDate: "2025-03-01",
-    academicYear: "2024-2025",
+    academicYear: "2025",
     status: "active",
     awsCollectionId: "eduguard-school-default",
     metadata: null,
@@ -611,10 +553,38 @@ export const studentsData = [
     lastName: "Torres",
     identificationNumber: "11985894-1",
     gradeId: "1st-secondary",
-    gradeSectionId: "gs-1sec-b", // 1° Medio B (different section)
+    gradeSectionId: "gs-1medio", // 1° Medio (Única)
     guardianId: "guardian-004",
     enrollmentDate: "2025-03-01",
-    academicYear: "2024-2025",
+    academicYear: "2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
+    metadata: null,
+  },
+  {
+    id: "student-005",
+    firstName: "Camila",
+    lastName: "Ortiz",
+    identificationNumber: "10144074-5",
+    gradeId: "4th-secondary",
+    gradeSectionId: "gs-4medio-a", // 4° Medio A
+    guardianId: "guardian-005",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2025",
+    status: "active",
+    awsCollectionId: "eduguard-school-default",
+    metadata: null,
+  },
+  {
+    id: "student-006",
+    firstName: "Nicolás",
+    lastName: "Álvarez",
+    identificationNumber: "16884133-7",
+    gradeId: "4th-secondary",
+    gradeSectionId: "gs-4medio-b", // 4° Medio B
+    guardianId: "guardian-006",
+    enrollmentDate: "2025-03-01",
+    academicYear: "2025",
     status: "active",
     awsCollectionId: "eduguard-school-default",
     metadata: null,
@@ -622,15 +592,14 @@ export const studentsData = [
 ];
 
 // Student faces seed data - uses PREDICTABLE externalImageId
-// The faceId will be looked up from AWS Rekognition using the externalImageId
-// This allows DB resets without re-uploading photos or re-indexing faces
+// Skipped in seeding flow; kept for reference
 export const studentFacesData = [
   // Joel Salas (student-001) - 3 photos
   {
     id: "face-001-1",
     studentId: "student-001",
-    faceId: "placeholder", // Will be updated by sync script
-    externalImageId: "student-001-photo-1", // PREDICTABLE - used to find face in AWS
+    faceId: "placeholder",
+    externalImageId: "student-001-photo-1",
     photoUrl: "students/student-001/photo-1.jpg",
     indexedAt: "2024-10-25T10:00:00Z",
     qualityScore: 99.0,
@@ -747,28 +716,28 @@ export const enrollmentsData = [
   // Joel enrolled in all classes
   {
     id: "enroll-001",
-    classId: "class-math-1m-a",
+    classId: "class-math-1m-u",
     studentId: "student-001",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-002",
-    classId: "class-lang-1m-a",
+    classId: "class-lang-1m-u",
     studentId: "student-001",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-003",
-    classId: "class-phys-1m-a",
+    classId: "class-phys-1m-u",
     studentId: "student-001",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-004",
-    classId: "class-chem-1m-a",
+    classId: "class-chem-1m-u",
     studentId: "student-001",
     enrolledDate: "2025-03-01",
     status: "active",
@@ -777,28 +746,28 @@ export const enrollmentsData = [
   // Sheen enrolled in all classes
   {
     id: "enroll-005",
-    classId: "class-math-1m-a",
+    classId: "class-math-1m-u",
     studentId: "student-002",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-006",
-    classId: "class-lang-1m-a",
+    classId: "class-lang-1m-u",
     studentId: "student-002",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-007",
-    classId: "class-phys-1m-a",
+    classId: "class-phys-1m-u",
     studentId: "student-002",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-008",
-    classId: "class-chem-1m-a",
+    classId: "class-chem-1m-u",
     studentId: "student-002",
     enrolledDate: "2025-03-01",
     status: "active",
@@ -807,28 +776,28 @@ export const enrollmentsData = [
   // Boris enrolled in all classes
   {
     id: "enroll-009",
-    classId: "class-math-1m-a",
+    classId: "class-math-1m-u",
     studentId: "student-003",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-010",
-    classId: "class-lang-1m-a",
+    classId: "class-lang-1m-u",
     studentId: "student-003",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-011",
-    classId: "class-phys-1m-a",
+    classId: "class-phys-1m-u",
     studentId: "student-003",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-012",
-    classId: "class-chem-1m-a",
+    classId: "class-chem-1m-u",
     studentId: "student-003",
     enrolledDate: "2025-03-01",
     status: "active",
@@ -837,33 +806,34 @@ export const enrollmentsData = [
   // Felipe enrolled in all classes
   {
     id: "enroll-013",
-    classId: "class-math-1m-a",
+    classId: "class-math-1m-u",
     studentId: "student-004",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-014",
-    classId: "class-lang-1m-a",
+    classId: "class-lang-1m-u",
     studentId: "student-004",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-015",
-    classId: "class-phys-1m-a",
+    classId: "class-phys-1m-u",
     studentId: "student-004",
     enrolledDate: "2025-03-01",
     status: "active",
   },
   {
     id: "enroll-016",
-    classId: "class-chem-1m-a",
+    classId: "class-chem-1m-u",
     studentId: "student-004",
     enrolledDate: "2025-03-01",
     status: "active",
   },
 ];
+
 // Function to seed the database
 export async function seedDatabase(db: D1Database) {
   const drizzleDb = drizzle(db);

@@ -23,3 +23,9 @@ export { getStages, getGrades } from "./grades";
 
 // Attendance
 export { captureAttendance, detectFaces, matchFace } from "./attendance";
+
+// Reasoning
+export { getReasoningFlags } from "./reasoning";
+
+// Voice
+export { getVoiceCalls, getVoiceCall, initiateVoiceCall } from "./voice";

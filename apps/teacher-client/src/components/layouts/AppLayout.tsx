@@ -32,6 +32,7 @@ import {
   Home,
   BookOpen,
   Phone,
+  AlertTriangle,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -109,6 +110,15 @@ export default function AppLayout() {
       icon: Phone,
       tooltip: "Historial de llamadas a apoderados",
       isActive: location.pathname === "/calls",
+    },
+    {
+      key: "alerts",
+      type: "link" as const,
+      to: "/alerts",
+      label: "Alertas",
+      icon: AlertTriangle,
+      tooltip: "Alertas de riesgo de estudiantes",
+      isActive: location.pathname === "/alerts",
     },
     {
       key: "students",

@@ -2,6 +2,8 @@
   "sidebar": {
     "label": "Navegación",
     "classes": "Mis clases",
+    "calls": "Llamadas",
+    "alerts": "Alertas",
     "attendance": "Asistencia",
     "enroll": "Inscribir Estudiante",
     "roster": "Listado de Estudiantes",
@@ -22,16 +24,25 @@
   "breadcrumbs": {
     "home": "Inicio",
     "classes": "Clases",
+    "calls": "Llamadas",
+    "alerts": "Alertas",
+    "sessions": "Sesiones",
+    "sessionDetail": "Detalle de Sesión",
+    "studentAttendance": "Asistencia",
     "attendance": "Asistencia",
     "takeAttendance": "Tomar asistencia",
     "students": "Estudiantes",
     "enroll": "Inscribir",
     "roster": "Listado",
     "editStudent": "Editar estudiante",
-    "guardians": "Apoderados"
+    "guardians": "Apoderados",
+    "guardiansList": "Listado",
+    "guardiansCreate": "Registrar"
   },
   "tooltips": {
     "classes": "Mis clases",
+    "calls": "Historial de llamadas a apoderados",
+    "alerts": "Alertas de riesgo de estudiantes",
     "attendance": "Asistencia",
     "students": "Estudiantes",
     "guardians": "Apoderados",

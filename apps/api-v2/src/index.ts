@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import agents from "./routes/agents";
 import attendance from "./routes/attendance";
 import classes from "./routes/classes";
 import grades from "./routes/grades";
@@ -48,5 +49,8 @@ app.route("/api/voice", voice);
 
 // Webhooks
 app.route("/api/webhooks", webhooks);
+
+// Agent logs
+app.route("/api/agents", agents);
 
 export default app;

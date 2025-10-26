@@ -663,17 +663,19 @@ attendance.post("/session", async (c) => {
             // For simplicity in hackathon, we'll just log this
             // In production, you'd fetch attendance history and call the reasoning agent
             console.log(
-              `[REASONING] Would analyze ${String(absentStudentsWithGuardians.length)} absent students for session ${sessionId}`,
+              `[REASONING] Trigger analyze for ${String(absentStudentsWithGuardians.length)} absent students in session ${sessionId}`,
             );
-            await Promise.resolve();
-            return;
-
-            // TODO: Implement batch reasoning analysis
-            // This would:
-            // 1. Fetch 7-day attendance history for each absent student
-            // 2. POST to ${aiAgentsUrl}/api/reasoning/batch-analyze
-            // 3. Store results in reasoning_analyses table
-            // 4. Trigger voice calls for high-risk students
+            const payload = {
+              session_id: sessionId,
+              class_id: body.class_id,
+              timestamp,
+              absent: absentStudentsWithGuardians,
+            };
+            await fetch(`${aiAgentsUrl}/api/reasoning/analyze`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
           } catch (error) {
             console.error("[REASONING] Auto-trigger failed:", error);
           }

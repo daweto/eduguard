@@ -21,6 +21,7 @@
     "@cloudflare/containers": "^0.0.29",
     "@elevenlabs/elevenlabs-js": "^2.20.1",
     "@hono/node-server": "^1.14.1",
+    "@repo/shared-types": "workspace:*",
     "ai": "^5.0.79",
     "dotenv": "^16.4.7",
     "hono": "^4.10.3",

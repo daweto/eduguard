@@ -19,6 +19,7 @@ import { ClassSessionsPage } from "./pages/ClassSessionsPage";
 import { SessionDetailPage } from "./pages/SessionDetailPage";
 import EditStudentPage from "./pages/EditStudentPage";
 import CallsHistoryPage from "./pages/CallsHistoryPage";
+import AlertsPage from "./pages/AlertsPage";
 import StudentAttendancePage from "./pages/StudentAttendancePage";
 
 export type CrumbHandle = {
@@ -82,6 +83,14 @@ const routes: RouteObject[] = [
         handle: {
           breadcrumb: "Llamadas",
           breadcrumbKey: "navigation:breadcrumbs.calls",
+        } satisfies CrumbHandle,
+      },
+      {
+        path: "alerts",
+        element: <AlertsPage />,
+        handle: {
+          breadcrumb: "Alertas",
+          breadcrumbKey: "navigation:breadcrumbs.alerts",
         } satisfies CrumbHandle,
       },
       // Students Domain

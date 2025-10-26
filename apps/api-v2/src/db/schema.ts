@@ -287,3 +287,18 @@ export type Call = typeof calls.$inferSelect;
 export type NewCall = typeof calls.$inferInsert;
 export type ReasoningAnalysis = typeof reasoningAnalyses.$inferSelect;
 export type NewReasoningAnalysis = typeof reasoningAnalyses.$inferInsert;
+
+// Agent decision logs
+export const agentLogs = sqliteTable("agent_logs", {
+  id: text("id").primaryKey(),
+  agent: text("agent").notNull(), // 'vision' | 'reasoning' | 'voice'
+  decisionType: text("decision_type").notNull(), // 'score' | 'auto_call' | 'skip_call' | 'manual_call'
+  sessionId: text("session_id").references(() => sessions.id),
+  studentId: text("student_id").references(() => students.id),
+  callId: text("call_id").references(() => calls.id),
+  details: text("details"), // JSON string
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type AgentLog = typeof agentLogs.$inferSelect;
+export type NewAgentLog = typeof agentLogs.$inferInsert;

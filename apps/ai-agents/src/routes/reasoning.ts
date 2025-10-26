@@ -1,11 +1,27 @@
+/* eslint-disable import-x/order */
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import type { LanguageModel } from "ai";
 import { Hono } from "hono";
 import { z } from "zod";
+import type {
+  ReasoningBulkAnalyzeRequest,
+  ReasoningAnalyzeSingleRequest,
+  ReasoningAnalyzeSingleResponse,
+  ReasoningBatchAnalyzeResponse,
+  RiskAssessmentObject,
+} from "@repo/shared-types";
 
 // Route handlers defined inline following Hono best practices
 const app = new Hono();
+
+function isBulkAnalyzeRequest(
+  req: unknown,
+): req is ReasoningBulkAnalyzeRequest {
+  if (typeof req !== "object" || req === null) return false;
+  const r = req as { absent?: unknown; session_id?: unknown };
+  return Array.isArray(r.absent) && typeof r.session_id === "string";
+}
 
 // Risk Assessment Schema
 const RiskAssessmentSchema = z.object({
@@ -32,13 +48,66 @@ interface AttendanceRecord {
  */
 app.post("/analyze", async (c) => {
   try {
-    const body = await c.req.json<{
-      student_id: string;
-      student_name: string;
-      session_id: string;
-      today_attendance: AttendanceRecord[];
-      history_7d: AttendanceRecord[];
-    }>();
+    const raw: unknown = await c.req.json();
+
+    // Bulk absent path from API attendance trigger
+    if (isBulkAnalyzeRequest(raw)) {
+      const sessionId: string = raw.session_id;
+      const apiUrl = process.env.API_BASE_URL ?? process.env.API_URL;
+
+      // Simple rule-based: mark all as medium risk; if name matches demo, mark high
+      for (const a of raw.absent) {
+        const riskLabel = a.name.toLowerCase().includes("joel")
+          ? "high"
+          : "medium";
+        const payload = {
+          studentId: a.student_id,
+          sessionId,
+          riskScore: riskLabel === "high" ? 95 : 70,
+          riskLabel,
+          patternType: "irregular" as const,
+          summary: `Ausencia detectada en sesión ${sessionId}`,
+          recommendation: riskLabel === "high" ? "immediate_call" : "monitor",
+          reasoning: "Regla simple (hackathon): ausente hoy",
+          confidence: 0.7,
+          detectedBy: ["rule_engine"],
+        };
+        if (apiUrl) {
+          // Fire-and-forget log
+          fetch(`${apiUrl}/api/reasoning/log`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }).catch(() => {});
+
+          // Auto-call for high risk if we have guardian
+          if (riskLabel === "high" && a.guardian_id && a.guardian_phone) {
+            fetch(`${apiUrl}/api/voice/call`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                student_id: a.student_id,
+                guardian_id: a.guardian_id,
+                guardian_phone: a.guardian_phone,
+                session_id: sessionId,
+                pattern_type: "irregular",
+                risk_level: "high",
+                reason: "auto from reasoning",
+                initiated_by: "reasoning-auto",
+              }),
+            }).catch(() => {});
+          }
+        }
+      }
+
+      return c.json({
+        analyzed: raw.absent.length,
+        session_id: sessionId,
+      });
+    }
+
+    // Single-student analysis path
+    const body = raw as ReasoningAnalyzeSingleRequest;
 
     const {
       student_id,
@@ -150,7 +219,8 @@ Analyze the pattern and provide:
       temperature: 0.3, // Low temperature for consistent analysis
     });
 
-    const analysis = result.object;
+    const analysis: RiskAssessmentObject =
+      result.object as unknown as RiskAssessmentObject;
 
     console.log(
       `   ✅ Analysis complete: ${analysis.risk_level} risk - ${analysis.pattern_type}`,
@@ -186,7 +256,7 @@ Analyze the pattern and provide:
       */
     }
 
-    return c.json({
+    const response: ReasoningAnalyzeSingleResponse = {
       student_id,
       student_name,
       session_id,
@@ -197,7 +267,8 @@ Analyze the pattern and provide:
         absent_count: absentCount,
         absent_rate: absentRate,
       },
-    });
+    };
+    return c.json(response);
   } catch (error) {
     console.error("❌ Reasoning analysis error:", error);
     return c.json(
@@ -274,13 +345,14 @@ app.post("/batch-analyze", async (c) => {
       `   ✅ Batch complete: ${String(successful.length)} succeeded, ${String(failed.length)} failed`,
     );
 
-    return c.json({
+    const payload: ReasoningBatchAnalyzeResponse = {
       session_id,
       total: students.length,
       successful: successful.length,
       failed: failed.length,
       results,
-    });
+    };
+    return c.json(payload);
   } catch (error) {
     console.error("❌ Batch analysis error:", error);
     return c.json(

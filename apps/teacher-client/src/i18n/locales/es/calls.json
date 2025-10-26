@@ -1,0 +1,47 @@
+{
+  "title": "Historial de Llamadas",
+  "subtitle": "Registro de todas las llamadas realizadas a apoderados",
+  "filters": {
+    "title": "Filtros",
+    "status": "Estado",
+    "initiatedBy": "Iniciada Por",
+    "riskLevel": "Nivel de Riesgo",
+    "allStatuses": "Todos los estados",
+    "all": "Todos",
+    "manual": "Manual (Docente)",
+    "automatic": "Automática (IA)",
+    "clearFilters": "Limpiar Filtros"
+  },
+  "statuses": {
+    "initiated": "Iniciada",
+    "ringing": "Timbrando",
+    "answered": "Contestada",
+    "voicemail": "Buzón",
+    "failed": "Fallida",
+    "completed": "Completada"
+  },
+  "labels": {
+    "student": "Estudiante",
+    "initiatedBy": "Gatillada por",
+    "duration": "Duración",
+    "date": "Fecha",
+    "dtmfResponse": "Respuesta DTMF",
+    "transcript": "Transcripción",
+    "recording": "Grabación",
+    "download": "Descargar"
+  },
+  "initiatedBy": {
+    "teacher": "Docente",
+    "automatic": "Automática"
+  },
+  "empty": {
+    "noCallsTitle": "No hay llamadas registradas",
+    "noCallsMessage": "Las llamadas a apoderados aparecerán aquí",
+    "noResultsTitle": "No se encontraron llamadas con los filtros seleccionados",
+    "noResultsMessage": "Intenta ajustar los filtros para ver más resultados"
+  },
+  "errors": {
+    "loadFailed": "No se pudieron cargar las llamadas. Por favor, intenta nuevamente.",
+    "retry": "Reintentar"
+  }
+}
