@@ -3,6 +3,12 @@
     "title": "Gestionar apoderados",
     "description": "Administra el registro de apoderados y vincúlalos con tus estudiantes."
   },
+  "createPage": {
+    "title": "Registrar nuevo apoderado",
+    "description": "Completa el formulario para agregar un nuevo apoderado al sistema.",
+    "cardTitle": "Datos del apoderado",
+    "cardDescription": "Ingresa la información personal del apoderado que deseas registrar."
+  },
   "actions": {
     "create": "Registrar apoderado"
   },

@@ -1,12 +1,13 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import common from './locales/es/common.json';
-import enrollment from './locales/es/enrollment.json';
-import roster from './locales/es/roster.json';
-import navigation from './locales/es/navigation.json';
-import errors from './locales/es/errors.json';
-import guardians from './locales/es/guardians.json';
-import students from './locales/es/students.json';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import common from "./locales/es/common.json";
+import enrollment from "./locales/es/enrollment.json";
+import roster from "./locales/es/roster.json";
+import navigation from "./locales/es/navigation.json";
+import errors from "./locales/es/errors.json";
+import guardians from "./locales/es/guardians.json";
+import students from "./locales/es/students.json";
+import attendance from "./locales/es/attendance.json";
 
 const resources = {
   es: {
@@ -17,22 +18,21 @@ const resources = {
     errors,
     guardians,
     students,
+    attendance,
   },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: 'es',
-    fallbackLng: 'es',
-    defaultNS: 'common',
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-    react: {
-      useSuspense: false,
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: "es",
+  fallbackLng: "es",
+  defaultNS: "common",
+  interpolation: {
+    escapeValue: false, // React already escapes values
+  },
+  react: {
+    useSuspense: false,
+  },
+});
 
 export default i18n;

@@ -6,6 +6,7 @@ import {
   DeleteFacesCommand,
   SearchFacesCommand,
 } from "@aws-sdk/client-rekognition";
+import type { BoundingBox } from "@repo/shared-types";
 import { and, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
@@ -49,7 +50,7 @@ attendance.post("/session", async (c) => {
       max_faces?: number;
     }>();
 
-    if (!body?.class_id || !body?.teacher_id) {
+    if (!body.class_id || !body.teacher_id) {
       return c.json({ error: "class_id and teacher_id are required" }, 400);
     }
 
@@ -64,7 +65,7 @@ attendance.post("/session", async (c) => {
       );
     }
 
-    const photoCount = body.photo_keys?.length || body.photos?.length || 0;
+    const photoCount = body.photo_keys?.length ?? body.photos?.length ?? 0;
     if (photoCount > 10) {
       return c.json({ error: "Maximum 10 photos allowed per session" }, 400);
     }
@@ -109,8 +110,8 @@ attendance.post("/session", async (c) => {
       );
 
     // Generate session ID first (needed for moving photos to final location)
-    const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const timestamp = body.timestamp || new Date().toISOString();
+    const sessionId = `session-${String(Date.now())}-${Math.random().toString(36).substring(2, 11)}`;
+    const timestamp = body.timestamp ?? new Date().toISOString();
 
     // Handle photo_keys: move from temp to final location
     const finalPhotoKeys: string[] = [];
@@ -153,8 +154,8 @@ attendance.post("/session", async (c) => {
           photoBytesArray.push(bytes);
 
           // Move to final location
-          const ext = key.split(".").pop() || "jpg";
-          const destKey = `attendance/${sessionId}/photo-${i + 1}.${ext}`;
+          const ext = key.split(".").pop() ?? "jpg";
+          const destKey = `attendance/${sessionId}/photo-${String(i + 1)}.${ext}`;
 
           // Infer content type from extension
           const contentType =
@@ -223,7 +224,6 @@ attendance.post("/session", async (c) => {
     });
 
     const FaceMatchThreshold = body.face_match_threshold ?? 95;
-    const MaxFaces = body.max_faces ?? 50;
 
     // Check if debug mode is enabled
     const debugEnabled =
@@ -238,7 +238,7 @@ attendance.post("/session", async (c) => {
         confidence: number;
         faceId: string;
         student: (typeof enrolledStudents)[number];
-        boundingBox?: any;
+        boundingBox?: Partial<BoundingBox>;
       }
     >();
 
@@ -247,7 +247,7 @@ attendance.post("/session", async (c) => {
       photoIndex: number;
       totalFacesInPhoto: number;
       faces: {
-        boundingBox: any;
+        boundingBox?: Partial<BoundingBox>;
         confidence: number;
         matchedStudent?: {
           id: string;
@@ -282,11 +282,11 @@ attendance.post("/session", async (c) => {
       try {
         // Step 1: Index ALL faces from the attendance photo into the student collection
         // Uses temporary external ID so we can delete them later
-        const tempExternalId = `temp_attendance_${sessionId}_photo${photoIdx}`;
+        const tempExternalId = `temp_attendance_${sessionId}_photo${String(photoIdx)}`;
 
         if (debugEnabled) {
           console.log(
-            `[ATTENDANCE] Photo ${photoIdx + 1}: Indexing all faces with temp ID: ${tempExternalId}`,
+            `[ATTENDANCE] Photo ${String(photoIdx + 1)}: Indexing all faces with temp ID: ${tempExternalId}`,
           );
         }
 
@@ -314,7 +314,7 @@ attendance.post("/session", async (c) => {
 
         if (debugEnabled) {
           console.log(
-            `[ATTENDANCE] Photo ${photoIdx + 1}: Indexed ${indexedFaces.length} faces`,
+            `[ATTENDANCE] Photo ${String(photoIdx + 1)}: Indexed ${String(indexedFaces.length)} faces`,
           );
         }
 
@@ -327,7 +327,7 @@ attendance.post("/session", async (c) => {
 
           if (!tempFaceId) {
             console.warn(
-              `[ATTENDANCE] Face ${faceIdx + 1} has no face ID, skipping`,
+              `[ATTENDANCE] Face ${String(faceIdx + 1)} has no face ID, skipping`,
             );
             continue;
           }
@@ -340,7 +340,7 @@ attendance.post("/session", async (c) => {
           try {
             if (debugEnabled) {
               console.log(
-                `[ATTENDANCE] Searching face ${faceIdx + 1}/${indexedFaces.length} (ID: ${tempFaceId})`,
+                `[ATTENDANCE] Searching face ${String(faceIdx + 1)}/${String(indexedFaces.length)} (ID: ${tempFaceId})`,
               );
             }
 
@@ -362,7 +362,7 @@ attendance.post("/session", async (c) => {
 
             if (debugEnabled) {
               console.log(
-                `[ATTENDANCE] Face ${faceIdx + 1} matched ${realMatches.length} potential students (excluding self)`,
+                `[ATTENDANCE] Face ${String(faceIdx + 1)} matched ${String(realMatches.length)} potential students (excluding self)`,
               );
             }
 
@@ -389,7 +389,7 @@ attendance.post("/session", async (c) => {
 
             // Process all matches for this face
             const faceMatches: {
-              student: any;
+              student: (typeof enrolledStudents)[number];
               similarity: number;
               meetsThreshold: boolean;
               faceId: string;
@@ -427,7 +427,14 @@ attendance.post("/session", async (c) => {
                     confidence: similarity,
                     faceId: fid,
                     student,
-                    boundingBox,
+                    boundingBox: boundingBox
+                      ? {
+                          Width: boundingBox.Width ?? 0,
+                          Height: boundingBox.Height ?? 0,
+                          Left: boundingBox.Left ?? 0,
+                          Top: boundingBox.Top ?? 0,
+                        }
+                      : undefined,
                   });
                 }
               }
@@ -437,9 +444,10 @@ attendance.post("/session", async (c) => {
             faceMatches.sort((a, b) => b.similarity - a.similarity);
             const bestMatch = faceMatches[0];
 
-            if (bestMatch?.meetsThreshold) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-optional-chain
+            if (bestMatch && bestMatch.meetsThreshold) {
               matchedStudent = {
-                id: bestMatch.student.id,
+                id: bestMatch.student.studentId,
                 name: `${bestMatch.student.firstName} ${bestMatch.student.lastName}`,
                 similarity: bestMatch.similarity,
               };
@@ -462,14 +470,19 @@ attendance.post("/session", async (c) => {
                 } else if (faceMatches.length === 0) {
                   noMatchReason =
                     "Rostro no coincide con ningún estudiante de esta clase";
-                } else if (faceMatches.every((m) => !m.meetsThreshold)) {
-                  noMatchReason = `Mejor coincidencia: ${bestMatch.student.firstName} ${bestMatch.student.lastName} con ${bestMatch.similarity.toFixed(1)}% (requiere ≥${FaceMatchThreshold}%)`;
+                } else if (
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                  bestMatch &&
+                  faceMatches.every((m) => !m.meetsThreshold)
+                ) {
+                  const similarityPercent = bestMatch.similarity.toFixed(1);
+                  noMatchReason = `Mejor coincidencia: ${bestMatch.student.firstName} ${bestMatch.student.lastName} con ${similarityPercent}% (requiere ≥${String(FaceMatchThreshold)}%)`;
                 }
               }
             }
           } catch (searchError) {
             console.error(
-              `[ATTENDANCE] Error searching face ${faceIdx + 1}:`,
+              `[ATTENDANCE] Error searching face ${String(faceIdx + 1)}:`,
               searchError,
             );
             noMatchReason = `Error al buscar rostro: ${searchError instanceof Error ? searchError.message : "Unknown error"}`;
@@ -478,7 +491,14 @@ attendance.post("/session", async (c) => {
           // Only add to debug if enabled
           if (collectDebug) {
             photoDebug.faces.push({
-              boundingBox,
+              boundingBox: boundingBox
+                ? {
+                    Width: boundingBox.Width ?? 0,
+                    Height: boundingBox.Height ?? 0,
+                    Left: boundingBox.Left ?? 0,
+                    Top: boundingBox.Top ?? 0,
+                  }
+                : { Width: 0, Height: 0, Left: 0, Top: 0 },
               confidence: faceConfidence,
               matchedStudent,
               faceId: matchedFaceId,
@@ -489,13 +509,13 @@ attendance.post("/session", async (c) => {
         }
       } catch (indexError) {
         console.error(
-          `[ATTENDANCE] Error indexing faces in photo ${photoIdx + 1}:`,
+          `[ATTENDANCE] Error indexing faces in photo ${String(photoIdx + 1)}:`,
           indexError,
         );
         photoDebug.totalFacesInPhoto = 0;
         photoDebug.faces = [
           {
-            boundingBox: undefined,
+            boundingBox: { Width: 0, Height: 0, Left: 0, Top: 0 },
             confidence: 0,
             noMatchReason: `Error al indexar rostros: ${indexError instanceof Error ? indexError.message : "Unknown error"}`,
           },
@@ -506,7 +526,7 @@ attendance.post("/session", async (c) => {
           try {
             if (debugEnabled) {
               console.log(
-                `[ATTENDANCE] Cleaning up ${tempFaceIds.length} temporary faces`,
+                `[ATTENDANCE] Cleaning up ${String(tempFaceIds.length)} temporary faces`,
               );
             }
             await rekognition.send(
@@ -555,7 +575,7 @@ attendance.post("/session", async (c) => {
     // Create attendance records for all enrolled students
     const attendanceRecords = enrolledStudents.map((student) => {
       const detected = allDetectedFaces.get(student.studentId);
-      const attendanceId = `att-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const attendanceId = `att-${String(Date.now())}-${Math.random().toString(36).substring(2, 11)}`;
 
       return {
         id: attendanceId,
@@ -581,7 +601,7 @@ attendance.post("/session", async (c) => {
     // Prepare response
     const presentStudents = Array.from(allDetectedFaces.values()).map((d) => ({
       student_id: d.studentId,
-      name: `${d.student.firstName} ${d.student.middleName || ""} ${d.student.lastName} ${d.student.secondLastName || ""}`.trim(),
+      name: `${d.student.firstName} ${d.student.middleName ?? ""} ${d.student.lastName} ${d.student.secondLastName ?? ""}`.trim(),
       confidence: d.confidence,
       face_id: d.faceId,
       identification: d.student.identificationNumber,
@@ -592,14 +612,14 @@ attendance.post("/session", async (c) => {
       .filter((s) => !allDetectedFaces.has(s.studentId))
       .map((s) => s.studentId);
 
-    let absentStudentsWithGuardians: Array<{
+    let absentStudentsWithGuardians: {
       student_id: string;
       name: string;
       identification: string;
       guardian_id?: string;
       guardian_name?: string;
       guardian_phone?: string;
-    }> = [];
+    }[] = [];
 
     if (absentStudentIds.length > 0) {
       // Fetch full student records with guardian info
@@ -625,7 +645,7 @@ attendance.post("/session", async (c) => {
 
       absentStudentsWithGuardians = studentsWithGuardians.map((s) => ({
         student_id: s.studentId,
-        name: `${s.firstName} ${s.middleName || ""} ${s.lastName} ${s.secondLastName || ""}`.trim(),
+        name: `${s.firstName} ${s.middleName ?? ""} ${s.lastName} ${s.secondLastName ?? ""}`.trim(),
         identification: s.identificationNumber,
         guardian_id: s.guardianId,
         guardian_name: `${s.guardianFirstName} ${s.guardianLastName}`,
@@ -643,8 +663,10 @@ attendance.post("/session", async (c) => {
             // For simplicity in hackathon, we'll just log this
             // In production, you'd fetch attendance history and call the reasoning agent
             console.log(
-              `[REASONING] Would analyze ${absentStudentsWithGuardians.length} absent students for session ${sessionId}`,
+              `[REASONING] Would analyze ${String(absentStudentsWithGuardians.length)} absent students for session ${sessionId}`,
             );
+            await Promise.resolve();
+            return;
 
             // TODO: Implement batch reasoning analysis
             // This would:
@@ -687,7 +709,7 @@ attendance.post("/capture", async (c) => {
       max_faces?: number; // optional override
     }>();
 
-    if (!body?.photo) {
+    if (!body.photo) {
       return c.json({ error: "photo is required (base64)" }, 400);
     }
 
@@ -809,7 +831,7 @@ attendance.post("/capture", async (c) => {
 attendance.post("/detect-faces", async (c) => {
   try {
     const body = await c.req.json<{ photo: string }>();
-    if (!body?.photo)
+    if (!body.photo)
       return c.json({ error: "photo is required (base64)" }, 400);
 
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = c.env;
@@ -854,7 +876,7 @@ attendance.post("/detect-faces", async (c) => {
 attendance.post("/match-face", async (c) => {
   try {
     const body = await c.req.json<{ face: string; threshold?: number }>();
-    if (!body?.face) return c.json({ error: "face is required (base64)" }, 400);
+    if (!body.face) return c.json({ error: "face is required (base64)" }, 400);
 
     const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } = c.env;
     const collectionId =
@@ -887,10 +909,11 @@ attendance.post("/match-face", async (c) => {
           QualityFilter: "AUTO",
         }),
       );
-    } catch (e: any) {
+    } catch (e) {
+      const error = e as { name?: string; Code?: string };
       if (
-        e?.name === "InvalidParameterException" ||
-        e?.Code === "InvalidParameterException"
+        error.name === "InvalidParameterException" ||
+        error.Code === "InvalidParameterException"
       ) {
         return c.json({ match: null });
       }
@@ -898,9 +921,10 @@ attendance.post("/match-face", async (c) => {
     }
 
     const match = (out.FaceMatches ?? [])[0];
-    if (!match?.Face?.FaceId) return c.json({ match: null });
-
-    const faceId = match.Face.FaceId;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const faceId = match?.Face?.FaceId;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!match || !faceId) return c.json({ match: null });
     const db = drizzle(c.env.DB);
     const rows = await db
       .select({ faceId: studentFacesTable.faceId, student: studentsTable })
@@ -912,15 +936,21 @@ attendance.post("/match-face", async (c) => {
       .where(eq(studentFacesTable.faceId, faceId))
       .limit(1);
 
-    const student = rows[0]?.student ?? null;
+    const studentData = rows[0];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const student = studentData?.student;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!student) {
+      return c.json({ match: null });
+    }
+
     return c.json({
-      match: student
-        ? {
-            student,
-            faceId,
-            similarity: match.Similarity ?? null,
-          }
-        : null,
+      match: {
+        student,
+        faceId,
+        similarity: match.Similarity ?? null,
+      },
     });
   } catch (err) {
     console.error("/attendance/match-face error", err);
@@ -956,7 +986,7 @@ attendance.get("/sessions/:sessionId/photos", async (c) => {
     // Parse photo URLs from JSON
     let photoKeys: string[] = [];
     try {
-      photoKeys = photoUrls ? JSON.parse(photoUrls) : [];
+      photoKeys = photoUrls ? (JSON.parse(photoUrls) as string[]) : [];
     } catch (e) {
       console.error("Failed to parse photo URLs:", e);
       return c.json({ error: "Invalid photo data" }, 500);
@@ -1156,7 +1186,7 @@ attendance.patch("/:attendanceId/override", async (c) => {
         corrected: true,
         correctedAt: new Date().toISOString(),
         correctedBy: body.teacher_id,
-        notes: body.notes || null,
+        notes: body.notes ?? null,
       })
       .where(eq(attendanceTable.id, attendanceId));
 

@@ -175,7 +175,7 @@ classes.get("/:classId/students", async (c) => {
         return {
           ...record,
           faceCount: faces.length,
-          fullName: `${record.student.firstName} ${record.student.middleName || ""} ${record.student.lastName} ${record.student.secondLastName || ""}`.trim(),
+          fullName: `${record.student.firstName} ${record.student.middleName ?? ""} ${record.student.lastName} ${record.student.secondLastName ?? ""}`.trim(),
         };
       })
     );

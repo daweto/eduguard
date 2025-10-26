@@ -36,7 +36,7 @@ Usa variables: {{student_name}}, {{guardian_name}}, {{rut}}, {{class_name}}, {{t
   console.log("Agent created with ID:", agent.agentId);
 }
 
-main().catch((e) => {
+main().catch((e: unknown) => {
   console.error(e);
-  process.exit(1);
+  throw new Error("Failed to create agent");
 });

@@ -60,7 +60,7 @@ export function createSessionColumns({
           `${student.firstName} ${student.middleName || ""} ${student.lastName} ${student.secondLastName || ""}`.trim();
         return <div className="font-medium min-w-[200px]">{fullName}</div>;
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, _id, value) => {
         const student = row.original.student;
         const fullName =
           `${student.firstName} ${student.middleName || ""} ${student.lastName} ${student.secondLastName || ""}`.toLowerCase();
@@ -96,7 +96,7 @@ export function createSessionColumns({
           />
         );
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, _id, value) => {
         return value.includes(row.original.attendance.status);
       },
     },

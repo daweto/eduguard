@@ -4,28 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Phone, Clock, User, AlertCircle } from "lucide-react";
 import { RiskBadge } from "@/components/attendance/RiskBadge";
+import { type Call as CallType } from "@repo/shared-types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8787";
 
-interface Call {
-  call_id: string;
-  student_id: string;
-  student_name?: string;
-  guardian_name?: string;
-  guardian_phone: string;
-  initiated_by: string;
-  risk_level?: string;
-  status: string;
-  duration?: number;
-  dtmf_response?: string;
-  transcript?: string;
-  recording_url?: string;
-  created_at: string;
-  updated_at?: string;
-}
-
 export default function CallsHistoryPage() {
-  const [calls, setCalls] = useState<Call[]>([]);
+  const [calls, setCalls] = useState<CallType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,7 +141,7 @@ export default function CallsHistoryPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {call.risk_level && (
-                      <RiskBadge riskLevel={call.risk_level as any} />
+                      <RiskBadge riskLevel={call.risk_level} />
                     )}
                     {getStatusBadge(call.status)}
                   </div>

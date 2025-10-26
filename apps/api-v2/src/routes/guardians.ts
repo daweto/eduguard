@@ -17,7 +17,7 @@ guardians.post("/", async (c) => {
       !body.lastName.trim() ||
       !body.identificationNumber.trim() ||
       !body.phone.trim() ||
-      !body.email?.trim()
+      !body.email.trim()
     ) {
       return c.json({ error: "Missing required fields" }, 400);
     }

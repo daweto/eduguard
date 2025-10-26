@@ -16,7 +16,7 @@ reasoning.all("/*", async (c) => {
         error: "AI Agents service not configured",
         details: "AI_AGENTS_URL environment variable is not set",
       },
-      500
+      500,
     );
   }
 
@@ -26,13 +26,22 @@ reasoning.all("/*", async (c) => {
 
   try {
     // Forward the request
+    // Convert headers to plain object
+    const headerEntries: [string, string][] = [];
+    c.req.raw.headers.forEach((value, key) => {
+      headerEntries.push([key, value]);
+    });
+
     const response = await fetch(targetUrl, {
       method: c.req.method,
       headers: {
         "Content-Type": "application/json",
-        ...Object.fromEntries(c.req.raw.headers),
+        ...Object.fromEntries(headerEntries),
       },
-      body: c.req.method !== "GET" && c.req.method !== "HEAD" ? await c.req.raw.text() : undefined,
+      body:
+        c.req.method !== "GET" && c.req.method !== "HEAD"
+          ? await c.req.raw.text()
+          : undefined,
     });
 
     // Return the response from AI Agents
@@ -40,7 +49,8 @@ reasoning.all("/*", async (c) => {
     return new Response(data, {
       status: response.status,
       headers: {
-        "Content-Type": response.headers.get("Content-Type") || "application/json",
+        "Content-Type":
+          response.headers.get("Content-Type") ?? "application/json",
       },
     });
   } catch (error) {
@@ -50,7 +60,7 @@ reasoning.all("/*", async (c) => {
         error: "Failed to connect to AI Agents service",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      503
+      503,
     );
   }
 });

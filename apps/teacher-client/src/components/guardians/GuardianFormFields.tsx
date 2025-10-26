@@ -15,13 +15,57 @@ import {
 } from '@/components/ui/field';
 import { formatRut } from '@/lib/helpers/rut';
 
-interface GuardianFormFieldsProps {
+/**
+ * Minimal interface for the field state we use from TanStack Form
+ * Note: TanStack Form uses generic error types, but for our simple string validations
+ * we know they'll always be strings or undefined
+ */
+interface FieldState {
+  value: string;
+  meta: {
+    isTouched: boolean;
+    errors: Array<string | undefined>;
+    isValid: boolean;
+  };
+}
+
+/**
+ * Minimal interface for field API methods we use from TanStack Form
+ */
+interface MinimalFieldApi {
+  name: string;
+  state: FieldState;
+  handleChange: (value: string) => void;
+  handleBlur: () => void;
+}
+
+/**
+ * Minimal interface for the form API we use from TanStack Form
+ * Using a broad type to be compatible with any FormApi instance
+ */
+interface MinimalFormApi {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  form: any; // FormApi from @tanstack/react-form
+  Field: any; // TanStack Form's FieldComponent with many generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setFieldValue: (...args: any[]) => any;
+  state: {
+    isSubmitted: boolean;
+  };
+}
+
+interface GuardianFormFieldsProps {
+  form: MinimalFormApi;
   fieldPrefix?: string; // e.g., "guardian" for nested fields
   formFieldErrorVisible: (isTouched: boolean, hasErrors: boolean) => boolean;
   translationNamespace?: string; // e.g., "guardians" or "enrollment"
   translationKeyPrefix?: string; // e.g., "form" or "fields.guardian"
+}
+
+/**
+ * Helper to convert TanStack Form string errors to the format expected by FieldError component
+ */
+function mapErrors(errors: Array<string | undefined>): Array<{ message?: string } | undefined> {
+  return errors.map(error => error ? { message: error } : undefined);
 }
 
 export function GuardianFormFields({
@@ -40,44 +84,49 @@ export function GuardianFormFields({
     <>
       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <form.Field name={getFieldName('firstName')}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(field: any) => {
-            const showError = formFieldErrorVisible(field.state.meta.isTouched, field.state.meta.errors.length > 0);
+            // Type assertion is safe because we know the form field structure
+            const typedField = field as MinimalFieldApi;
+            const showError = formFieldErrorVisible(typedField.state.meta.isTouched, typedField.state.meta.errors.length > 0);
             return (
               <Field data-invalid={showError} className="space-y-2">
-                <FieldLabel htmlFor={field.name}>{t(getTranslationKey('firstName.label'))} *</FieldLabel>
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('firstName.label'))} *</FieldLabel>
                 <FieldContent>
                   <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
+                    id={typedField.name}
+                    value={typedField.state.value}
+                    onChange={(e) => typedField.handleChange(e.target.value)}
+                    onBlur={typedField.handleBlur}
                     placeholder={t(getTranslationKey('firstName.placeholder'))}
                     aria-invalid={showError}
                   />
                 </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError errors={mapErrors(typedField.state.meta.errors)} />
               </Field>
             );
           }}
         </form.Field>
 
         <form.Field name={getFieldName('lastName')}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(field: any) => {
-            const showError = formFieldErrorVisible(field.state.meta.isTouched, field.state.meta.errors.length > 0);
+            const typedField = field as MinimalFieldApi;
+            const showError = formFieldErrorVisible(typedField.state.meta.isTouched, typedField.state.meta.errors.length > 0);
             return (
               <Field data-invalid={showError} className="space-y-2">
-                <FieldLabel htmlFor={field.name}>{t(getTranslationKey('lastName.label'))} *</FieldLabel>
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('lastName.label'))} *</FieldLabel>
                 <FieldContent>
                   <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    onBlur={field.handleBlur}
+                    id={typedField.name}
+                    value={typedField.state.value}
+                    onChange={(e) => typedField.handleChange(e.target.value)}
+                    onBlur={typedField.handleBlur}
                     placeholder={t(getTranslationKey('lastName.placeholder'))}
                     aria-invalid={showError}
                   />
                 </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError errors={mapErrors(typedField.state.meta.errors)} />
               </Field>
             );
           }}
@@ -86,55 +135,65 @@ export function GuardianFormFields({
 
       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <form.Field name={getFieldName('middleName')}>
-          {(field: any) => (
-            <Field className="space-y-2">
-              <FieldLabel htmlFor={field.name}>{t(getTranslationKey('middleName.label'))}</FieldLabel>
-              <FieldContent>
-                <Input
-                  id={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  placeholder={t(getTranslationKey('middleName.placeholder'))}
-                />
-              </FieldContent>
-            </Field>
-          )}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {(field: any) => {
+            const typedField = field as MinimalFieldApi;
+            return (
+              <Field className="space-y-2">
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('middleName.label'))}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={typedField.name}
+                    value={typedField.state.value}
+                    onChange={(e) => typedField.handleChange(e.target.value)}
+                    onBlur={typedField.handleBlur}
+                    placeholder={t(getTranslationKey('middleName.placeholder'))}
+                  />
+                </FieldContent>
+              </Field>
+            );
+          }}
         </form.Field>
 
         <form.Field name={getFieldName('secondLastName')}>
-          {(field: any) => (
-            <Field className="space-y-2">
-              <FieldLabel htmlFor={field.name}>{t(getTranslationKey('secondLastName.label'))}</FieldLabel>
-              <FieldContent>
-                <Input
-                  id={field.name}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  placeholder={t(getTranslationKey('secondLastName.placeholder'))}
-                />
-              </FieldContent>
-            </Field>
-          )}
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {(field: any) => {
+            const typedField = field as MinimalFieldApi;
+            return (
+              <Field className="space-y-2">
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('secondLastName.label'))}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={typedField.name}
+                    value={typedField.state.value}
+                    onChange={(e) => typedField.handleChange(e.target.value)}
+                    onBlur={typedField.handleBlur}
+                    placeholder={t(getTranslationKey('secondLastName.placeholder'))}
+                  />
+                </FieldContent>
+              </Field>
+            );
+          }}
         </form.Field>
       </FieldGroup>
 
       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <form.Field name={getFieldName('identificationNumber')}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(field: any) => {
-            const showError = formFieldErrorVisible(field.state.meta.isTouched, field.state.meta.errors.length > 0);
+            const typedField = field as MinimalFieldApi;
+            const showError = formFieldErrorVisible(typedField.state.meta.isTouched, typedField.state.meta.errors.length > 0);
             return (
               <Field data-invalid={showError} className="space-y-2">
-                <FieldLabel htmlFor={field.name}>{t(getTranslationKey('identification.label'))} *</FieldLabel>
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('identification.label'))} *</FieldLabel>
                 <FieldContent>
                   <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    id={typedField.name}
+                    value={typedField.state.value}
+                    onChange={(e) => typedField.handleChange(e.target.value)}
                     onBlur={() => {
-                      field.handleBlur();
-                      form.setFieldValue(field.name, formatRut(field.state.value));
+                      typedField.handleBlur();
+                      form.setFieldValue(typedField.name, formatRut(typedField.state.value));
                     }}
                     placeholder={t(getTranslationKey('identification.placeholder'))}
                     aria-invalid={showError}
@@ -142,30 +201,32 @@ export function GuardianFormFields({
                     autoCapitalize="characters"
                   />
                 </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError errors={mapErrors(typedField.state.meta.errors)} />
               </Field>
             );
           }}
         </form.Field>
 
         <form.Field name={getFieldName('phone')}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(field: any) => {
-            const showError = formFieldErrorVisible(field.state.meta.isTouched, field.state.meta.errors.length > 0);
+            const typedField = field as MinimalFieldApi;
+            const showError = formFieldErrorVisible(typedField.state.meta.isTouched, typedField.state.meta.errors.length > 0);
             return (
               <Field data-invalid={showError} className="space-y-2">
-                <FieldLabel htmlFor={field.name}>{t(getTranslationKey('phone.label'))} *</FieldLabel>
+                <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('phone.label'))} *</FieldLabel>
                 <FieldContent>
                   <PhoneInput
-                    value={field.state.value}
+                    value={typedField.state.value}
                     onChange={(val) => {
-                      field.handleChange((val as string) ?? '');
-                      field.handleBlur();
+                      typedField.handleChange((val as string) ?? '');
+                      typedField.handleBlur();
                     }}
                     placeholder={t(getTranslationKey('phone.placeholder')) as string}
                     defaultCountry="CL"
                   />
                 </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
+                <FieldError errors={mapErrors(typedField.state.meta.errors)} />
               </Field>
             );
           }}
@@ -173,24 +234,26 @@ export function GuardianFormFields({
       </FieldGroup>
 
       <form.Field name={getFieldName('email')}>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {(field: any) => {
-          const showError = formFieldErrorVisible(field.state.meta.isTouched, field.state.meta.errors.length > 0);
+          const typedField = field as MinimalFieldApi;
+          const showError = formFieldErrorVisible(typedField.state.meta.isTouched, typedField.state.meta.errors.length > 0);
           return (
             <Field data-invalid={showError} className="space-y-2">
-              <FieldLabel htmlFor={field.name}>{t(getTranslationKey('email.label'))} *</FieldLabel>
+              <FieldLabel htmlFor={typedField.name}>{t(getTranslationKey('email.label'))} *</FieldLabel>
               <FieldContent>
                 <Input
-                  id={field.name}
+                  id={typedField.name}
                   type="email"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
+                  value={typedField.state.value}
+                  onChange={(e) => typedField.handleChange(e.target.value)}
+                  onBlur={typedField.handleBlur}
                   placeholder={t(getTranslationKey('email.placeholder'))}
                   aria-invalid={showError}
                   autoComplete="email"
                 />
               </FieldContent>
-              <FieldError errors={field.state.meta.errors} />
+              <FieldError errors={mapErrors(typedField.state.meta.errors)} />
             </Field>
           );
         }}

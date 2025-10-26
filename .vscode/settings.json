@@ -1,6 +1,11 @@
 {
+  // ESLint Configuration
+  "eslint.enable": true,
   "eslint.useFlatConfig": true,
-  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.workingDirectories": [
+    { "pattern": "apps/*" },
+    { "pattern": "packages/*" }
+  ],
   "eslint.validate": [
     "javascript",
     "javascriptreact",
@@ -8,11 +13,19 @@
     "typescriptreact"
   ],
   "eslint.codeActionsOnSave.mode": "all",
+  "eslint.experimental.useFlatConfig": true,
+
+  // Editor
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "editor.formatOnSave": false,
 
+  // TypeScript
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // i18n-ally
   "i18n-ally.localesPaths": ["apps/teacher-client/src/i18n/locales"],
   "i18n-ally.sourceLanguage": "es",
   "i18n-ally.displayLanguage": "es",

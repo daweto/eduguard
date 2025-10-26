@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, AlertCircle, Info } from "lucide-react";
-
-type RiskLevel = "none" | "low" | "medium" | "high";
+import { type RiskLevel } from "@repo/shared-types";
 
 interface RiskBadgeProps {
   riskLevel: RiskLevel;

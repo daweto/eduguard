@@ -109,7 +109,7 @@ seedRouter.post("/sync-faces", async (c) => {
     const listResult = await rekognition.send(listCommand);
     const awsFaces = listResult.Faces ?? [];
 
-    console.log(`[SYNC] Found ${awsFaces.length} faces in AWS Rekognition`);
+    console.log(`[SYNC] Found ${String(awsFaces.length)} faces in AWS Rekognition`);
 
     // Create map of externalImageId -> faceId
     const faceMap = new Map<string, string>();
@@ -126,7 +126,7 @@ seedRouter.post("/sync-faces", async (c) => {
       .where(eq(studentFaces.faceId, "placeholder"))
       .all();
 
-    console.log(`[SYNC] Found ${dbFaces.length} faces to sync in database`);
+    console.log(`[SYNC] Found ${String(dbFaces.length)} faces to sync in database`);
 
     // Update each face with the correct faceId from AWS
     let syncedCount = 0;

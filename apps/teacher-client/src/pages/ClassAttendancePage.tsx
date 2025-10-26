@@ -505,7 +505,7 @@ export function ClassAttendancePage() {
                                 </div>
                                 {student.risk_level && (
                                   <RiskBadge
-                                    riskLevel={student.risk_level as any}
+                                    riskLevel={student.risk_level as "none" | "low" | "medium" | "high"}
                                   />
                                 )}
                               </div>

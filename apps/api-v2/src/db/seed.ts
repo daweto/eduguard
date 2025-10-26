@@ -1,17 +1,16 @@
 // Seed data for Chilean school stages and grades
 import { drizzle } from "drizzle-orm/d1";
 import {
-  stages,
-  grades,
-  gradeSections,
-  teachers,
-  classrooms,
   courses,
-  classes,
+  grades,
+  classrooms,
+  teachers,
+  stages,
   legalGuardians,
   students,
-  studentFaces,
   classEnrollments,
+  gradeSections,
+  classes,
 } from "./schema";
 
 export const stagesData = [

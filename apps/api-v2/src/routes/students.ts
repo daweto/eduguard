@@ -587,7 +587,7 @@ students.post("/:id/photos", async (c) => {
     const studentId = c.req.param("id");
     const body = await c.req.json<{ photo_keys: string[] }>();
     
-    if (!body.photo_keys || body.photo_keys.length === 0) {
+    if (body.photo_keys.length === 0) {
       return c.json({ error: "At least one photo key is required" }, 400);
     }
 
@@ -662,8 +662,8 @@ students.post("/:id/photos", async (c) => {
         }
 
         // Move to final location
-        const ext = tempKey.split('.').pop() || 'jpg';
-        const photoKey = `students/${studentId}/photo-${Date.now()}-${i}.${ext}`;
+        const ext = tempKey.split('.').pop() ?? 'jpg';
+        const photoKey = `students/${studentId}/photo-${String(Date.now())}-${String(i)}.${ext}`;
         
         // Infer content type from extension
         const contentType = ext === 'png' ? 'image/png' : 
@@ -686,7 +686,7 @@ students.post("/:id/photos", async (c) => {
           .from(studentFacesTable)
           .where(eq(studentFacesTable.studentId, studentId));
         const photoNumber = (existingFacesCount[0]?.count ?? 0) + i + 1;
-        const externalImageId = `${studentId}-photo-${photoNumber}`;
+        const externalImageId = `${studentId}-photo-${String(photoNumber)}`;
         
         try {
           const indexResult = await indexFaceBytes({
@@ -873,13 +873,13 @@ students.get("/:id/attendance", async (c) => {
       summary,
       records: attendanceRecords,
       filters: {
-        classId: classId || null,
-        courseId: courseId || null,
-        subject: subject || null,
-        teacherId: teacherId || null,
-        from: from || null,
-        to: to || null,
-        status: status || null,
+        classId: classId ?? null,
+        courseId: courseId ?? null,
+        subject: subject ?? null,
+        teacherId: teacherId ?? null,
+        from: from ?? null,
+        to: to ?? null,
+        status: status ?? null,
       },
     });
   } catch (error) {

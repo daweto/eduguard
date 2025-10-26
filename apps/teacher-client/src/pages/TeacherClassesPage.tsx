@@ -17,7 +17,7 @@ import { useTeacherContext } from "@/contexts/teacher-context";
 
 export function TeacherClassesPage() {
   const navigate = useNavigate();
-  const { activeTeacherId, activeTeacher } = useTeacherContext();
+  const { activeTeacherId } = useTeacherContext();
   const { classes, isLoading, error } = useTeacherClasses(activeTeacherId);
 
   const handleTakeAttendance = (classId: string) => {

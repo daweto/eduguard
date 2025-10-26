@@ -9,9 +9,15 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, CheckCircle, XCircle, Clock, AlertCircle } from "lucide-react";
+import {
+  MoreHorizontal,
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import type { AttendanceRecord } from "@/types/attendance";
 
@@ -54,12 +60,13 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         <div className="max-w-[200px]">
           <div className="font-medium truncate">{row.original.course.name}</div>
           <div className="text-xs text-muted-foreground">
-            {row.original.course.courseCode} · Sección {row.original.class.section}
+            {row.original.course.courseCode} · Sección{" "}
+            {row.original.class.section}
           </div>
         </div>
       );
     },
-    filterFn: (row, id, value) => {
+    filterFn: (row, _id, value) => {
       return value.includes(row.original.course.name);
     },
   },
@@ -72,7 +79,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
     cell: ({ row }) => {
       return <div className="w-[100px]">{row.original.course.subject}</div>;
     },
-    filterFn: (row, id, value) => {
+    filterFn: (row, _id, value) => {
       return value.includes(row.original.course.subject);
     },
   },
@@ -121,7 +128,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         </Badge>
       );
     },
-    filterFn: (row, id, value) => {
+    filterFn: (row, _id, value) => {
       return value.includes(row.original.attendance.status);
     },
   },
@@ -139,7 +146,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         </div>
       );
     },
-    filterFn: (row, id, value) => {
+    filterFn: (row, _id, value) => {
       const teacherName = `${row.original.teacher.firstName} ${row.original.teacher.lastName}`;
       return value.some((v: string) => teacherName.includes(v));
     },
@@ -151,7 +158,9 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
       <DataTableColumnHeader column={column} title="Período" />
     ),
     cell: ({ row }) => {
-      return <div className="w-[70px] text-center">{row.original.class.period}</div>;
+      return (
+        <div className="w-[70px] text-center">{row.original.class.period}</div>
+      );
     },
   },
   {
@@ -162,7 +171,8 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
     ),
     cell: ({ row }) => {
       const confidence = row.original.attendance.confidence;
-      if (confidence === null) return <div className="text-muted-foreground text-center">-</div>;
+      if (confidence === null)
+        return <div className="text-muted-foreground text-center">-</div>;
 
       const confidenceColor =
         confidence >= 95

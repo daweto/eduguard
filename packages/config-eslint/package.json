@@ -7,11 +7,15 @@
   "exports": {
     ".": "./index.js",
     "./next": "./next.js",
+    "./next.js": "./next.js",
     "./react": "./react.js",
+    "./react.js": "./react.js",
     "./remix": "./remix.js",
+    "./remix.js": "./remix.js",
     "./vite": "./vite.js",
+    "./vite.js": "./vite.js",
     "./hono": "./hono.js",
-    "./*": "./*.js"
+    "./hono.js": "./hono.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",

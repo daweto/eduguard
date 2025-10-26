@@ -18,11 +18,12 @@
     "db:reset": "rm -rf .wrangler/state && pnpm migrate:local"
   },
   "dependencies": {
-    "drizzle-orm": "^0.44.7",
-    "hono": "^4.10.3",
     "@aws-sdk/client-rekognition": "^3.699.0",
     "@aws-sdk/client-s3": "^3.699.0",
-    "@aws-sdk/s3-request-presigner": "^3.699.0"
+    "@aws-sdk/s3-request-presigner": "^3.699.0",
+    "@repo/shared-types": "workspace:*",
+    "drizzle-orm": "^0.44.7",
+    "hono": "^4.10.3"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

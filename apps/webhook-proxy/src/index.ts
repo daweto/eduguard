@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 
-type Bindings = {
+interface Bindings {
   FORWARD_TO_URL?: string;
-};
+}
 
 const app = new Hono<{ Bindings: Bindings }>();
 

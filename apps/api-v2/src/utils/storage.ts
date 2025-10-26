@@ -118,10 +118,9 @@ export async function fetchFromRemoteR2(
     const chunks: Uint8Array[] = [];
     const reader = response.Body.transformToWebStream().getReader();
     
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value as Uint8Array);
+    let readResult;
+    while ((readResult = await reader.read(), !readResult.done)) {
+      chunks.push(readResult.value as Uint8Array);
     }
 
     // Combine chunks

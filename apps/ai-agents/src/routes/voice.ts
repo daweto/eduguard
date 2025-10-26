@@ -1,11 +1,31 @@
-import { Hono } from "hono";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import { Hono } from "hono";
 
 // Route handlers defined inline following Hono best practices
 const app = new Hono();
 
 // In-memory call tracking (use database in production)
-const activeCalls = new Map<string, any>();
+interface CallData {
+  call_id: string;
+  conversation_id: string | null;
+  call_sid: string | null;
+  student_id: string;
+  student_name: string;
+  guardian_name: string;
+  guardian_phone: string;
+  risk_level: string;
+  pattern_type: string;
+  status: string;
+  initiated_at: string;
+  updated_at?: string;
+  completed_at?: string;
+  duration?: number;
+  dtmf_response?: string;
+  transcript?: string;
+  outcome?: string;
+}
+
+const activeCalls = new Map<string, CallData>();
 
 /**
  * POST /call
@@ -32,12 +52,7 @@ app.post("/call", async (c) => {
       guardian_phone,
       risk_level,
       pattern_type,
-      reasoning,
       class_name = "clase",
-      time = new Date().toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
     } = body;
 
     if (!student_id || !student_name || !guardian_phone) {
@@ -51,7 +66,7 @@ app.post("/call", async (c) => {
     }
 
     // Validate phone number (basic check)
-    if (!guardian_phone.match(/^\+?\d{10,15}$/)) {
+    if (!/^\+?\d{10,15}$/.exec(guardian_phone)) {
       return c.json(
         {
           error:
@@ -85,7 +100,7 @@ app.post("/call", async (c) => {
       );
     }
 
-    const schoolName = process.env.SCHOOL_NAME || "Colegio Skyward";
+    const schoolName = process.env.SCHOOL_NAME ?? "Colegio Skyward";
 
     console.log(
       `📞 Initiating call to ${guardian_name} (${guardian_phone}) for ${student_name}`,
@@ -94,26 +109,6 @@ app.post("/call", async (c) => {
 
     // Initialize ElevenLabs client
     const client = new ElevenLabsClient({ apiKey });
-
-    // Build natural conversation prompt in Spanish
-    const systemPrompt = `Eres un asistente de voz de asistencia del ${schoolName}.
-Hablas español chileno, profesional y cercano.
-
-CONTEXTO:
-- Estudiante: ${student_name}
-- Apoderado: ${guardian_name}
-- Clase: ${class_name}
-- Hora: ${time}
-- Patrón detectado: ${pattern_type === "sneak_out" ? "presente en primera clase, ausente después" : reasoning}
-
-OBJETIVO: Notificar la inasistencia de hoy y registrar el motivo.
-
-REGLAS:
-- Conversación natural (no menús DTMF, a menos que el flujo lo requiera en el futuro).
-- Confirma identidad de quien atiende antes de revelar datos.
-- Sé breve (máx. 90s), empático y claro.
-- Si el apoderado desconoce la situación, ofrece canal de contacto del colegio.
-`;
 
     try {
       console.log(
@@ -143,15 +138,15 @@ REGLAS:
       });
 
       const callId =
-        resp.conversationId ||
-        resp.callSid ||
-        `call_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        resp.conversationId ??
+        resp.callSid ??
+        `call_${String(Date.now())}_${Math.random().toString(36).slice(2)}`;
 
       // Track the call
-      const callData = {
+      const callData: CallData = {
         call_id: callId,
-        conversation_id: resp.conversationId || null,
-        call_sid: resp.callSid || null,
+        conversation_id: resp.conversationId ?? null,
+        call_sid: resp.callSid ?? null,
         student_id,
         student_name,
         guardian_name,
@@ -210,7 +205,7 @@ REGLAS:
  * GET /call/:call_id
  * Get call status
  */
-app.get("/call/:call_id", async (c) => {
+app.get("/call/:call_id", (c) => {
   try {
     const callId = c.req.param("call_id");
 
@@ -225,17 +220,16 @@ app.get("/call/:call_id", async (c) => {
       return c.json({ error: "ElevenLabs API key not configured" }, 500);
     }
 
-    const client = new ElevenLabsClient({ apiKey });
-
     // TODO: Update with correct ElevenLabs v2 API
     // Placeholder for development
+    const currentStatus = trackedCall.status || "in_progress";
     const status = {
-      status: trackedCall.status || "in_progress",
+      status: currentStatus,
       callId,
     };
 
     // Update tracked call
-    trackedCall.status = status.status;
+    trackedCall.status = currentStatus;
     trackedCall.updated_at = new Date().toISOString();
 
     return c.json({
@@ -260,7 +254,14 @@ app.get("/call/:call_id", async (c) => {
  */
 app.post("/webhook/call-completed", async (c) => {
   try {
-    const payload = await c.req.json();
+    const payload = await c.req.json<{
+      call_id?: string;
+      conversation_id?: string;
+      status?: string;
+      duration?: number;
+      dtmf_input?: string;
+      transcript?: string;
+    }>();
 
     console.log("📥 Call completed webhook:", JSON.stringify(payload, null, 2));
 
@@ -274,34 +275,36 @@ app.post("/webhook/call-completed", async (c) => {
     } = payload;
 
     // Update tracked call
-    const trackedCall = activeCalls.get(call_id);
-    if (trackedCall) {
-      trackedCall.status = "completed";
-      trackedCall.completed_at = new Date().toISOString();
-      trackedCall.duration = duration;
-      trackedCall.dtmf_response = dtmf_input;
-      trackedCall.transcript = transcript;
-      trackedCall.outcome = status;
+    if (call_id) {
+      const trackedCall = activeCalls.get(call_id);
+      if (trackedCall) {
+        trackedCall.status = "completed";
+        trackedCall.completed_at = new Date().toISOString();
+        trackedCall.duration = duration;
+        trackedCall.dtmf_response = dtmf_input;
+        trackedCall.transcript = transcript;
+        trackedCall.outcome = status;
 
-      console.log(
-        `   ✅ Call ${call_id} completed: ${duration}s, DTMF: ${dtmf_input || "none"}`,
-      );
+        console.log(
+          `   ✅ Call ${call_id} completed: ${String(duration)}s, DTMF: ${dtmf_input ?? "none"}`,
+        );
+      }
     }
 
     // Optionally forward to API webhook for persistence
-    const apiUrl = process.env.API_BASE_URL || process.env.API_URL;
+    const apiUrl = process.env.API_BASE_URL;
     if (apiUrl) {
       try {
         await fetch(`${apiUrl}/api/webhooks/elevenlabs/call-completed`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            call_id,
-            conversation_id,
-            status,
-            duration,
-            dtmf_input,
-            transcript,
+            call_id: call_id ?? "",
+            conversation_id: conversation_id ?? "",
+            status: status ?? "",
+            duration: duration ?? 0,
+            dtmf_input: dtmf_input ?? "",
+            transcript: transcript ?? "",
           }),
         });
       } catch (e) {

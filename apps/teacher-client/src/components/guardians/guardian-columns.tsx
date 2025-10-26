@@ -24,7 +24,7 @@ export function createGuardianColumns(): ColumnDef<LegalGuardian>[] {
           </div>
         );
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, _id, value) => {
         const fullName = formatFullName(row.original).toLowerCase();
         return fullName.includes(value.toLowerCase());
       },
@@ -72,7 +72,7 @@ export function createGuardianColumns(): ColumnDef<LegalGuardian>[] {
           </div>
         );
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, _id, value) => {
         return row.original.email.toLowerCase().includes(value.toLowerCase());
       },
     },
@@ -90,7 +90,7 @@ export function createGuardianColumns(): ColumnDef<LegalGuardian>[] {
         const formatted = relation.charAt(0).toUpperCase() + relation.slice(1);
         return <span>{formatted}</span>;
       },
-      filterFn: (row, id, value) => {
+      filterFn: (row, _id, value) => {
         return value.includes(row.original.relation);
       },
     },

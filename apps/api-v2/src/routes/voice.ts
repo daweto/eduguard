@@ -1,6 +1,7 @@
-import { Hono } from "hono";
-import { drizzle } from "drizzle-orm/d1";
+import type { VoiceCallRequest, VoiceCallResponse } from "@repo/shared-types";
 import { eq, desc } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
+import { Hono } from "hono";
 import { calls } from "../db/schema";
 import type { Bindings } from "../types";
 
@@ -48,8 +49,8 @@ voice.post("/call", async (c) => {
   }
 
   try {
-    const payload = await c.req.json<any>();
-    const guardianId = payload.guardian_id || payload.guardianId;
+    const payload = await c.req.json<VoiceCallRequest>();
+    const guardianId = payload.guardian_id ?? payload.guardianId;
     if (!payload.student_id || !payload.guardian_phone || !guardianId) {
       return c.json(
         { error: "student_id, guardian_id and guardian_phone are required" },
@@ -65,11 +66,11 @@ voice.post("/call", async (c) => {
     });
 
     const resultText = await resp.text();
-    let result: any;
+    let result: VoiceCallResponse;
     try {
-      result = JSON.parse(resultText);
+      result = JSON.parse(resultText) as VoiceCallResponse;
     } catch {
-      result = { raw: resultText };
+      result = { status: "error", message: resultText };
     }
     if (!resp.ok) {
       return new Response(resultText, {
@@ -80,10 +81,10 @@ voice.post("/call", async (c) => {
 
     // Persist minimal call record
     const callId: string =
-      result.call_id ||
-      result.conversation_id ||
-      result.call_sid ||
-      `call_${Date.now()}`;
+      result.call_id ??
+      result.conversation_id ??
+      result.call_sid ??
+      `call_${String(Date.now())}`;
     const db = drizzle(c.env.DB);
     await db
       .insert(calls)
@@ -127,12 +128,18 @@ voice.all("/*", async (c) => {
   const targetUrl = `${aiAgentsUrl}/api/voice${path}`;
 
   try {
+    // Convert headers to plain object
+    const headerEntries: [string, string][] = [];
+    c.req.raw.headers.forEach((value, key) => {
+      headerEntries.push([key, value]);
+    });
+
     // Forward the request
     const response = await fetch(targetUrl, {
       method: c.req.method,
       headers: {
         "Content-Type": "application/json",
-        ...Object.fromEntries(c.req.raw.headers),
+        ...Object.fromEntries(headerEntries),
       },
       body:
         c.req.method !== "GET" && c.req.method !== "HEAD"
@@ -146,7 +153,7 @@ voice.all("/*", async (c) => {
       status: response.status,
       headers: {
         "Content-Type":
-          response.headers.get("Content-Type") || "application/json",
+          response.headers.get("Content-Type") ?? "application/json",
       },
     });
   } catch (error) {

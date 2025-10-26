@@ -84,21 +84,6 @@ export function SessionDetailPage() {
     [sessionId],
   );
 
-  const handleOpenOverrideDialog = (
-    attendanceId: string,
-    currentStatus: string,
-    studentName: string,
-  ) => {
-    setOverrideDialog({
-      open: true,
-      attendanceId,
-      currentStatus,
-      studentName,
-    });
-    setNewStatus(currentStatus);
-    setNotes("");
-  };
-
   const handleCloseOverrideDialog = () => {
     setOverrideDialog({
       open: false,

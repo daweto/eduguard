@@ -103,4 +103,5 @@ function useTeacherContext() {
   return context;
 }
 
-export { TeacherProvider, useTeacherContext, TEACHER_GROUPS, TEACHERS };
+// eslint-disable-next-line react-refresh/only-export-components
+export { TeacherProvider, useTeacherContext };

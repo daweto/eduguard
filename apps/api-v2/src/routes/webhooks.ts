@@ -1,5 +1,5 @@
-import { drizzle } from "drizzle-orm/d1";
 import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { calls } from "../db/schema";
 import type { Bindings } from "../types";
@@ -34,21 +34,21 @@ webhooks.post("/elevenlabs/call-completed", async (c) => {
     const db = drizzle(c.env.DB);
 
     // Update the call record
-    const dtmfValue = dtmf_response || dtmf_input;
+    const dtmfValue = dtmf_response ?? dtmf_input;
 
     await db
       .update(calls)
       .set({
-        status: status || "completed",
-        duration: duration || null,
-        dtmfResponse: dtmfValue || null,
-        transcript: transcript || null,
-        recordingUrl: recording_url || null,
+        status,
+        duration: duration ?? null,
+        dtmfResponse: dtmfValue ?? null,
+        transcript: transcript ?? null,
+        recordingUrl: recording_url ?? null,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(calls.id, call_id));
 
-    console.log(`✅ Call ${call_id} updated: status=${status}, duration=${duration}s`);
+    console.log(`✅ Call ${call_id} updated: status=${status}, duration=${String(duration ?? 0)}s`);
 
     return c.json({
       received: true,
