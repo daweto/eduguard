@@ -26,7 +26,13 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Users, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+} from "lucide-react";
 import { useSessionDetail } from "@/components/classes/hooks/useSessionDetail";
 import { useOverrideAttendance } from "@/components/classes/hooks/useOverrideAttendance";
 import { useReasoningFlags } from "@/components/alerts/hooks/useReasoningFlags";

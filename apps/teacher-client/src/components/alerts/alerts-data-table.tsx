@@ -17,13 +17,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  AlertTriangle,
-  AlertCircle,
-  Info,
-  ShieldCheck,
-  X,
-} from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, ShieldCheck, X } from "lucide-react";
 
 import {
   Table,

@@ -28,7 +28,14 @@ function isCallInitiatedBy(value: string): value is CallInitiatedBy {
 }
 
 function isCallStatus(value: string): value is CallStatus {
-  return ["initiated", "ringing", "answered", "voicemail", "failed", "completed"].includes(value);
+  return [
+    "initiated",
+    "ringing",
+    "answered",
+    "voicemail",
+    "failed",
+    "completed",
+  ].includes(value);
 }
 
 function isRiskLevel(value: string | null): value is RiskLevel {
@@ -50,7 +57,9 @@ function mapCallRowToShared(
       ? `${guardian.firstName} ${guardian.lastName}`
       : undefined,
     guardian_phone: row.guardianPhone,
-    initiated_by: isCallInitiatedBy(row.initiatedBy) ? row.initiatedBy : "manual",
+    initiated_by: isCallInitiatedBy(row.initiatedBy)
+      ? row.initiatedBy
+      : "manual",
     risk_level: isRiskLevel(row.riskLevel) ? row.riskLevel : undefined,
     status: isCallStatus(row.status) ? row.status : "initiated",
     duration: row.duration ?? undefined,
@@ -77,7 +86,7 @@ voice.get("/calls", async (c) => {
     const guardianIds = Array.from(new Set(rows.map((r) => r.guardianId)));
 
     const studentsMap = new Map<string, DbStudent>();
-     
+
     const s =
       studentIds.length === 0
         ? []
@@ -88,7 +97,7 @@ voice.get("/calls", async (c) => {
     for (const st of s) studentsMap.set(st.id, st as DbStudent);
 
     const guardiansMap = new Map<string, DbGuardian>();
-     
+
     const g =
       guardianIds.length === 0
         ? []

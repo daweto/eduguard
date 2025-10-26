@@ -102,16 +102,17 @@ export const alertsColumns: ColumnDef<ReasoningFlagView>[] = [
       const recommendation = row.original.recommendation;
       const label = recommendationLabels[recommendation] || recommendation;
 
-      const variantMap: Record<string, "default" | "secondary" | "destructive"> = {
+      const variantMap: Record<
+        string,
+        "default" | "secondary" | "destructive"
+      > = {
         none: "secondary",
         monitor: "default",
         immediate_call: "destructive",
       };
 
       return (
-        <Badge variant={variantMap[recommendation] || "default"}>
-          {label}
-        </Badge>
+        <Badge variant={variantMap[recommendation] || "default"}>{label}</Badge>
       );
     },
   },
@@ -132,7 +133,9 @@ export const alertsColumns: ColumnDef<ReasoningFlagView>[] = [
         <div className="flex flex-col">
           <span className="text-sm">{guardianName}</span>
           {guardianPhone && (
-            <span className="text-xs text-muted-foreground">{guardianPhone}</span>
+            <span className="text-xs text-muted-foreground">
+              {guardianPhone}
+            </span>
           )}
         </div>
       );

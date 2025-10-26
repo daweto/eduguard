@@ -183,7 +183,9 @@ export default function CallsHistoryPage() {
               <Label htmlFor="status-filter">Estado</Label>
               <Select
                 value={statusFilter}
-                onValueChange={(value) => setStatusFilter(value as CallStatus | "all")}
+                onValueChange={(value) =>
+                  setStatusFilter(value as CallStatus | "all")
+                }
               >
                 <SelectTrigger id="status-filter">
                   <SelectValue placeholder="Todos los estados" />
@@ -216,17 +218,16 @@ export default function CallsHistoryPage() {
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="manual">Manual (Docente)</SelectItem>
-                  <SelectItem value="reasoning-auto">Automática (IA)</SelectItem>
+                  <SelectItem value="reasoning-auto">
+                    Automática (IA)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex-1 min-w-[200px]">
               <Label htmlFor="risk-filter">Nivel de Riesgo</Label>
-              <Select
-                value={riskFilter}
-                onValueChange={setRiskFilter}
-              >
+              <Select value={riskFilter} onValueChange={setRiskFilter}>
                 <SelectTrigger id="risk-filter">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
