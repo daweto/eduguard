@@ -15,13 +15,6 @@ export class AIAgentsContainer extends Container {
   // Sleep after 10 minutes of inactivity to save costs
   sleepAfter = "10m";
 
-  // Environment variables passed to the container
-  // NOTE: Secrets must be set via Cloudflare dashboard or wrangler CLI
-  envVars = {
-    PORT: "3001",
-    NODE_ENV: "production",
-  };
-
   override onStart() {
     console.log("🤖 AI Agents Container started successfully");
   }
@@ -97,6 +90,23 @@ export default {
     const container = env.AI_AGENTS_CONTAINER.getByName("ai-agents-primary");
 
     try {
+      // Start container with environment variables if not already running
+      // This ensures env vars are passed on first request
+      await container.startAndWaitForPorts({
+        startOptions: {
+          envVars: {
+            PORT: "3001",
+            NODE_ENV: "production",
+            OPENAI_API_KEY: env.OPENAI_API_KEY ?? "",
+            ELEVENLABS_API_KEY: env.ELEVENLABS_API_KEY ?? "",
+            ELEVENLABS_AGENT_ID: env.ELEVENLABS_AGENT_ID ?? "",
+            ELEVENLABS_PHONE_NUMBER_ID: env.ELEVENLABS_PHONE_NUMBER_ID ?? "",
+            CLOUDFLARE_API_URL: env.CLOUDFLARE_API_URL ?? "",
+            SCHOOL_NAME: env.SCHOOL_NAME ?? "Colegio Skyward",
+          },
+        },
+      });
+
       // Forward the request to the container
       const response = await container.fetch(request);
 
@@ -148,10 +158,10 @@ export interface Env {
   AI_AGENTS_CONTAINER: DurableObjectNamespace<AIAgentsContainer>;
 
   // Secrets (set via wrangler secret put)
-  OPENAI_API_KEY: string;
-  ELEVENLABS_API_KEY: string;
-  ELEVENLABS_AGENT_ID: string;
-  ELEVENLABS_PHONE_NUMBER_ID: string;
-  CLOUDFLARE_API_URL: string;
+  OPENAI_API_KEY?: string;
+  ELEVENLABS_API_KEY?: string;
+  ELEVENLABS_AGENT_ID?: string;
+  ELEVENLABS_PHONE_NUMBER_ID?: string;
+  CLOUDFLARE_API_URL?: string;
   SCHOOL_NAME?: string;
 }
