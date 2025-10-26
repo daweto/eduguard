@@ -51,9 +51,9 @@ export class AIAgentsContainer extends Container {
     const id = state?.id?.toString();
     const now = new Date().toISOString();
     try {
-      console.log("[ai-agents] DO alarm fired", { id, now });
+      console.log("[ai-agents container] DO alarm fired", { id, now });
     } catch (err) {
-      console.error("[ai-agents] DO alarm error", {
+      console.error("[ai-agents container] DO alarm error", {
         id,
         now,
         error: err instanceof Error ? err.message : String(err),

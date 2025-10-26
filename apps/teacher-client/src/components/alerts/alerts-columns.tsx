@@ -3,13 +3,21 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Eye } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/attendance/data-table-column-header";
 import { RiskBadge } from "@/components/attendance/RiskBadge";
 import { CallParentButton } from "@/components/attendance/CallParentButton";
 import type { ReasoningFlagView } from "@repo/shared-types";
 import { formatRut } from "@/lib/helpers/rut";
 import { Link } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Pattern type labels in Spanish
 const patternTypeLabels: Record<string, string> = {
@@ -150,12 +158,77 @@ export const alertsColumns: ColumnDef<ReasoningFlagView>[] = [
 
       return (
         <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-1" /> Ver
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {flag.studentName} · {flag.className ?? "Sin clase"}
+                </DialogTitle>
+                <DialogDescription>
+                  Alerta de riesgo {flag.riskLabel}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <RiskBadge riskLevel={flag.riskLabel} />
+                  {flag.patternType && (
+                    <Badge variant="outline">
+                      {patternTypeLabels[flag.patternType] ?? flag.patternType}
+                    </Badge>
+                  )}
+                  {typeof flag.confidence === "number" && (
+                    <Badge variant="secondary">
+                      Confianza {(flag.confidence * 100).toFixed(0)}%
+                    </Badge>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Resumen</p>
+                  <p className="text-sm leading-6">{flag.summary}</p>
+                </div>
+                {flag.reasoning && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Razón</p>
+                    <p className="text-sm leading-6 whitespace-pre-wrap">
+                      {flag.reasoning}
+                    </p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Apoderado</p>
+                    <p>{flag.guardianName ?? "Sin apoderado"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Teléfono</p>
+                    <p>{flag.guardianPhone ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Identificación</p>
+                    <p>{formatRut(flag.identification)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Recomendación</p>
+                    <p>
+                      {recommendationLabels[flag.recommendation] ??
+                        flag.recommendation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <CallParentButton
             studentId={flag.studentId}
             studentName={studentName}
             guardianPhone={flag.guardianPhone}
             guardianName={flag.guardianName}
-            guardianId={flag.studentId} // TODO: Should be guardianId from backend
+            guardianId={flag.studentId}
             sessionId={flag.sessionId}
             riskLevel={flag.riskLabel}
             className="w-full"
