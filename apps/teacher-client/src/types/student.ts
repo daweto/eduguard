@@ -31,6 +31,8 @@ export interface StudentProfileInput {
   secondLastName?: string;
   identificationNumber: string;
   gradeId?: string;
+  gradeSectionId?: string;
+  academicYear?: string;
 }
 
 export interface EnrollStudentRequest {

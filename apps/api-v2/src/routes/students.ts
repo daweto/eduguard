@@ -1,4 +1,4 @@
-import { eq, desc, count } from "drizzle-orm";
+import { eq, desc, count, and, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import {
@@ -6,6 +6,11 @@ import {
   studentFaces as studentFacesTable,
   legalGuardians as legalGuardiansTable,
   grades as gradesTable,
+  attendance as attendanceTable,
+  sessions as sessionsTable,
+  classes as classesTable,
+  courses as coursesTable,
+  teachers as teachersTable,
 } from "../db/schema";
 import type { NewStudent, NewLegalGuardian } from "../db/schema";
 import type {
@@ -730,6 +735,143 @@ students.post("/:id/photos", async (c) => {
     }
   } catch (error) {
     console.error("Error uploading photos:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+/**
+ * GET /api/students/:id/attendance
+ * Get attendance history for a student with optional filters
+ * Query params: classId, courseId, subject, teacherId, from, to, status
+ */
+students.get("/:id/attendance", async (c) => {
+  try {
+    const studentId = c.req.param("id");
+    const db = drizzle(c.env.DB);
+
+    // Verify student exists
+    const studentRows = await db
+      .select()
+      .from(studentsTable)
+      .where(eq(studentsTable.id, studentId))
+      .limit(1);
+
+    if (studentRows.length === 0) {
+      return c.json({ error: "Student not found" }, 404);
+    }
+
+    // Build query with filters
+    const classId = c.req.query("classId");
+    const courseId = c.req.query("courseId");
+    const subject = c.req.query("subject");
+    const teacherId = c.req.query("teacherId");
+    const from = c.req.query("from");
+    const to = c.req.query("to");
+    const status = c.req.query("status");
+
+    // Get attendance records with session and class details
+    const query = db
+      .select({
+        attendance: {
+          id: attendanceTable.id,
+          status: attendanceTable.status,
+          confidence: attendanceTable.confidence,
+          markedAt: attendanceTable.markedAt,
+          markedBy: attendanceTable.markedBy,
+          corrected: attendanceTable.corrected,
+          correctedAt: attendanceTable.correctedAt,
+          correctedBy: attendanceTable.correctedBy,
+          notes: attendanceTable.notes,
+        },
+        session: {
+          id: sessionsTable.id,
+          timestamp: sessionsTable.timestamp,
+        },
+        class: {
+          id: classesTable.id,
+          section: classesTable.section,
+          period: classesTable.period,
+        },
+        course: {
+          id: coursesTable.id,
+          name: coursesTable.name,
+          subject: coursesTable.subject,
+          courseCode: coursesTable.courseCode,
+        },
+        teacher: {
+          id: teachersTable.id,
+          firstName: teachersTable.firstName,
+          lastName: teachersTable.lastName,
+        },
+      })
+      .from(attendanceTable)
+      .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
+      .innerJoin(classesTable, eq(attendanceTable.classId, classesTable.id))
+      .innerJoin(coursesTable, eq(classesTable.courseId, coursesTable.id))
+      .innerJoin(teachersTable, eq(classesTable.teacherId, teachersTable.id));
+
+    // Apply filters
+    const conditions = [eq(attendanceTable.studentId, studentId)];
+
+    if (classId) {
+      conditions.push(eq(attendanceTable.classId, classId));
+    }
+    if (courseId) {
+      conditions.push(eq(classesTable.courseId, courseId));
+    }
+    if (subject) {
+      conditions.push(eq(coursesTable.subject, subject));
+    }
+    if (teacherId) {
+      conditions.push(eq(classesTable.teacherId, teacherId));
+    }
+    if (from) {
+      conditions.push(gte(sessionsTable.timestamp, from));
+    }
+    if (to) {
+      conditions.push(lte(sessionsTable.timestamp, to));
+    }
+    if (status) {
+      conditions.push(eq(attendanceTable.status, status));
+    }
+
+    const attendanceRecords = await query
+      .where(conditions.length > 1 ? and(...conditions) : conditions[0])
+      .orderBy(desc(sessionsTable.timestamp))
+      .all();
+
+    // Calculate summary statistics
+    const summary = {
+      total: attendanceRecords.length,
+      present: attendanceRecords.filter((r) => r.attendance.status === "present").length,
+      absent: attendanceRecords.filter((r) => r.attendance.status === "absent").length,
+      excused: attendanceRecords.filter((r) => r.attendance.status === "excused").length,
+      late: attendanceRecords.filter((r) => r.attendance.status === "late").length,
+      attendanceRate: attendanceRecords.length > 0
+        ? Math.round(
+            (attendanceRecords.filter((r) => r.attendance.status === "present" || r.attendance.status === "late").length /
+              attendanceRecords.length) *
+              100
+          )
+        : 0,
+    };
+
+    return c.json({
+      student_id: studentId,
+      summary,
+      records: attendanceRecords,
+      filters: {
+        classId: classId || null,
+        courseId: courseId || null,
+        subject: subject || null,
+        teacherId: teacherId || null,
+        from: from || null,
+        to: to || null,
+        status: status || null,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching student attendance:", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 });

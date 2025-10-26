@@ -1,0 +1,45 @@
+{
+  "sessions": "Sesiones",
+  "sessionDetail": "Detalle de Sesión",
+  "viewSessions": "Ver Sesiones",
+  "takeAttendance": "Tomar Asistencia",
+  "overrideAttendance": "Corregir Asistencia",
+  "markedBy": "Marcado por",
+  "auto": "Automático",
+  "manual": "Manual",
+  "corrected": "Corregido",
+  "filters": "Filtros",
+  "allClasses": "Todas las clases",
+  "allSubjects": "Todas las materias",
+  "allTeachers": "Todos los profesores",
+  "dateRange": "Rango de fechas",
+  "attendanceHistory": "Historial de Asistencia",
+  "attendanceRate": "Tasa de Asistencia",
+  "attendanceRoster": "Lista de Asistencia",
+  "sessionSummary": "Resumen de Sesión",
+  "status": {
+    "present": "Presente",
+    "absent": "Ausente",
+    "excused": "Justificado",
+    "late": "Tarde"
+  },
+  "labels": {
+    "total": "Total",
+    "present": "Presentes",
+    "absent": "Ausentes",
+    "excused": "Justificados",
+    "late": "Tarde",
+    "expected": "Esperados",
+    "confidence": "Confianza",
+    "notes": "Notas",
+    "newStatus": "Nuevo Estado",
+    "student": "Estudiante"
+  },
+  "messages": {
+    "noSessions": "No hay sesiones registradas para esta clase",
+    "sessionLoadError": "No se pudo cargar el detalle de la sesión",
+    "override Success": "Asistencia actualizada correctamente",
+    "overrideError": "Error al actualizar la asistencia"
+  }
+}
+

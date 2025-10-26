@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { 
   stages, 
   grades, 
+  gradeSections,
   teachers, 
   classrooms, 
   courses, 
@@ -140,6 +141,33 @@ export const gradesData = [
     stageId: 'secondary',
     order: 14,
   },
+];
+
+// Grade Sections seed data (Homerooms for academic year 2024-2025)
+export const gradeSectionsData = [
+  // Preschool sections
+  { id: 'gs-prekinder-a', gradeId: 'prekinder', label: 'A', displayName: 'Prekinder A', academicYear: '2024-2025', maxStudents: 25 },
+  { id: 'gs-kinder-a', gradeId: 'kinder', label: 'A', displayName: 'Kinder A', academicYear: '2024-2025', maxStudents: 25 },
+  
+  // Elementary sections (creating A and B sections for demonstration)
+  { id: 'gs-1elem-a', gradeId: '1st-elementary', label: 'A', displayName: '1° Básico A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-002', maxStudents: 30 },
+  { id: 'gs-1elem-b', gradeId: '1st-elementary', label: 'B', displayName: '1° Básico B', academicYear: '2024-2025', maxStudents: 30 },
+  { id: 'gs-2elem-a', gradeId: '2nd-elementary', label: 'A', displayName: '2° Básico A', academicYear: '2024-2025', maxStudents: 30 },
+  { id: 'gs-3elem-a', gradeId: '3rd-elementary', label: 'A', displayName: '3° Básico A', academicYear: '2024-2025', maxStudents: 30 },
+  { id: 'gs-4elem-a', gradeId: '4th-elementary', label: 'A', displayName: '4° Básico A', academicYear: '2024-2025', maxStudents: 35 },
+  { id: 'gs-4elem-b', gradeId: '4th-elementary', label: 'B', displayName: '4° Básico B', academicYear: '2024-2025', maxStudents: 35 },
+  { id: 'gs-5elem-a', gradeId: '5th-elementary', label: 'A', displayName: '5° Básico A', academicYear: '2024-2025', maxStudents: 35 },
+  { id: 'gs-6elem-a', gradeId: '6th-elementary', label: 'A', displayName: '6° Básico A', academicYear: '2024-2025', maxStudents: 35 },
+  { id: 'gs-7elem-a', gradeId: '7th-elementary', label: 'A', displayName: '7° Básico A', academicYear: '2024-2025', maxStudents: 35 },
+  { id: 'gs-8elem-a', gradeId: '8th-elementary', label: 'A', displayName: '8° Básico A', academicYear: '2024-2025', maxStudents: 35 },
+  
+  // Secondary sections (1st and 2nd Medio with A/B sections, teacher-001 is homeroom for 1m-a)
+  { id: 'gs-1sec-a', gradeId: '1st-secondary', label: 'A', displayName: '1° Medio A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-001', maxStudents: 40 },
+  { id: 'gs-1sec-b', gradeId: '1st-secondary', label: 'B', displayName: '1° Medio B', academicYear: '2024-2025', maxStudents: 40 },
+  { id: 'gs-2sec-a', gradeId: '2nd-secondary', label: 'A', displayName: '2° Medio A', academicYear: '2024-2025', homeroomTeacherId: 'teacher-003', maxStudents: 40 },
+  { id: 'gs-2sec-b', gradeId: '2nd-secondary', label: 'B', displayName: '2° Medio B', academicYear: '2024-2025', maxStudents: 40 },
+  { id: 'gs-3sec-a', gradeId: '3rd-secondary', label: 'A', displayName: '3° Medio A', academicYear: '2024-2025', maxStudents: 40 },
+  { id: 'gs-4sec-a', gradeId: '4th-secondary', label: 'A', displayName: '4° Medio A', academicYear: '2024-2025', maxStudents: 40 },
 ];
 
 // Teachers seed data
@@ -382,6 +410,19 @@ export const guardiansData = [
     relation: 'Padre',
     address: 'Pasaje Los Robles 789, Santiago',
   },
+  {
+    id: 'guardian-004',
+    firstName: 'David',
+    middleName: 'Felipe',
+    lastName: 'Weinstein',
+    identificationNumber: '20074036-K',
+    phone: '+56969357637',
+    email: 'dweinsteint@gmail.com',
+    preferredLanguage: 'es',
+    relation: 'Padre',
+    address: 'Av Providencia 1000, Providencia',
+  },
+
 ];
 
 // Sample students
@@ -392,8 +433,10 @@ export const studentsData = [
     lastName: 'Salas',
     identificationNumber: '25123456-7',
     gradeId: '1st-secondary',
+    gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-001',
     enrollmentDate: '2025-03-01',
+    academicYear: '2024-2025',
     status: 'active',
     awsCollectionId: 'eduguard-school-default',
     metadata: null,
@@ -404,8 +447,10 @@ export const studentsData = [
     lastName: 'Fernández',
     identificationNumber: '25234567-8',
     gradeId: '1st-secondary',
+    gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-002',
     enrollmentDate: '2025-03-01',
+    academicYear: '2024-2025',
     status: 'active',
     awsCollectionId: 'eduguard-school-default',
     metadata: null,
@@ -416,35 +461,56 @@ export const studentsData = [
     lastName: 'Puentes',
     identificationNumber: '25345678-9',
     gradeId: '1st-secondary',
+    gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-003',
     enrollmentDate: '2025-03-01',
+    academicYear: '2024-2025',
     status: 'active',
     awsCollectionId: 'eduguard-school-default',
     metadata: null,
   },
+  {
+    id: 'student-004',
+    firstName: 'Felipe',
+    lastName: 'Torres',
+    identificationNumber: '1-9',
+    gradeId: '1st-secondary',
+    gradeSectionId: 'gs-1sec-b', // 1° Medio B (different section)
+    guardianId: 'guardian-004',
+    enrollmentDate: '2025-03-01',
+    academicYear: '2024-2025',
+    status: 'active',
+    awsCollectionId: 'eduguard-school-default',
+    metadata: null,
+  }
 ];
 
 // Class enrollments (students enrolled in classes)
 export const enrollmentsData = [
-  // Sofía enrolled in all classes
+  // Joel enrolled in all classes
   { id: 'enroll-001', classId: 'class-math-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-002', classId: 'class-lang-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-003', classId: 'class-phys-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-004', classId: 'class-chem-1m-a', studentId: 'student-001', enrolledDate: '2025-03-01', status: 'active' },
   
-  // Diego enrolled in all classes
+  // Sheen enrolled in all classes
   { id: 'enroll-005', classId: 'class-math-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-006', classId: 'class-lang-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-007', classId: 'class-phys-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-008', classId: 'class-chem-1m-a', studentId: 'student-002', enrolledDate: '2025-03-01', status: 'active' },
   
-  // Catalina enrolled in all classes
+  // Boris enrolled in all classes
   { id: 'enroll-009', classId: 'class-math-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-010', classId: 'class-lang-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-011', classId: 'class-phys-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
   { id: 'enroll-012', classId: 'class-chem-1m-a', studentId: 'student-003', enrolledDate: '2025-03-01', status: 'active' },
-];
 
+  // Felipe enrolled in all classes
+  { id: 'enroll-013', classId: 'class-math-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
+  { id: 'enroll-014', classId: 'class-lang-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
+  { id: 'enroll-015', classId: 'class-phys-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
+  { id: 'enroll-016', classId: 'class-chem-1m-a', studentId: 'student-004', enrolledDate: '2025-03-01', status: 'active' },
+];
 // Function to seed the database
 export async function seedDatabase(db: D1Database) {
   const drizzleDb = drizzle(db);
@@ -461,37 +527,42 @@ export async function seedDatabase(db: D1Database) {
 
   console.log('Seeding teachers...');
   for (const teacher of teachersData) {
-    await drizzleDb.insert(teachers).values(teacher);
+    await drizzleDb.insert(teachers).values(teacher).onConflictDoNothing();
+  }
+
+  console.log('Seeding grade sections...');
+  for (const gradeSection of gradeSectionsData) {
+    await drizzleDb.insert(gradeSections).values(gradeSection).onConflictDoNothing();
   }
 
   console.log('Seeding classrooms...');
   for (const classroom of classroomsData) {
-    await drizzleDb.insert(classrooms).values(classroom);
+    await drizzleDb.insert(classrooms).values(classroom).onConflictDoNothing();
   }
 
   console.log('Seeding courses...');
   for (const course of coursesData) {
-    await drizzleDb.insert(courses).values(course);
+    await drizzleDb.insert(courses).values(course).onConflictDoNothing();
   }
 
   console.log('Seeding classes...');
   for (const cls of classesData) {
-    await drizzleDb.insert(classes).values(cls);
+    await drizzleDb.insert(classes).values(cls).onConflictDoNothing();
   }
 
   console.log('Seeding guardians...');
   for (const guardian of guardiansData) {
-    await drizzleDb.insert(legalGuardians).values(guardian);
+    await drizzleDb.insert(legalGuardians).values(guardian).onConflictDoNothing();
   }
 
   console.log('Seeding students...');
   for (const student of studentsData) {
-    await drizzleDb.insert(students).values(student);
+    await drizzleDb.insert(students).values(student).onConflictDoNothing();
   }
 
   console.log('Seeding class enrollments...');
   for (const enrollment of enrollmentsData) {
-    await drizzleDb.insert(classEnrollments).values(enrollment);
+    await drizzleDb.insert(classEnrollments).values(enrollment).onConflictDoNothing();
   }
 
   console.log('Database seeded successfully!');

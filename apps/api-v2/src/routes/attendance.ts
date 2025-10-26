@@ -16,8 +16,6 @@ import {
   classEnrollments as enrollmentsTable,
   sessions as sessionsTable,
   attendance as attendanceTable,
-  teachers as teachersTable,
-  classrooms as classroomsTable,
 } from "../db/schema";
 import type { Bindings } from "../types";
 import { 
@@ -868,6 +866,171 @@ attendance.get("/sessions/:sessionId/photos", async (c) => {
     });
   } catch (error) {
     console.error("/attendance/sessions/:sessionId/photos error", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+/**
+ * GET /api/attendance/classes/:classId/sessions
+ * Get all attendance sessions for a specific class
+ */
+attendance.get("/classes/:classId/sessions", async (c) => {
+  try {
+    const classId = c.req.param("classId");
+    const db = drizzle(c.env.DB);
+
+    // Fetch sessions for this class ordered by timestamp (most recent first)
+    const sessions = await db
+      .select({
+        id: sessionsTable.id,
+        classId: sessionsTable.classId,
+        teacherId: sessionsTable.teacherId,
+        classroomId: sessionsTable.classroomId,
+        timestamp: sessionsTable.timestamp,
+        expectedStudents: sessionsTable.expectedStudents,
+        presentCount: sessionsTable.presentCount,
+        absentCount: sessionsTable.absentCount,
+        photoUrls: sessionsTable.photoUrls,
+        awsFacesDetected: sessionsTable.awsFacesDetected,
+        metadata: sessionsTable.metadata,
+        createdAt: sessionsTable.createdAt,
+      })
+      .from(sessionsTable)
+      .where(eq(sessionsTable.classId, classId))
+      .orderBy(sessionsTable.timestamp)
+      .all();
+
+    // Calculate attendance summary for each session
+    const sessionsWithSummary = await Promise.all(
+      sessions.map(async (session) => {
+        const attendanceRecords = await db
+          .select({
+            status: attendanceTable.status,
+          })
+          .from(attendanceTable)
+          .where(eq(attendanceTable.sessionId, session.id));
+
+        const summary = {
+          present: attendanceRecords.filter((r) => r.status === "present").length,
+          absent: attendanceRecords.filter((r) => r.status === "absent").length,
+          excused: attendanceRecords.filter((r) => r.status === "excused").length,
+          late: attendanceRecords.filter((r) => r.status === "late").length,
+          total: attendanceRecords.length,
+        };
+
+        return {
+          ...session,
+          attendanceSummary: summary,
+        };
+      })
+    );
+
+    return c.json({
+      class_id: classId,
+      sessions: sessionsWithSummary,
+      total: sessionsWithSummary.length,
+    });
+  } catch (error) {
+    console.error("/attendance/classes/:classId/sessions error", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+/**
+ * GET /api/attendance/sessions/:sessionId
+ * Get detailed attendance roster for a specific session
+ */
+attendance.get("/sessions/:sessionId", async (c) => {
+  try {
+    const sessionId = c.req.param("sessionId");
+    const db = drizzle(c.env.DB);
+
+    // Get session details
+    const session = await db
+      .select()
+      .from(sessionsTable)
+      .where(eq(sessionsTable.id, sessionId))
+      .limit(1);
+
+    if (session.length === 0) {
+      return c.json({ error: "Session not found" }, 404);
+    }
+
+    // Get attendance records with student details
+    const attendanceRecords = await db
+      .select({
+        attendance: {
+          id: attendanceTable.id,
+          status: attendanceTable.status,
+          confidence: attendanceTable.confidence,
+          faceId: attendanceTable.faceId,
+          markedAt: attendanceTable.markedAt,
+          markedBy: attendanceTable.markedBy,
+          corrected: attendanceTable.corrected,
+          correctedAt: attendanceTable.correctedAt,
+          correctedBy: attendanceTable.correctedBy,
+          notes: attendanceTable.notes,
+        },
+        student: {
+          id: studentsTable.id,
+          firstName: studentsTable.firstName,
+          middleName: studentsTable.middleName,
+          lastName: studentsTable.lastName,
+          secondLastName: studentsTable.secondLastName,
+          identificationNumber: studentsTable.identificationNumber,
+          gradeId: studentsTable.gradeId,
+          gradeSectionId: studentsTable.gradeSectionId,
+        },
+      })
+      .from(attendanceTable)
+      .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+      .where(eq(attendanceTable.sessionId, sessionId))
+      .all();
+
+    return c.json({
+      session: session[0],
+      attendance: attendanceRecords,
+      total: attendanceRecords.length,
+    });
+  } catch (error) {
+    console.error("/attendance/sessions/:sessionId error", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+/**
+ * PATCH /api/attendance/:attendanceId/override
+ * Override/correct an attendance record
+ */
+attendance.patch("/:attendanceId/override", async (c) => {
+  try {
+    const attendanceId = c.req.param("attendanceId");
+    const body = await c.req.json<{
+      status: "present" | "absent" | "excused" | "late";
+      teacher_id: string;
+      notes?: string;
+    }>();
+
+    const db = drizzle(c.env.DB);
+
+    // Update the attendance record
+    await db
+      .update(attendanceTable)
+      .set({
+        status: body.status,
+        corrected: true,
+        correctedAt: new Date().toISOString(),
+        correctedBy: body.teacher_id,
+        notes: body.notes || null,
+      })
+      .where(eq(attendanceTable.id, attendanceId));
+
+    return c.json({ 
+      success: true,
+      message: "Attendance record updated successfully" 
+    });
+  } catch (error) {
+    console.error("/attendance/:attendanceId/override error", error);
     return c.json({ error: "Internal server error" }, 500);
   }
 });

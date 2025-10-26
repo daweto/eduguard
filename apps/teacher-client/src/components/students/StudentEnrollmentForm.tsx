@@ -19,7 +19,7 @@ import { useGuardians } from "@/components/guardians/hooks/useGuardians";
 import { GuardianFormFields } from "@/components/guardians/GuardianFormFields";
 import { formatFullName } from "@/lib/helpers/format";
 import { formatRut, zRutString } from "@/lib/helpers/rut";
-import { CheckCircle2, Loader2, Upload, X } from "lucide-react";
+import { CheckCircle2, Upload, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -46,6 +46,8 @@ type EnrollmentFormValues = {
     secondLastName: string;
     identificationNumber: string;
     gradeId: string;
+    gradeSectionId?: string;
+    academicYear?: string;
   };
   guardian: {
     id: string;
@@ -69,6 +71,8 @@ const defaultValues: EnrollmentFormValues = {
     secondLastName: "",
     identificationNumber: "",
     gradeId: "",
+    gradeSectionId: "",
+    academicYear: "2024-2025",
   },
   guardian: {
     id: "",
@@ -119,6 +123,49 @@ export function StudentEnrollmentForm({
       try {
         const normalize = (input: string) => input.trim();
 
+        // Client-side RUT validation to avoid confusing loading overlay
+        const studentRut = zRutString.safeParse(
+          value.student.identificationNumber,
+        );
+        if (!studentRut.success) {
+          formApi.setFieldMeta("student.identificationNumber", (prev) => ({
+            ...prev,
+            isTouched: true,
+            errors: [studentRut.error.issues[0]?.message || "RUT inválido"],
+          }));
+          // ensure formatted input for clarity
+          formApi.setFieldValue(
+            "student.identificationNumber",
+            formatRut(value.student.identificationNumber),
+          );
+          // focus the field
+          setTimeout(() => {
+            const el = document.getElementById("student.identificationNumber");
+            if (el) (el as HTMLInputElement).focus();
+          }, 0);
+          return;
+        }
+
+        const guardianRut = zRutString.safeParse(
+          value.guardian.identificationNumber,
+        );
+        if (!guardianRut.success) {
+          formApi.setFieldMeta("guardian.identificationNumber", (prev) => ({
+            ...prev,
+            isTouched: true,
+            errors: [guardianRut.error.issues[0]?.message || "RUT inválido"],
+          }));
+          formApi.setFieldValue(
+            "guardian.identificationNumber",
+            formatRut(value.guardian.identificationNumber),
+          );
+          setTimeout(() => {
+            const el = document.getElementById("guardian.identificationNumber");
+            if (el) (el as HTMLInputElement).focus();
+          }, 0);
+          return;
+        }
+
         const payload: {
           student: EnrollStudentRequest["student"];
           guardian: EnrollStudentRequest["guardian"];
@@ -128,10 +175,10 @@ export function StudentEnrollmentForm({
             middleName: value.student.middleName.trim() || undefined,
             lastName: normalize(value.student.lastName),
             secondLastName: value.student.secondLastName.trim() || undefined,
-            identificationNumber: zRutString.parse(
-              value.student.identificationNumber,
-            ),
+            identificationNumber: studentRut.data,
             gradeId: value.student.gradeId.trim() || undefined,
+            gradeSectionId: value.student.gradeSectionId?.trim() || undefined,
+            academicYear: value.student.academicYear?.trim() || undefined,
           },
           guardian: {
             id: value.guardian.id.trim() || undefined,
@@ -139,9 +186,7 @@ export function StudentEnrollmentForm({
             middleName: value.guardian.middleName.trim() || undefined,
             lastName: normalize(value.guardian.lastName),
             secondLastName: value.guardian.secondLastName.trim() || undefined,
-            identificationNumber: zRutString.parse(
-              value.guardian.identificationNumber,
-            ),
+            identificationNumber: guardianRut.data,
             phone: normalize(value.guardian.phone),
             email: normalize(value.guardian.email),
             preferredLanguage: value.guardian.preferredLanguage.trim() || "es",
@@ -224,17 +269,6 @@ export function StudentEnrollmentForm({
       className="space-y-6 relative"
       noValidate
     >
-      {/* Loading overlay */}
-      {isSubmitting && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm font-medium text-muted-foreground">
-              {t("messages.enrolling")}
-            </p>
-          </div>
-        </div>
-      )}
       <FieldSet className="space-y-4">
         <FieldLegend variant="label">{t("sections.studentInfo")}</FieldLegend>
         <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -260,6 +294,7 @@ export function StudentEnrollmentForm({
                       placeholder={t("fields.student.firstName.placeholder")}
                       aria-invalid={showError}
                       autoComplete="given-name"
+                      disabled={isSubmitting}
                     />
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
@@ -290,6 +325,7 @@ export function StudentEnrollmentForm({
                       placeholder={t("fields.student.lastName.placeholder")}
                       aria-invalid={showError}
                       autoComplete="family-name"
+                      disabled={isSubmitting}
                     />
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
@@ -314,6 +350,7 @@ export function StudentEnrollmentForm({
                     onBlur={field.handleBlur}
                     placeholder={t("fields.student.middleName.placeholder")}
                     autoComplete="additional-name"
+                    disabled={isSubmitting}
                   />
                 </FieldContent>
               </Field>
@@ -333,6 +370,7 @@ export function StudentEnrollmentForm({
                     onChange={(event) => field.handleChange(event.target.value)}
                     onBlur={field.handleBlur}
                     placeholder={t("fields.student.secondLastName.placeholder")}
+                    disabled={isSubmitting}
                   />
                 </FieldContent>
               </Field>
@@ -373,6 +411,7 @@ export function StudentEnrollmentForm({
                       autoComplete="off"
                       inputMode="text"
                       autoCapitalize="characters"
+                      disabled={isSubmitting}
                     />
                   </FieldContent>
                   <FieldError errors={field.state.meta.errors} />
@@ -404,7 +443,7 @@ export function StudentEnrollmentForm({
                         field.handleChange(next);
                         field.handleBlur();
                       }}
-                      disabled={gradesLoading || !!gradesError}
+                      disabled={isSubmitting || gradesLoading || !!gradesError}
                     >
                       <SelectTrigger
                         id={field.name}
@@ -437,6 +476,53 @@ export function StudentEnrollmentForm({
               );
             }}
           </form.Field>
+
+          <form.Field name="student.gradeSectionId">
+            {(field) => (
+              <Field className="space-y-2">
+                <FieldLabel htmlFor={field.name}>
+                  Sección (opcional)
+                </FieldLabel>
+                <FieldDescription>
+                  Ej: gs-1sec-a para 1° Medio A
+                </FieldDescription>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value || ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="gs-1sec-a"
+                  />
+                </FieldContent>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="student.academicYear">
+            {(field) => (
+              <Field className="space-y-2">
+                <FieldLabel htmlFor={field.name}>
+                  Año Académico (opcional)
+                </FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value || ""}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    disabled={isSubmitting}
+                    placeholder="2024-2025"
+                  />
+                </FieldContent>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
         </FieldGroup>
       </FieldSet>
 
@@ -458,7 +544,9 @@ export function StudentEnrollmentForm({
                       field.handleBlur();
                       handleGuardianSelection(guardianId);
                     }}
-                    disabled={guardiansLoading || !!guardiansError}
+                    disabled={
+                      isSubmitting || guardiansLoading || !!guardiansError
+                    }
                   >
                     <SelectTrigger
                       id={field.name}
@@ -490,8 +578,43 @@ export function StudentEnrollmentForm({
             )}
           </form.Field>
 
-          {/* Only show guardian form fields if creating a new guardian */}
-          {!form.state.values.guardian.id && (
+          {/* Show either compact summary (selected) or create-new fields */}
+          {form.state.values.guardian.id ? (
+            (() => {
+              const selected = guardians.find(
+                (g) => g.id === form.state.values.guardian.id,
+              );
+              return (
+                <div className="rounded-lg border p-3 text-sm grid grid-cols-1 md:grid-cols-2 gap-3 bg-muted/20">
+                  <div>
+                    <div className="font-medium">
+                      {selected
+                        ? formatFullName(selected)
+                        : t("fields.guardian.select.placeholder")}
+                    </div>
+                    {selected?.identificationNumber && (
+                      <div className="text-muted-foreground">
+                        {t("fields.guardian.identification")}:{" "}
+                        {selected.identificationNumber}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-muted-foreground">
+                    {selected?.phone && (
+                      <div>
+                        {t("fields.guardian.phone")}: {selected.phone}
+                      </div>
+                    )}
+                    {selected?.email && (
+                      <div>
+                        {t("fields.guardian.email")}: {selected.email}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()
+          ) : (
             <GuardianFormFields
               form={form}
               fieldPrefix="guardian"
@@ -569,7 +692,8 @@ export function StudentEnrollmentForm({
                         <button
                           type="button"
                           onClick={() => removePhoto(index)}
-                          className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={isSubmitting}
+                          className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50 disabled:pointer-events-none"
                           aria-label={t("fields.photos.removeAlt", {
                             number: index + 1,
                           })}
@@ -603,6 +727,7 @@ export function StudentEnrollmentForm({
                         className="hidden"
                         onChange={handlePhotoSelect}
                         onBlur={field.handleBlur}
+                        disabled={isSubmitting}
                       />
                     </FieldLabel>
                   </div>

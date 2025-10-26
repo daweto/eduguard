@@ -79,3 +79,106 @@ export async function matchFace(
     body: JSON.stringify({ face: base64Face, threshold }),
   });
 }
+
+// Class Sessions
+export interface SessionSummary {
+  id: string;
+  classId: string;
+  teacherId: string;
+  classroomId: string;
+  timestamp: string;
+  expectedStudents: number | null;
+  presentCount: number | null;
+  absentCount: number | null;
+  photoUrls: string | null;
+  awsFacesDetected: number | null;
+  metadata: string | null;
+  createdAt: string;
+  attendanceSummary: {
+    present: number;
+    absent: number;
+    excused: number;
+    late: number;
+    total: number;
+  };
+}
+
+export interface ClassSessionsResponse {
+  class_id: string;
+  sessions: SessionSummary[];
+  total: number;
+}
+
+export async function getClassSessions(
+  classId: string
+): Promise<ClassSessionsResponse> {
+  return fetchApi(`/api/attendance/classes/${classId}/sessions`);
+}
+
+// Session Detail
+export interface AttendanceRecord {
+  attendance: {
+    id: string;
+    status: string;
+    confidence: number | null;
+    faceId: string | null;
+    markedAt: string | null;
+    markedBy: string | null;
+    corrected: boolean;
+    correctedAt: string | null;
+    correctedBy: string | null;
+    notes: string | null;
+  };
+  student: {
+    id: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    secondLastName: string | null;
+    identificationNumber: string;
+    gradeId: string | null;
+    gradeSectionId: string | null;
+  };
+}
+
+export interface SessionDetailResponse {
+  session: {
+    id: string;
+    classId: string;
+    teacherId: string;
+    classroomId: string;
+    timestamp: string;
+    expectedStudents: number | null;
+    presentCount: number | null;
+    absentCount: number | null;
+    photoUrls: string | null;
+    awsFacesDetected: number | null;
+    metadata: string | null;
+    createdAt: string;
+  };
+  attendance: AttendanceRecord[];
+  total: number;
+}
+
+export async function getSessionDetail(
+  sessionId: string
+): Promise<SessionDetailResponse> {
+  return fetchApi(`/api/attendance/sessions/${sessionId}`);
+}
+
+// Override Attendance
+export interface OverrideAttendanceRequest {
+  status: "present" | "absent" | "excused" | "late";
+  teacher_id: string;
+  notes?: string;
+}
+
+export async function overrideAttendance(
+  attendanceId: string,
+  data: OverrideAttendanceRequest
+): Promise<{ success: boolean; message: string }> {
+  return fetchApi(`/api/attendance/${attendanceId}/override`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}

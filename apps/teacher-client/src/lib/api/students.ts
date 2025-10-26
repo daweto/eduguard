@@ -189,3 +189,85 @@ export async function uploadStudentPhotos(
     body: JSON.stringify({ photo_keys: presign.uploads.map(u => u.key) }),
   });
 }
+
+/**
+ * Student Attendance History
+ */
+export interface AttendanceFilters {
+  classId?: string;
+  courseId?: string;
+  subject?: string;
+  teacherId?: string;
+  from?: string;
+  to?: string;
+  status?: "present" | "absent" | "excused" | "late";
+}
+
+export interface StudentAttendanceResponse {
+  student_id: string;
+  summary: {
+    total: number;
+    present: number;
+    absent: number;
+    excused: number;
+    late: number;
+    attendanceRate: number;
+  };
+  records: Array<{
+    attendance: {
+      id: string;
+      status: string;
+      confidence: number | null;
+      markedAt: string | null;
+      markedBy: string | null;
+      corrected: boolean;
+      correctedAt: string | null;
+      correctedBy: string | null;
+      notes: string | null;
+    };
+    session: {
+      id: string;
+      timestamp: string;
+    };
+    class: {
+      id: string;
+      section: string;
+      period: number;
+    };
+    course: {
+      id: string;
+      name: string;
+      subject: string;
+      courseCode: string;
+    };
+    teacher: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    };
+  }>;
+  filters: {
+    classId: string | null;
+    courseId: string | null;
+    subject: string | null;
+    teacherId: string | null;
+    from: string | null;
+    to: string | null;
+    status: string | null;
+  };
+}
+
+export async function getStudentAttendance(
+  studentId: string,
+  filters?: AttendanceFilters
+): Promise<StudentAttendanceResponse> {
+  const params = new URLSearchParams();
+  if (filters) {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.append(key, value);
+    });
+  }
+  
+  const url = `/api/students/${studentId}/attendance${params.toString() ? `?${params.toString()}` : ''}`;
+  return fetchApi(url);
+}

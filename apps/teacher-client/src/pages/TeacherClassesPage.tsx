@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, Users, Clock, MapPin, BookOpen } from "lucide-react";
+import { Camera, Users, Clock, MapPin, BookOpen, History } from "lucide-react";
 import { useTeacherClasses, type TeacherClass } from "@/components/classes/hooks/useTeacherClasses";
 
 export function TeacherClassesPage() {
@@ -13,6 +13,11 @@ export function TeacherClassesPage() {
 
   const handleTakeAttendance = (classId: string) => {
     navigate(`/attendance/class/${classId}`);
+  };
+
+  const handleViewSessions = (classId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/classes/${classId}/sessions`);
   };
 
   if (isLoading) {
@@ -102,7 +107,7 @@ export function TeacherClassesPage() {
                   <Users className="h-4 w-4 mr-2" />
                   {cls.enrolledStudents} / {cls.maxStudents} estudiantes
                 </div>
-                <div className="pt-3 border-t">
+                <div className="pt-3 border-t space-y-2">
                   <Button 
                     className="w-full" 
                     onClick={(e) => {
@@ -112,6 +117,14 @@ export function TeacherClassesPage() {
                   >
                     <Camera className="h-4 w-4 mr-2" />
                     Tomar Asistencia
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="w-full" 
+                    onClick={(e) => handleViewSessions(cls.id, e)}
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    Ver Sesiones
                   </Button>
                 </div>
               </CardContent>

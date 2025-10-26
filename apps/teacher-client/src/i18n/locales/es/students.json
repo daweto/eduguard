@@ -3,6 +3,13 @@
     "title": "Estudiantes",
     "description": "Gestiona los estudiantes de tu institución"
   },
+  "fields": {
+    "gradeSection": "Curso/Sección",
+    "academicYear": "Año Académico",
+    "selectGradeSection": "Seleccionar sección",
+    "attendanceHistory": "Historial de Asistencia",
+    "attendanceRate": "Tasa de Asistencia"
+  },
   "cards": {
     "enroll": {
       "title": "Inscribir Estudiante",

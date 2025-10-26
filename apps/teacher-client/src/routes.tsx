@@ -16,6 +16,8 @@ import RouteErrorBoundary from "./components/layouts/RouteErrorBoundary";
 import AttendancePage from "./pages/AttendancePage";
 import { TeacherClassesPage } from "./pages/TeacherClassesPage";
 import { ClassAttendancePage } from "./pages/ClassAttendancePage";
+import { ClassSessionsPage } from "./pages/ClassSessionsPage";
+import { SessionDetailPage } from "./pages/SessionDetailPage";
 import EditStudentPage from "./pages/EditStudentPage";
 
 export type CrumbHandle = {
@@ -47,6 +49,22 @@ const routes: RouteObject[] = [
         handle: {
           breadcrumb: "Mis Clases",
           breadcrumbKey: "navigation:breadcrumbs.classes",
+        } satisfies CrumbHandle,
+      },
+      {
+        path: "classes/:classId/sessions",
+        element: <ClassSessionsPage />,
+        handle: {
+          breadcrumb: "Sesiones",
+          breadcrumbKey: "navigation:breadcrumbs.sessions",
+        } satisfies CrumbHandle,
+      },
+      {
+        path: "sessions/:sessionId",
+        element: <SessionDetailPage />,
+        handle: {
+          breadcrumb: "Detalle de Sesión",
+          breadcrumbKey: "navigation:breadcrumbs.sessionDetail",
         } satisfies CrumbHandle,
       },
       {

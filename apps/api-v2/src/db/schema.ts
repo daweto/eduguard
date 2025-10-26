@@ -23,6 +23,21 @@ export const grades = sqliteTable("grades", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Grade Sections table (Homeroom sections like "4° Básico A", "1° Medio B")
+export const gradeSections = sqliteTable("grade_sections", {
+  id: text("id").primaryKey(),
+  gradeId: text("grade_id")
+    .notNull()
+    .references(() => grades.id),
+  label: text("label").notNull(), // "A", "B", "C", etc.
+  displayName: text("display_name").notNull(), // "4° Básico A"
+  academicYear: text("academic_year").notNull(), // "2024-2025"
+  homeroomTeacherId: text("homeroom_teacher_id").references(() => teachers.id),
+  maxStudents: integer("max_students"),
+  status: text("status").default("active"), // 'active' | 'archived'
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 // Legal guardians table
 export const legalGuardians = sqliteTable("legal_guardians", {
   id: text("id").primaryKey(),
@@ -47,10 +62,12 @@ export const students = sqliteTable("students", {
   secondLastName: text("second_last_name"),
   identificationNumber: text("identification_number").notNull().unique(),
   gradeId: text("grade_id").references(() => grades.id),
+  gradeSectionId: text("grade_section_id").references(() => gradeSections.id),
   guardianId: text("guardian_id")
     .notNull()
     .references(() => legalGuardians.id),
   enrollmentDate: text("enrollment_date").notNull(),
+  academicYear: text("academic_year"), // "2024-2025"
   status: text("status").default("active"),
   awsCollectionId: text("aws_collection_id").default("eduguard-school-default"),
   metadata: text("metadata"),
@@ -190,6 +207,8 @@ export const attendance = sqliteTable("attendance", {
   markedAt: text("marked_at"),
   markedBy: text("marked_by"), // 'auto' | teacher_id
   corrected: integer("corrected", { mode: "boolean" }).default(false),
+  correctedAt: text("corrected_at"), // When was it corrected
+  correctedBy: text("corrected_by"), // Teacher ID who corrected
   notes: text("notes"),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
@@ -198,6 +217,8 @@ export type Stage = typeof stages.$inferSelect;
 export type NewStage = typeof stages.$inferInsert;
 export type Grade = typeof grades.$inferSelect;
 export type NewGrade = typeof grades.$inferInsert;
+export type GradeSection = typeof gradeSections.$inferSelect;
+export type NewGradeSection = typeof gradeSections.$inferInsert;
 export type LegalGuardian = typeof legalGuardians.$inferSelect;
 export type NewLegalGuardian = typeof legalGuardians.$inferInsert;
 export type Student = typeof students.$inferSelect;
