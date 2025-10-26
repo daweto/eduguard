@@ -47,7 +47,7 @@ app.get("/", (c) => {
     status: "ok",
     service: "EduGuard AI Agents",
     agents: {
-      reasoning: "GPT-4 via Vercel AI SDK",
+      reasoning: "GPT-5-nano via Vercel AI SDK",
       voice: "ElevenLabs Conversational AI",
     },
     timestamp: new Date().toISOString(),
@@ -85,7 +85,7 @@ app.get("/health", (c) => {
       },
       agents: {
         reasoning: {
-          provider: "OpenAI GPT-4",
+          provider: "OpenAI GPT-5-nano",
           status: checks.openai ? "ready" : "not_configured",
         },
         voice: {
@@ -117,7 +117,7 @@ const server = serve({
 });
 
 console.log(`✅ AI Agents Server running at http://localhost:${String(port)}`);
-console.log(`📊 Reasoning Agent: Ready (GPT-4)`);
+console.log(`📊 Reasoning Agent: Ready (GPT-5-nano)`);
 console.log(`📞 Voice Agent: Ready (ElevenLabs)`);
 
 // Graceful shutdown

@@ -6,7 +6,11 @@
     "port": 8788,
     "inspector_port": 9230,
   },
-  "observability": { "enabled": true },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "logpush": true,
   "vars": {
     "FORWARD_TO_URL": "https://api-v2.dweinsteint.workers.dev/api/webhooks/elevenlabs/call-completed",
   },

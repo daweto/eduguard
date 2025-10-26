@@ -1,7 +1,7 @@
 # AI Agents Environment Variables
 # Copy this file to .dev.vars and fill in your actual values
 
-# OpenAI API Key (for GPT-4 reasoning)
+# OpenAI API Key (for GPT-5-nano reasoning)
 OPENAI_API_KEY=sk-...
 
 # ElevenLabs API Key

@@ -80,10 +80,15 @@ app.post("/call", async (c) => {
 
     const schoolName = process.env.SCHOOL_NAME ?? "Colegio Skyward";
 
-    console.log(
-      `📞 Initiating call to ${guardian_name} (${guardian_phone}) for ${student_name}`,
-    );
-    console.log(`   Risk: ${risk_level} | Pattern: ${pattern_type}`);
+    const masked = guardian_phone.replace(/\d(?=\d{2})/g, "*");
+    console.log("[ai-agents] /api/voice/call", {
+      student_id,
+      guardian_id,
+      guardian_phone: masked,
+      risk_level,
+      pattern_type,
+      call_id,
+    });
 
     // Initialize ElevenLabs client
     const client = new ElevenLabsClient({ apiKey });
@@ -93,6 +98,7 @@ app.post("/call", async (c) => {
         `   📞 Initiating ElevenLabs Twilio outbound call to: ${guardian_phone}`,
       );
 
+      const started = Date.now();
       const resp = await client.conversationalAi.twilio.outboundCall({
         agentId: agentId,
         agentPhoneNumberId: phoneNumberId,
@@ -123,6 +129,13 @@ app.post("/call", async (c) => {
           : null) ??
         (typeof resp.callSid === "string" ? resp.callSid : null) ??
         `call_${String(Date.now())}_${Math.random().toString(36).slice(2)}`;
+
+      console.log("[ai-agents] elevenlabs outbound", {
+        call_id: callId,
+        conversationId: resp.conversationId,
+        callSid: resp.callSid,
+        duration_ms: Date.now() - started,
+      });
 
       // Log agent decision (manual call)
       const apiUrl = process.env.API_BASE_URL ?? process.env.API_URL;
@@ -162,7 +175,14 @@ app.post("/call", async (c) => {
 
       return c.json(callData);
     } catch (elevenLabsError) {
-      console.error("❌ ElevenLabs API error:", elevenLabsError);
+      console.error("[ai-agents] elevenlabs error", {
+        error:
+          elevenLabsError instanceof Error
+            ? elevenLabsError.message
+            : String(elevenLabsError),
+        stack:
+          elevenLabsError instanceof Error ? elevenLabsError.stack : undefined,
+      });
 
       if (elevenLabsError instanceof Error) {
         if (elevenLabsError.message.includes("agent_id")) {

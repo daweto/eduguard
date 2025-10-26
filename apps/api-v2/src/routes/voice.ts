@@ -174,6 +174,14 @@ voice.post("/call", async (c) => {
 
   try {
     const payload = await c.req.json<VoiceCallRequest>();
+    const maskedPhone = payload.guardian_phone.replace(/\d(?=\d{2})/g, "*");
+    console.log("[api-v2] /api/voice/call request", {
+      student_id: payload.student_id,
+      guardian_id: payload.guardian_id,
+      guardian_phone: maskedPhone,
+      risk_level: payload.risk_level ?? "",
+      pattern_type: payload.pattern_type ?? "",
+    });
     const guardianId = payload.guardian_id;
     if (!payload.student_id || !payload.guardian_phone || !guardianId) {
       return c.json(
@@ -230,6 +238,7 @@ voice.post("/call", async (c) => {
     };
 
     // Forward to AI Agents first
+    const started = Date.now();
     const resp = await fetch(`${aiAgentsUrl}/api/voice/call`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -237,6 +246,11 @@ voice.post("/call", async (c) => {
     });
 
     const resultText = await resp.text();
+    console.log("[api-v2] forwarded to ai-agents", {
+      call_id: callId,
+      status: resp.status,
+      duration_ms: Date.now() - started,
+    });
     let result: VoiceCallResponse;
     try {
       result = JSON.parse(resultText) as VoiceCallResponse;
@@ -270,7 +284,10 @@ voice.post("/call", async (c) => {
 
     return c.json({ ...result, call_id: callId });
   } catch (error) {
-    console.error("Voice call proxy error:", error);
+    console.error("[api-v2] /api/voice/call error", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return c.json({ error: "Failed to initiate call" }, 500);
   }
 });
@@ -291,6 +308,9 @@ voice.all("/*", async (c) => {
   // Get the path after /api/voice
   const path = c.req.path.replace("/api/voice", "");
   const targetUrl = `${aiAgentsUrl}/api/voice${path}`;
+
+  const started = Date.now();
+  console.log("[api-v2] proxy -> ai-agents", { method: c.req.method, path });
 
   try {
     // Convert headers to plain object
@@ -314,6 +334,12 @@ voice.all("/*", async (c) => {
 
     // Return the response from AI Agents
     const data = await response.text();
+    console.log("[api-v2] proxy <- ai-agents", {
+      method: c.req.method,
+      path,
+      status: response.status,
+      duration_ms: Date.now() - started,
+    });
     return new Response(data, {
       status: response.status,
       headers: {
@@ -322,7 +348,12 @@ voice.all("/*", async (c) => {
       },
     });
   } catch (error) {
-    console.error("Voice proxy error:", error);
+    console.error("[api-v2] proxy error:", {
+      method: c.req.method,
+      path,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return c.json(
       {
         error: "Failed to connect to AI Agents service",

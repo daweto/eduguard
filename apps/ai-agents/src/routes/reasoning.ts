@@ -43,7 +43,7 @@ interface AttendanceRecord {
 
 /**
  * POST /analyze
- * Analyze student attendance pattern using GPT-4
+ * Analyze student attendance pattern using GPT-5-nano
  */
 app.post("/analyze", async (c) => {
   try {
@@ -143,7 +143,7 @@ app.post("/analyze", async (c) => {
       );
     }
 
-    // Format attendance for GPT-4
+    // Format attendance for GPT-5-nano
     const today = new Date().toISOString().split("T")[0];
 
     const todayFormatted = today_attendance
