@@ -14,19 +14,19 @@ const seedRouter = new Hono<{ Bindings: Bindings }>();
 // POST /api/seed - Seed the database with reference data (grades/stages)
 seedRouter.post("/", async (c) => {
   try {
-    // Only allow seeding in development or with explicit permission
-    // You can add authentication here if needed for production
-    const isProduction = c.env.ENVIRONMENT === "production";
+    // // Only allow seeding in development or with explicit permission
+    // // You can add authentication here if needed for production
+    // const isProduction = c.env.ENVIRONMENT === "production";
 
-    if (isProduction) {
-      return c.json(
-        {
-          error:
-            "Seeding is disabled in production. Use seed endpoint with authentication.",
-        },
-        403,
-      );
-    }
+    // if (isProduction) {
+    //   return c.json(
+    //     {
+    //       error:
+    //         "Seeding is disabled in production. Use seed endpoint with authentication.",
+    //     },
+    //     403,
+    //   );
+    // }
 
     // Run the seed function
     await seedDatabase(c.env.DB);
