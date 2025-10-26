@@ -70,8 +70,12 @@ app.post("/elevenlabs/call-completed", async (c) => {
     }
 
     // Log truncated version to avoid exceeding log size limits
-    const truncated = bodyText.slice(0, 1000) + (bodyText.length > 1000 ? "..." : "");
-    console.log("[Webhook] webhook-proxy elevenlabs call-completed (truncated)", truncated);
+    const truncated =
+      bodyText.slice(0, 1000) + (bodyText.length > 1000 ? "..." : "");
+    console.log(
+      "[Webhook] webhook-proxy elevenlabs call-completed (truncated)",
+      truncated,
+    );
 
     let forwarded = false;
     let forwardStatus: number | undefined;
