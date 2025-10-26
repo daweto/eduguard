@@ -305,9 +305,6 @@ importers:
 
   packages/shared-types:
     devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../config-eslint
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../config-typescript
