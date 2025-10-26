@@ -1,4 +1,8 @@
 # Forward received ElevenLabs webhook payloads to your API webhook
 # Example (local API): http://localhost:8787/api/webhooks/elevenlabs/call-completed
 FORWARD_TO_URL=
+
+# HMAC webhook secret (required). Use the secret provided by ElevenLabs webhook settings.
+# Either key name is supported; set one.
 WEBHOOK_SECRET=
+# ELEVENLABS_CONVAI_WEBHOOK_SECRET=

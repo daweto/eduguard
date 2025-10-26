@@ -2,6 +2,8 @@ import { Hono } from "hono";
 
 interface Bindings {
   FORWARD_TO_URL?: string;
+  WEBHOOK_SECRET?: string;
+  ELEVENLABS_CONVAI_WEBHOOK_SECRET?: string;
 }
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -16,19 +18,59 @@ app.get("/", (c) =>
 
 app.post("/elevenlabs/call-completed", async (c) => {
   try {
-    let payload: unknown;
-    try {
-      payload = await c.req.json();
-    } catch {
-      const text = await c.req.text();
-      try {
-        payload = JSON.parse(text);
-      } catch {
-        return c.json({ error: "invalid payload" }, 400);
-      }
+    const bodyText = await c.req.text();
+
+    // Verify HMAC signature
+    const header =
+      c.req.header("ElevenLabs-Signature") ||
+      c.req.header("elevenlabs-signature");
+    const secret =
+      c.env.WEBHOOK_SECRET || c.env.ELEVENLABS_CONVAI_WEBHOOK_SECRET;
+
+    if (!secret || !header) {
+      return c.json({ error: "unauthorized" }, 401);
     }
 
-    console.log("[Webhook] elevenlabs call-completed", JSON.stringify(payload));
+    const parts = header.split(",");
+    const t = parts.find((p) => p.startsWith("t="))?.slice(2);
+    const v0 = parts.find((p) => p.startsWith("v0="));
+    if (!t || !v0) return c.json({ error: "invalid signature" }, 401);
+
+    // Timestamp tolerance: 30 minutes
+    const tsMs = Number(t) * 1000;
+    const tolerance = Date.now() - 30 * 60 * 1000;
+    if (Number.isFinite(tsMs) && tsMs < tolerance)
+      return c.json({ error: "expired" }, 401);
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+    const signature = await crypto.subtle.sign(
+      "HMAC",
+      key,
+      encoder.encode(`${t}.${bodyText}`),
+    );
+    const hex = [...new Uint8Array(signature)]
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const expected = `v0=${hex}`;
+
+    if (expected !== v0) return c.json({ error: "invalid signature" }, 401);
+
+    // Parse JSON now that signature is valid
+    let payload: unknown;
+    try {
+      payload = JSON.parse(bodyText);
+    } catch {
+      return c.json({ error: "invalid payload" }, 400);
+    }
+
+    console.log("[Webhook] elevenlabs call-completed", bodyText);
 
     let forwarded = false;
     let forwardStatus: number | undefined;
@@ -39,7 +81,7 @@ app.post("/elevenlabs/call-completed", async (c) => {
         const resp = await fetch(c.env.FORWARD_TO_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: bodyText, // forward original JSON
         });
         forwardStatus = resp.status;
         forwarded = true;
