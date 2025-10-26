@@ -14,10 +14,6 @@
     "migrate:remote": "wrangler d1 execute eduguard-db --remote --file=./migrations/0000_skinny_maestro.sql && wrangler d1 execute eduguard-db --remote --file=./migrations/0001_add_classes_attendance_tables.sql && wrangler d1 execute eduguard-db --remote --file=./migrations/0002_add_grade_sections_attendance_drilldown.sql && wrangler d1 execute eduguard-db --remote --file=./migrations/0003_add_external_image_id.sql && wrangler d1 execute eduguard-db --remote --file=./migrations/0004_add_calls_and_reasoning.sql",
     "seed:local": "curl -X POST http://localhost:8787/api/seed",
     "seed:remote": "curl -X POST https://api-v2.dweinsteint.workers.dev/api/seed",
-    "sync-faces": "curl -X POST http://localhost:8787/api/seed/sync-faces",
-    "sync-faces:remote": "curl -X POST https://api-v2.dweinsteint.workers.dev/api/seed/sync-faces",
-    "seed:full": "pnpm seed:local && pnpm sync-faces",
-    "seed:full:remote": "pnpm seed:remote && pnpm sync-faces:remote",
     "db:reset": "rm -rf .wrangler/state && pnpm migrate:local"
   },
   "dependencies": {
