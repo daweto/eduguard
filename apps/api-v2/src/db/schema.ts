@@ -80,6 +80,7 @@ export const studentFaces = sqliteTable("student_faces", {
     .notNull()
     .references(() => students.id, { onDelete: "cascade" }),
   faceId: text("face_id").notNull(),
+  externalImageId: text("external_image_id").unique(), // Predictable ID for AWS Rekognition
   photoUrl: text("photo_url"),
   indexedAt: text("indexed_at").notNull(),
   qualityScore: real("quality_score"),

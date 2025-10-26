@@ -1,4 +1,4 @@
-import { eq, desc, count, and, gte, lte } from "drizzle-orm";
+import { eq, desc, count, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import {
@@ -287,12 +287,14 @@ students.post("/", async (c) => {
         // for presigned uploads using deleteFromRemoteR2()
 
         // Step 2: Index face with AWS Rekognition
-        console.log(`[PHOTO ${String(photoNumber)}] Indexing face with AWS Rekognition...`);
+        // Use predictable externalImageId so we can reconnect after DB resets
+        const externalImageId = `${studentId}-photo-${String(photoNumber)}`;
+        console.log(`[PHOTO ${String(photoNumber)}] Indexing face with AWS Rekognition (ExternalImageId: ${externalImageId})...`);
         const result = await indexFaceBytes({
           client: rek,
           collectionId,
           bytes,
-          externalImageId: `student_${studentId}_photo_${String(photoNumber)}`,
+          externalImageId,
         });
         const qualityScoreStr = result.qualityScore !== undefined ? String(result.qualityScore) : 'N/A';
         console.log(`[PHOTO ${String(photoNumber)}] ✓ Face indexed - FaceID: ${result.faceId}, Quality: ${qualityScoreStr}`);
@@ -303,6 +305,7 @@ students.post("/", async (c) => {
           id: crypto.randomUUID(),
           studentId,
           faceId: result.faceId,
+          externalImageId,
           photoUrl: destKey,
           indexedAt: new Date().toISOString(),
           qualityScore:
@@ -677,12 +680,20 @@ students.post("/:id/photos", async (c) => {
         console.log(`[PHOTO-UPLOAD] ✓ Moved photo from ${tempKey} to ${photoKey}`);
 
         // Index face with AWS Rekognition
+        // Get existing face count to determine photo number
+        const existingFacesCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(studentFacesTable)
+          .where(eq(studentFacesTable.studentId, studentId));
+        const photoNumber = (existingFacesCount[0]?.count ?? 0) + i + 1;
+        const externalImageId = `${studentId}-photo-${photoNumber}`;
+        
         try {
           const indexResult = await indexFaceBytes({
             client: rekognition,
             collectionId,
             bytes,
-            externalImageId: `${studentId}_photo_${Date.now()}_${i}`,
+            externalImageId,
           });
 
           if (indexResult.faceId) {
@@ -694,16 +705,17 @@ students.post("/:id/photos", async (c) => {
 
             // Store face record in database
             await db.insert(studentFacesTable).values({
-              id: `face-${Date.now()}-${i}`,
+              id: crypto.randomUUID(),
               studentId: studentId,
               faceId: indexResult.faceId,
+              externalImageId,
               photoUrl: photoKey,
               indexedAt: new Date().toISOString(),
               qualityScore: indexResult.qualityScore ?? null,
             });
 
             console.log(
-              `[FACE-INDEX] ✓ Indexed face ${indexResult.faceId} for student ${studentId}`
+              `[FACE-INDEX] ✓ Indexed face ${indexResult.faceId} (${externalImageId}) for student ${studentId}`
             );
           }
         } catch (awsError) {

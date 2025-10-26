@@ -10,6 +10,7 @@ import {
   classes,
   legalGuardians,
   students,
+  studentFaces,
   classEnrollments,
 } from './schema';
 
@@ -369,6 +370,14 @@ export const classesData = [
   },
 ];
 
+// Valid Chilean RUTs available for use:
+// Used: 9677209-2, 17679737-1, 8274022-8, 5585167-0 (guardians)
+//       4871402-1, 9878848-4, 11794411-5, 11985894-1 (students)
+// Available: 17778813-9, 7136662-6, 10144074-5, 16884133-7, 1422696-6, 17018079-8,
+//            7786045-2, 19906768-0, 6346960-2, 19734201-3, 21876999-3, 17348019-9,
+//            23719337-7, 2488071-0, 8108386-K, 5296555-1, 23560178-8, 22937078-2,
+//            15495967-K, 2034453-9, 23670066-6, 15641036-5
+
 // Sample guardians
 export const guardiansData = [
   {
@@ -377,7 +386,7 @@ export const guardiansData = [
     middleName: 'José',
     lastName: 'Muñoz',
     secondLastName: 'García',
-    identificationNumber: '12345678-9',
+    identificationNumber: '9677209-2',
     phone: '+56987654321',
     email: 'pedro.munoz@email.cl',
     preferredLanguage: 'es',
@@ -390,7 +399,7 @@ export const guardiansData = [
     middleName: 'Rosa',
     lastName: 'Fernández',
     secondLastName: 'Soto',
-    identificationNumber: '23456789-0',
+    identificationNumber: '17679737-1',
     phone: '+56987654322',
     email: 'carmen.fernandez@email.cl',
     preferredLanguage: 'es',
@@ -403,7 +412,7 @@ export const guardiansData = [
     middleName: 'Andrés',
     lastName: 'Castro',
     secondLastName: 'Ramírez',
-    identificationNumber: '34567890-1',
+    identificationNumber: '8274022-8',
     phone: '+56987654323',
     email: 'luis.castro@email.cl',
     preferredLanguage: 'es',
@@ -415,7 +424,7 @@ export const guardiansData = [
     firstName: 'David',
     middleName: 'Felipe',
     lastName: 'Weinstein',
-    identificationNumber: '20074036-K',
+    identificationNumber: '5585167-0',
     phone: '+56969357637',
     email: 'dweinsteint@gmail.com',
     preferredLanguage: 'es',
@@ -431,7 +440,7 @@ export const studentsData = [
     id: 'student-001',
     firstName: 'Joel',
     lastName: 'Salas',
-    identificationNumber: '25123456-7',
+    identificationNumber: '4871402-1',
     gradeId: '1st-secondary',
     gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-001',
@@ -445,7 +454,7 @@ export const studentsData = [
     id: 'student-002',
     firstName: 'Sheen',
     lastName: 'Fernández',
-    identificationNumber: '25234567-8',
+    identificationNumber: '9878848-4',
     gradeId: '1st-secondary',
     gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-002',
@@ -459,7 +468,7 @@ export const studentsData = [
     id: 'student-003',
     firstName: 'Boris',
     lastName: 'Puentes',
-    identificationNumber: '25345678-9',
+    identificationNumber: '11794411-5',
     gradeId: '1st-secondary',
     gradeSectionId: 'gs-1sec-a', // 1° Medio A
     guardianId: 'guardian-003',
@@ -473,7 +482,7 @@ export const studentsData = [
     id: 'student-004',
     firstName: 'Felipe',
     lastName: 'Torres',
-    identificationNumber: '1-9',
+    identificationNumber: '11985894-1',
     gradeId: '1st-secondary',
     gradeSectionId: 'gs-1sec-b', // 1° Medio B (different section)
     guardianId: 'guardian-004',
@@ -483,6 +492,127 @@ export const studentsData = [
     awsCollectionId: 'eduguard-school-default',
     metadata: null,
   }
+];
+
+// Student faces seed data - uses PREDICTABLE externalImageId
+// The faceId will be looked up from AWS Rekognition using the externalImageId
+// This allows DB resets without re-uploading photos or re-indexing faces
+export const studentFacesData = [
+  // Joel Salas (student-001) - 3 photos
+  {
+    id: 'face-001-1',
+    studentId: 'student-001',
+    faceId: 'placeholder', // Will be updated by sync script
+    externalImageId: 'student-001-photo-1', // PREDICTABLE - used to find face in AWS
+    photoUrl: 'students/student-001/photo-1.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-001-2',
+    studentId: 'student-001',
+    faceId: 'placeholder',
+    externalImageId: 'student-001-photo-2',
+    photoUrl: 'students/student-001/photo-2.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-001-3',
+    studentId: 'student-001',
+    faceId: 'placeholder',
+    externalImageId: 'student-001-photo-3',
+    photoUrl: 'students/student-001/photo-3.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  
+  // Sheen Fernández (student-002) - 3 photos
+  {
+    id: 'face-002-1',
+    studentId: 'student-002',
+    faceId: 'placeholder',
+    externalImageId: 'student-002-photo-1',
+    photoUrl: 'students/student-002/photo-1.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-002-2',
+    studentId: 'student-002',
+    faceId: 'placeholder',
+    externalImageId: 'student-002-photo-2',
+    photoUrl: 'students/student-002/photo-2.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-002-3',
+    studentId: 'student-002',
+    faceId: 'placeholder',
+    externalImageId: 'student-002-photo-3',
+    photoUrl: 'students/student-002/photo-3.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  
+  // Boris Puentes (student-003) - 3 photos
+  {
+    id: 'face-003-1',
+    studentId: 'student-003',
+    faceId: 'placeholder',
+    externalImageId: 'student-003-photo-1',
+    photoUrl: 'students/student-003/photo-1.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-003-2',
+    studentId: 'student-003',
+    faceId: 'placeholder',
+    externalImageId: 'student-003-photo-2',
+    photoUrl: 'students/student-003/photo-2.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-003-3',
+    studentId: 'student-003',
+    faceId: 'placeholder',
+    externalImageId: 'student-003-photo-3',
+    photoUrl: 'students/student-003/photo-3.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  
+  // Felipe Torres (student-004) - 3 photos
+  {
+    id: 'face-004-1',
+    studentId: 'student-004',
+    faceId: 'placeholder',
+    externalImageId: 'student-004-photo-1',
+    photoUrl: 'students/student-004/photo-1.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-004-2',
+    studentId: 'student-004',
+    faceId: 'placeholder',
+    externalImageId: 'student-004-photo-2',
+    photoUrl: 'students/student-004/photo-2.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
+  {
+    id: 'face-004-3',
+    studentId: 'student-004',
+    faceId: 'placeholder',
+    externalImageId: 'student-004-photo-3',
+    photoUrl: 'students/student-004/photo-3.jpg',
+    indexedAt: '2024-10-25T10:00:00Z',
+    qualityScore: 99.0,
+  },
 ];
 
 // Class enrollments (students enrolled in classes)
@@ -558,6 +688,11 @@ export async function seedDatabase(db: D1Database) {
   console.log('Seeding students...');
   for (const student of studentsData) {
     await drizzleDb.insert(students).values(student).onConflictDoNothing();
+  }
+
+  console.log('Seeding student faces (reusing existing S3/Rekognition data)...');
+  for (const face of studentFacesData) {
+    await drizzleDb.insert(studentFaces).values(face).onConflictDoNothing();
   }
 
   console.log('Seeding class enrollments...');
