@@ -36,7 +36,7 @@ Run this locally to create the Pages project:
 ```bash
 cd apps/teacher-client
 pnpm build
-pnpm exec wrangler pages project create teacher-client
+pnpm exec wrangler pages project create eduguard
 ```
 
 Or create it via the Cloudflare Dashboard:
@@ -44,7 +44,7 @@ Or create it via the Cloudflare Dashboard:
 1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. Click **"Workers & Pages"**
 3. Click **"Create"** → **"Pages"** → **"Upload assets"**
-4. Name: `teacher-client`
+4. Name: `eduguard`
 
 ## ✅ Step 3: Verify Resources Exist
 
@@ -107,7 +107,7 @@ After workflows run successfully:
 
 - [ ] Check API: https://api-v2.dweinsteint.workers.dev
 - [ ] Check Webhook Proxy: https://webhook-proxy.dweinsteint.workers.dev
-- [ ] Check Frontend: https://teacher-client.pages.dev (or custom domain)
+- [ ] Check Frontend: https://eduguard.pages.dev (or custom domain)
 
 ## 🎉 You're All Set!
 
@@ -138,7 +138,7 @@ pnpm --filter webhook-proxy exec wrangler deploy --minify
 
 # Frontend
 cd apps/teacher-client && pnpm build
-pnpm exec wrangler pages deploy dist --project-name=teacher-client
+pnpm exec wrangler pages deploy dist --project-name=eduguard
 ```
 
 ### View logs:

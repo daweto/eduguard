@@ -67,14 +67,14 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/teacher-client/dist --project-name=teacher-client --branch=main
+          command: pages deploy apps/teacher-client/dist --project-name=eduguard --branch=main
           packageManager: pnpm
 
       - name: Deployment Summary
         run: |
           echo "### ✅ Frontend Deployed Successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://teacher-client.pages.dev" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** https://eduguard.pages.dev" >> $GITHUB_STEP_SUMMARY
           echo "**API URL:** ${{ secrets.VITE_API_URL || 'https://api-v2.dweinsteint.workers.dev' }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

@@ -28,7 +28,7 @@
 4. **`deploy-frontend.yml`** - Deploy Frontend
    - Triggers: Push to `main` when `apps/teacher-client/**` changes
    - Deploys to Cloudflare Pages
-   - URL: https://teacher-client.pages.dev
+   - URL: https://eduguard.pages.dev
 
 ### Documentation (`.github/`)
 
@@ -96,7 +96,7 @@ VITE_API_URL=https://api-v2.dweinsteint.workers.dev
 ```bash
 cd apps/teacher-client
 pnpm build
-pnpm exec wrangler pages project create teacher-client
+pnpm exec wrangler pages project create eduguard
 ```
 
 ### 3. Test the Setup
