@@ -7,7 +7,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
-    "migrate:local": "wrangler d1 execute eduguard-db --local --file=./migrations/0000_skinny_maestro.sql",
+    "migrate:local": "wrangler d1 execute eduguard-db --local --file=./migrations/0001_add_classes_attendance_tables.sql",
     "migrate:remote": "wrangler d1 execute eduguard-db --remote --file=./migrations/0000_skinny_maestro.sql",
     "seed:local": "curl -X POST http://localhost:8787/api/seed",
     "db:reset": "rm -rf .wrangler/state && pnpm migrate:local"

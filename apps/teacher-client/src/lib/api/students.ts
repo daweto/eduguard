@@ -10,6 +10,9 @@ import type {
   Student,
 } from '@/types/student';
 
+// Re-export types for convenience
+export type { Student } from '@/types/student';
+
 /**
  * Convert File to base64
  */
@@ -131,5 +134,58 @@ export async function getStudent(id: string): Promise<Student> {
 export async function deleteStudent(id: string): Promise<{ deleted: boolean; student_id: string }> {
   return fetchApi(`/api/students/${id}`, {
     method: 'DELETE',
+  });
+}
+
+/**
+ * Upload photos to existing student using presigned URLs
+ */
+export async function uploadStudentPhotos(
+  studentId: string,
+  photos: File[],
+): Promise<{
+  success: boolean;
+  student_id: string;
+  photos_uploaded: number;
+  faces_indexed: Array<{ face_id: string; photo_key: string }>;
+}> {
+  console.log(`[STUDENT PHOTOS] Starting upload for ${studentId} with ${photos.length} photo(s)`);
+  
+  // 1. Request presigned URLs
+  console.log('[STUDENT PHOTOS] Requesting presigned URLs...');
+  const presign = await presignStudentPhotos(photos.length, photos[0]?.type || 'image/jpeg');
+  console.log('[STUDENT PHOTOS] Received presigned URLs');
+  
+  // 2. Upload photos to R2
+  console.log('[STUDENT PHOTOS] Uploading photos to R2...');
+  await Promise.all(
+    presign.uploads.map(async (u, idx) => {
+      const file = photos[idx]!;
+      console.log(`[STUDENT PHOTOS] Uploading photo ${idx + 1}/${photos.length}`);
+      
+      const res = await fetch(u.upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': u.content_type },
+        body: file,
+      });
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed for photo ${idx + 1}: ${res.status}`);
+      }
+      
+      console.log(`[STUDENT PHOTOS] ✓ Photo ${idx + 1} uploaded`);
+    }),
+  );
+  
+  // 3. Send photo keys to backend
+  console.log('[STUDENT PHOTOS] Sending photo keys to backend...');
+  return fetchApi<{
+    success: boolean;
+    student_id: string;
+    photos_uploaded: number;
+    faces_indexed: Array<{ face_id: string; photo_key: string }>;
+  }>(`/api/students/${studentId}/photos`, {
+    method: 'POST',
+    body: JSON.stringify({ photo_keys: presign.uploads.map(u => u.key) }),
   });
 }

@@ -179,7 +179,16 @@ export function StudentEnrollmentForm({
 
   const handleGuardianSelection = (guardianId: string) => {
     if (!guardianId) {
+      // Clear all guardian fields when deselecting
       form.setFieldValue("guardian.id", "");
+      form.setFieldValue("guardian.firstName", "");
+      form.setFieldValue("guardian.middleName", "");
+      form.setFieldValue("guardian.lastName", "");
+      form.setFieldValue("guardian.secondLastName", "");
+      form.setFieldValue("guardian.identificationNumber", "");
+      form.setFieldValue("guardian.phone", "");
+      form.setFieldValue("guardian.email", "");
+      form.setFieldValue("guardian.preferredLanguage", "es");
       return;
     }
 
@@ -444,13 +453,10 @@ export function StudentEnrollmentForm({
                   <Select
                     value={field.state.value || undefined}
                     onValueChange={(value) => {
-                      field.handleChange(value === "none" ? "" : value);
+                      const guardianId = value === "none" ? "" : value;
+                      field.handleChange(guardianId);
                       field.handleBlur();
-                      if (value === "none") {
-                        form.setFieldValue("guardian.id", "");
-                      } else {
-                        handleGuardianSelection(value);
-                      }
+                      handleGuardianSelection(guardianId);
                     }}
                     disabled={guardiansLoading || !!guardiansError}
                   >
@@ -484,13 +490,16 @@ export function StudentEnrollmentForm({
             )}
           </form.Field>
 
-          <GuardianFormFields
-            form={form}
-            fieldPrefix="guardian"
-            formFieldErrorVisible={formFieldErrorVisible}
-            translationNamespace="enrollment"
-            translationKeyPrefix="fields.guardian"
-          />
+          {/* Only show guardian form fields if creating a new guardian */}
+          {!form.state.values.guardian.id && (
+            <GuardianFormFields
+              form={form}
+              fieldPrefix="guardian"
+              formFieldErrorVisible={formFieldErrorVisible}
+              translationNamespace="enrollment"
+              translationKeyPrefix="fields.guardian"
+            />
+          )}
         </FieldGroup>
       </FieldSet>
 

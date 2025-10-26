@@ -4,6 +4,8 @@
   "studentCard": {
     "guardian": "Apoderado",
     "identification": "Identificación",
+    "course": "Curso",
+    "gradeLevel": "Nivel",
     "phone": "Teléfono",
     "email": "Correo electrónico",
     "enrolled": "Inscrito",

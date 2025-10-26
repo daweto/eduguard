@@ -13,11 +13,49 @@
       "title": "Listado de Estudiantes",
       "description": "Ver y gestionar todos los estudiantes",
       "action": "Ver Listado"
+    }
+  },
+  "edit": {
+    "title": "Editar Estudiante",
+    "backToRoster": "Volver al Listado",
+    "info": {
+      "title": "Información del Estudiante",
+      "fullName": "Nombre Completo",
+      "rut": "RUT",
+      "grade": "Curso",
+      "currentPhotos": "Fotos actuales",
+      "photosCount": "{{count}} foto(s)",
+      "indexedFaces": "Rostros indexados",
+      "facesCount": "{{count}} rostro(s)",
+      "readyForAttendance": "✓ Listo para asistencia"
     },
-    "grades": {
-      "title": "Calificaciones",
-      "description": "Gestionar notas y evaluaciones",
-      "action": "Ver Calificaciones"
+    "currentPhotos": {
+      "title": "Fotos Actuales",
+      "photoAlt": "Foto {{index}}"
+    },
+    "upload": {
+      "title": "Subir Fotos de Rostro",
+      "description": "Sube de 1 a 5 fotos claras del rostro del estudiante para el reconocimiento facial. Las fotos deben mostrar claramente la cara desde diferentes ángulos.",
+      "selectButton": "Seleccionar Fotos ({{current}}/{{max}})",
+      "submitButton": "Subir {{count}} Foto(s)",
+      "uploading": "Subiendo fotos...",
+      "previewAlt": "Preview {{index}}",
+      "photoLabel": "Foto {{index}}",
+      "success": {
+        "title": "¡Fotos subidas correctamente!",
+        "message": "El estudiante ahora está listo para el reconocimiento facial."
+      }
+    },
+    "errors": {
+      "loadStudent": "Error al cargar el estudiante",
+      "notFound": "No se pudo cargar el estudiante.",
+      "invalidImage": "{{fileName}} no es una imagen válida",
+      "fileTooLarge": "{{fileName}} es demasiado grande (máx. 10MB)",
+      "selectPhotos": "Por favor, selecciona al menos una foto",
+      "uploadFailed": "Error al subir las fotos"
+    },
+    "success": {
+      "photosUploaded": "{{count}} foto(s) subida(s) correctamente"
     }
   }
 }

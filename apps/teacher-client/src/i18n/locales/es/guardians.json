@@ -1,28 +1,29 @@
 {
   "page": {
-    "title": "Apoderados",
-    "description": "Gestiona los apoderados y tutores de los estudiantes"
+    "title": "Gestionar apoderados",
+    "description": "Administra el registro de apoderados y vincúlalos con tus estudiantes."
+  },
+  "actions": {
+    "create": "Registrar apoderado"
+  },
+  "dialog": {
+    "create": {
+      "title": "Registrar apoderado",
+      "description": "Completa el formulario para agregar un nuevo apoderado."
+    }
   },
   "cards": {
     "list": {
-      "title": "Listado de Apoderados",
-      "description": "Ver y gestionar todos los apoderados registrados",
-      "action": "Ver Listado"
+      "title": "Listado de apoderados",
+      "description": "Revisa todos los apoderados registrados",
+      "action": "Ver listado"
     },
     "create": {
-      "title": "Registrar Apoderado",
-      "description": "Agregar un nuevo apoderado al sistema",
-      "action": "Registrar Nuevo"
+      "title": "Registrar apoderado",
+      "description": "Crea un nuevo apoderado y asócialo a estudiantes",
+      "action": "Registrar"
     }
   },
-  "createPage": {
-    "title": "Registrar Apoderado",
-    "description": "Completa el formulario para registrar un nuevo apoderado",
-    "cardTitle": "Información del Apoderado",
-    "cardDescription": "Ingresa los datos del apoderado o tutor legal"
-  },
-  "title": "Registrar Apoderado",
-  "description": "Completa los datos personales del apoderado para poder asignarlo a estudiantes",
   "form": {
     "title": "Nuevo apoderado",
     "description": "Completa el formulario con los datos del apoderado.",
@@ -52,7 +53,7 @@
       "placeholder": "+56 9 1234 5678"
     },
     "email": {
-      "label": "Correo electrónico",
+      "label": "Correo electrónico (opcional)",
       "placeholder": "maria@example.com"
     },
     "submit": "Crear apoderado",
@@ -62,25 +63,18 @@
     "title": "Apoderados registrados",
     "description": "Listado completo de apoderados disponibles",
     "loading": "Cargando...",
+    "empty": "Aún no tienes apoderados registrados",
     "headers": {
       "name": "Nombre completo",
       "identification": "Identificación",
       "phone": "Teléfono",
-      "email": "Correo"
-    }
-  },
-  "actions": {
-    "create": "Nuevo Apoderado"
-  },
-  "dialog": {
-    "create": {
-      "title": "Registrar Nuevo Apoderado",
-      "description": "Completa el formulario para agregar un nuevo apoderado al sistema"
+      "email": "Correo",
+      "language": "Idioma preferido"
     }
   },
   "messages": {
     "loadError": "No pudimos cargar la lista de apoderados.",
     "createError": "No se pudo crear el apoderado",
-    "createSuccess": "Apoderado creado exitosamente"
+    "createSuccess": "Apoderado registrado correctamente"
   }
 }

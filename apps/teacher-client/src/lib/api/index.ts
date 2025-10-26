@@ -3,13 +3,23 @@
  */
 
 // Base client
-export { ApiError, fetchApi, API_BASE_URL } from './client';
+export { ApiError, fetchApi, API_BASE_URL } from "./client";
 
 // Students
-export { enrollStudent, getStudents, getStudent, deleteStudent, fileToBase64, presignStudentPhotos } from './students';
+export {
+  enrollStudent,
+  getStudents,
+  getStudent,
+  deleteStudent,
+  fileToBase64,
+  presignStudentPhotos,
+} from "./students";
 
 // Guardians
-export { getGuardians, createGuardian } from './guardians';
+export { getGuardians, createGuardian } from "./guardians";
 
 // Grades
-export { getStages, getGrades } from './grades';
+export { getStages, getGrades } from "./grades";
+
+// Attendance
+export { captureAttendance, detectFaces, matchFace } from "./attendance";

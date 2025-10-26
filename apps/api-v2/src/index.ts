@@ -1,5 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import attendance from "./routes/attendance";
+import classes from "./routes/classes";
 import grades from "./routes/grades";
 import guardians from "./routes/guardians";
 import seed from "./routes/seed";
@@ -34,5 +36,7 @@ app.route("/api/grades", grades);
 app.route("/api/guardians", guardians);
 app.route("/api/seed", seed);
 app.route("/api/uploads", uploads);
+app.route("/api/attendance", attendance);
+app.route("/api/classes", classes);
 
 export default app;

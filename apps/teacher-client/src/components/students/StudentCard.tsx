@@ -1,5 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -7,12 +7,22 @@ import {
   CarouselNext,
   CarouselPrevious,
   type CarouselApi,
-} from '@/components/ui/carousel';
-import { ImagePlaceholder } from '@/components/ui/image-placeholder';
-import type { Student } from '@/types/student';
-import { User, Phone, Mail, GraduationCap, Trash2, IdCard } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+} from "@/components/ui/carousel";
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import type { Student } from "@/types/student";
+import {
+  User,
+  Phone,
+  Mail,
+  GraduationCap,
+  Trash2,
+  IdCard,
+  Edit,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 interface StudentCardProps {
   student: Student;
@@ -20,7 +30,7 @@ interface StudentCardProps {
 }
 
 export function StudentCard({ student, onDelete }: StudentCardProps) {
-  const { t } = useTranslation('roster');
+  const { t } = useTranslation("roster");
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -34,7 +44,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
     student.secondLastName?.trim() ? student.secondLastName : null,
   ]
     .filter(Boolean)
-    .join(' ');
+    .join(" ");
 
   const guardianSource = student.guardian ?? null;
   const guardianFullName = guardianSource
@@ -42,8 +52,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
         guardianSource.firstName,
         guardianSource.middleName?.trim() ? guardianSource.middleName : null,
         guardianSource.lastName,
-        guardianSource.secondLastName?.trim() ? guardianSource.secondLastName : null,
-      ].filter(Boolean).join(' ')
+        guardianSource.secondLastName?.trim()
+          ? guardianSource.secondLastName
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ")
     : student.guardianName;
 
   // Track carousel state
@@ -53,7 +67,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
     setCount(carouselApi.scrollSnapList().length);
     setCurrent(carouselApi.selectedScrollSnap());
 
-    carouselApi.on('select', () => {
+    carouselApi.on("select", () => {
       setCurrent(carouselApi.selectedScrollSnap());
     });
   }, [carouselApi]);
@@ -74,24 +88,48 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
               <CarouselContent>
                 {photos.map((photoUrl, index) => (
                   <CarouselItem key={index}>
-                    <div className="relative h-48 bg-muted">
-                      <img
-                        src={photoUrl}
-                        alt={`${studentFullName} - Photo ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Replace with placeholder if image fails to load
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            e.currentTarget.style.display = 'none';
-                            parent.classList.add('flex', 'items-center', 'justify-center', 'bg-gradient-to-br', 'from-primary/20', 'to-primary/5');
-                            const placeholder = document.createElement('div');
-                            placeholder.innerHTML = '<svg class="w-20 h-20 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                            parent.appendChild(placeholder.firstElementChild!);
-                          }
-                        }}
-                      />
-                    </div>
+                    <AspectRatio
+                      ratio={4 / 3}
+                      className="rounded-lg overflow-hidden"
+                    >
+                      <div className="relative w-full h-full">
+                        <img
+                          src={photoUrl}
+                          alt={`${studentFullName} - Photo ${index + 1}`}
+                          className="absolute inset-0 w-full h-full object-contain"
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                          onError={(e) => {
+                            // Replace with placeholder if image fails to load
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              e.currentTarget.style.display = "none";
+                              parent.classList.add(
+                                "flex",
+                                "items-center",
+                                "justify-center",
+                                "bg-gradient-to-br",
+                                "from-primary/20",
+                                "to-primary/5",
+                              );
+                              const placeholder = document.createElement("div");
+                              placeholder.innerHTML =
+                                '<svg class="w-16 h-16 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                              parent.appendChild(
+                                placeholder.firstElementChild!,
+                              );
+                            }
+                          }}
+                        />
+
+                        {photos.length > 1 && (
+                          <div className="absolute bottom-2 right-2 rounded bg-black/60 text-white text-xs px-2 py-0.5">
+                            {index + 1}/{photos.length}
+                          </div>
+                        )}
+                      </div>
+                    </AspectRatio>
                   </CarouselItem>
                 ))}
               </CarouselContent>
@@ -112,7 +150,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
                   <div
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all ${
-                      index === current ? 'bg-white w-4' : 'bg-white/50'
+                      index === current ? "bg-white w-4" : "bg-white/50"
                     }`}
                   />
                 ))}
@@ -120,10 +158,7 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
             )}
           </div>
         ) : (
-          <ImagePlaceholder
-            className="h-48"
-            name={studentFullName}
-          />
+          <ImagePlaceholder className="h-48" name={studentFullName} />
         )}
       </div>
 
@@ -148,7 +183,9 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
           <div className="flex items-start gap-2">
             <User className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
             <div>
-              <p className="text-muted-foreground text-xs">{t('studentCard.guardian')}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("studentCard.guardian")}
+              </p>
               <p className="font-medium">{guardianFullName}</p>
             </div>
           </div>
@@ -157,8 +194,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
             <div className="flex items-start gap-2">
               <IdCard className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-muted-foreground text-xs">{t('studentCard.identification')}</p>
-                <p className="font-medium">{guardianSource.identificationNumber}</p>
+                <p className="text-muted-foreground text-xs">
+                  {t("studentCard.identification")}
+                </p>
+                <p className="font-medium">
+                  {guardianSource.identificationNumber}
+                </p>
               </div>
             </div>
           )}
@@ -166,8 +207,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
           <div className="flex items-start gap-2">
             <Phone className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
             <div>
-              <p className="text-muted-foreground text-xs">{t('studentCard.phone')}</p>
-              <p className="font-medium">{guardianSource?.phone ?? student.guardianPhone}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("studentCard.phone")}
+              </p>
+              <p className="font-medium">
+                {guardianSource?.phone ?? student.guardianPhone}
+              </p>
             </div>
           </div>
 
@@ -175,8 +220,12 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
             <div className="flex items-start gap-2">
               <Mail className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
               <div>
-                <p className="text-muted-foreground text-xs">{t('studentCard.email')}</p>
-                <p className="font-medium truncate">{guardianSource?.email ?? student.guardianEmail}</p>
+                <p className="text-muted-foreground text-xs">
+                  {t("studentCard.email")}
+                </p>
+                <p className="font-medium truncate">
+                  {guardianSource?.email ?? student.guardianEmail}
+                </p>
               </div>
             </div>
           )}
@@ -185,28 +234,46 @@ export function StudentCard({ student, onDelete }: StudentCardProps) {
         {/* Metadata */}
         <div className="pt-3 border-t text-xs text-muted-foreground">
           <div className="flex justify-between items-center">
-            <span>{t('studentCard.enrolled')}: {new Date(student.enrollmentDate).toLocaleDateString()}</span>
-            <span className="text-green-600 dark:text-green-400 font-medium">{t('studentCard.active')}</span>
+            <span>
+              {t("studentCard.enrolled")}:{" "}
+              {new Date(student.enrollmentDate).toLocaleDateString()}
+            </span>
+            <span className="text-green-600 dark:text-green-400 font-medium">
+              {t("studentCard.active")}
+            </span>
           </div>
           {student.face_ids && student.face_ids.length > 0 && (
             <div className="mt-1">
-              {t('studentCard.facesIndexed', { count: student.face_ids.length })}
+              {t("studentCard.facesIndexed", {
+                count: student.face_ids.length,
+              })}
             </div>
           )}
         </div>
 
-        {/* Delete button (optional) */}
-        {onDelete && (
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full mt-2"
-            onClick={() => onDelete(student.id)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            {t('studentCard.removeStudent')}
+        {/* Action buttons */}
+        <div className="pt-3 border-t space-y-2">
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link to={`/students/${student.id}/edit`}>
+              <Edit className="w-4 h-4 mr-2" />
+              {t("studentCard.editStudent", {
+                defaultValue: "Editar / Subir Fotos",
+              })}
+            </Link>
           </Button>
-        )}
+
+          {onDelete && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full"
+              onClick={() => onDelete(student.id)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {t("studentCard.removeStudent")}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

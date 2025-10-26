@@ -6,16 +6,29 @@ import type { Bindings } from "../types";
 const uploads = new Hono<{ Bindings: Bindings }>();
 
 // POST /api/uploads/presign
-// Body: { purpose: 'student_photo', count: number, contentType?: string }
+// Body: { purpose: 'student_photo' | 'attendance_photo', count: number, contentType?: string }
 uploads.post("/presign", async (c) => {
   try {
     const body = await c.req.json<{
-      purpose: "student_photo";
+      purpose: "student_photo" | "attendance_photo";
       count?: number;
       contentType?: string;
     }>();
-    const count = Math.min(Math.max(body.count ?? 1, 1), 3);
+    
+    // Validate purpose
+    if (!["student_photo", "attendance_photo"].includes(body.purpose)) {
+      return c.json({ error: "Invalid purpose. Must be 'student_photo' or 'attendance_photo'" }, 400);
+    }
+    
+    // Validate content type is an image
     const contentType = body.contentType ?? "image/jpeg";
+    if (!contentType.startsWith("image/")) {
+      return c.json({ error: "Invalid content type. Must be an image" }, 400);
+    }
+    
+    // Different limits based on purpose
+    const maxCount = body.purpose === "attendance_photo" ? 10 : 3;
+    const count = Math.min(Math.max(body.count ?? 1, 1), maxCount);
 
     const accountId = c.env.R2_ACCOUNT_ID;
     const bucket = c.env.R2_BUCKET_NAME;
@@ -37,11 +50,18 @@ uploads.post("/presign", async (c) => {
     });
 
     const now = new Date().toISOString().slice(0, 10);
-    const basePrefix = `uploads/tmp/${now}/${crypto.randomUUID()}`;
+    const uuid = crypto.randomUUID();
+    
+    // Different path prefixes based on purpose
+    const basePrefix = body.purpose === "attendance_photo"
+      ? `uploads/tmp/attendance/${now}/${uuid}`
+      : `uploads/tmp/${now}/${uuid}`;
 
     const items = await Promise.all(
       Array.from({ length: count }).map(async (_, idx) => {
-        const key = `${basePrefix}/photo-${String(idx + 1)}.jpg`;
+        // Infer file extension from content type
+        const ext = contentType.split('/')[1]?.split('+')[0] || 'jpg';
+        const key = `${basePrefix}/photo-${String(idx + 1)}.${ext}`;
         const command = new PutObjectCommand({
           Bucket: bucket,
           Key: key,

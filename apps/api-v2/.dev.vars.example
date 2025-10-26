@@ -1,0 +1,17 @@
+# AWS Rekognition Configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key_here
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key_here
+AWS_REGION=us-east-1
+AWS_REKOGNITION_COLLECTION=eduguard-school-default
+
+# R2 Storage Configuration
+R2_ACCOUNT_ID=your_r2_account_id_here
+R2_BUCKET_NAME=eduguard-photos
+R2_ACCESS_KEY_ID=your_r2_access_key_here
+R2_SECRET_ACCESS_KEY=your_r2_secret_key_here
+
+# Debug Mode (Development Only)
+# Set to 'true' or '1' to enable detailed face detection debugging
+# REMOVE or set to 'false' in production
+ENABLE_ATTENDANCE_DEBUG=true
+

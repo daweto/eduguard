@@ -23,6 +23,8 @@ export interface Bindings {
   R2_BUCKET_NAME?: string;
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
+  // Debug flags
+  ENABLE_ATTENDANCE_DEBUG?: string; // 'true' or '1' to enable detailed debug info
 }
 
 // Re-export DB types

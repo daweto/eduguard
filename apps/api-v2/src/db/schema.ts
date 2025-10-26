@@ -69,6 +69,131 @@ export const studentFaces = sqliteTable("student_faces", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+// Teachers table
+export const teachers = sqliteTable("teachers", {
+  id: text("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  middleName: text("middle_name"),
+  lastName: text("last_name").notNull(),
+  secondLastName: text("second_last_name"),
+  email: text("email").notNull().unique(),
+  phone: text("phone"),
+  subjects: text("subjects"), // Comma-separated subjects taught
+  department: text("department"),
+  status: text("status").default("active"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Classrooms table
+export const classrooms = sqliteTable("classrooms", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(), // e.g., "A1", "C2", "Science Lab 3"
+  building: text("building"),
+  floor: text("floor"),
+  capacity: integer("capacity"),
+  roomType: text("room_type").default("classroom"), // 'classroom' | 'lab' | 'library' | 'gym' | 'auditorium'
+  facilities: text("facilities"), // Comma-separated: "projector,whiteboard,computers"
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Courses table (course templates/definitions)
+export const courses = sqliteTable("courses", {
+  id: text("id").primaryKey(),
+  courseCode: text("course_code").notNull(), // e.g., "MATH101", "ENG201"
+  name: text("name").notNull(), // e.g., "Introduction to Algebra"
+  subject: text("subject").notNull(), // e.g., "Math", "English", "Science"
+  gradeLevel: text("grade_level"), // e.g., "10th", "11th", "1st-secondary"
+  credits: real("credits"), // e.g., 1.0, 0.5
+  description: text("description"),
+  prerequisites: text("prerequisites"), // Comma-separated course codes
+  department: text("department"),
+  status: text("status").default("active"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Classes table (specific class sections)
+export const classes = sqliteTable("classes", {
+  id: text("id").primaryKey(),
+  courseId: text("course_id")
+    .notNull()
+    .references(() => courses.id),
+  section: text("section").notNull(), // e.g., "A", "B", "1", "2"
+  teacherId: text("teacher_id")
+    .notNull()
+    .references(() => teachers.id),
+  classroomId: text("classroom_id")
+    .notNull()
+    .references(() => classrooms.id),
+  period: integer("period").notNull(), // 1-8 typically
+  scheduleDay: text("schedule_day").notNull(), // Day of week or "daily"
+  startTime: text("start_time"), // e.g., "08:00"
+  endTime: text("end_time"), // e.g., "08:50"
+  academicYear: text("academic_year"), // e.g., "2024-2025"
+  semester: text("semester"), // e.g., "Fall", "Spring", "Full Year"
+  maxStudents: integer("max_students"),
+  status: text("status").default("active"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Class enrollments (many-to-many: students <-> classes)
+export const classEnrollments = sqliteTable("class_enrollments", {
+  id: text("id").primaryKey(),
+  classId: text("class_id")
+    .notNull()
+    .references(() => classes.id),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => students.id),
+  enrolledDate: text("enrolled_date"),
+  status: text("status").default("active"), // 'active' | 'dropped' | 'completed'
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Sessions table (attendance sessions)
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  classId: text("class_id")
+    .notNull()
+    .references(() => classes.id),
+  teacherId: text("teacher_id")
+    .notNull()
+    .references(() => teachers.id),
+  classroomId: text("classroom_id")
+    .notNull()
+    .references(() => classrooms.id),
+  timestamp: text("timestamp").notNull(),
+  expectedStudents: integer("expected_students"),
+  presentCount: integer("present_count"),
+  absentCount: integer("absent_count"),
+  photoUrls: text("photo_urls"), // JSON array of photo URLs
+  awsFacesDetected: integer("aws_faces_detected"),
+  metadata: text("metadata"), // JSON
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Attendance records (individual student attendance per session)
+export const attendance = sqliteTable("attendance", {
+  id: text("id").primaryKey(),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => students.id),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id),
+  classId: text("class_id")
+    .notNull()
+    .references(() => classes.id), // Denormalized for quick queries
+  classroomId: text("classroom_id").references(() => classrooms.id), // Denormalized for location context
+  status: text("status").notNull(), // 'present' | 'absent' | 'excused' | 'late'
+  confidence: real("confidence"), // AWS Rekognition confidence score (0-100)
+  faceId: text("face_id"), // AWS Face ID if detected
+  markedAt: text("marked_at"),
+  markedBy: text("marked_by"), // 'auto' | teacher_id
+  corrected: integer("corrected", { mode: "boolean" }).default(false),
+  notes: text("notes"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
 export type Stage = typeof stages.$inferSelect;
 export type NewStage = typeof stages.$inferInsert;
 export type Grade = typeof grades.$inferSelect;
@@ -79,3 +204,17 @@ export type Student = typeof students.$inferSelect;
 export type NewStudent = typeof students.$inferInsert;
 export type StudentFace = typeof studentFaces.$inferSelect;
 export type NewStudentFace = typeof studentFaces.$inferInsert;
+export type Teacher = typeof teachers.$inferSelect;
+export type NewTeacher = typeof teachers.$inferInsert;
+export type Classroom = typeof classrooms.$inferSelect;
+export type NewClassroom = typeof classrooms.$inferInsert;
+export type Course = typeof courses.$inferSelect;
+export type NewCourse = typeof courses.$inferInsert;
+export type Class = typeof classes.$inferSelect;
+export type NewClass = typeof classes.$inferInsert;
+export type ClassEnrollment = typeof classEnrollments.$inferSelect;
+export type NewClassEnrollment = typeof classEnrollments.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;
+export type Attendance = typeof attendance.$inferSelect;
+export type NewAttendance = typeof attendance.$inferInsert;

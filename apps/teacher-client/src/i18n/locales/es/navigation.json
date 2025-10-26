@@ -1,42 +1,41 @@
 {
-  "domains": {
-    "students": "Estudiantes",
-    "guardians": "Apoderados",
-    "grades": "Calificaciones"
-  },
   "sidebar": {
     "label": "Navegación",
+    "classes": "Mis clases",
+    "attendance": "Asistencia",
+    "enroll": "Inscribir Estudiante",
+    "roster": "Listado de Estudiantes",
+    "guardians": "Apoderados",
     "students": {
       "label": "Estudiantes",
-      "home": "Inicio",
-      "enroll": "Inscribir",
-      "roster": "Listado",
-      "grades": "Calificaciones"
+      "home": "Panel de estudiantes",
+      "enroll": "Registrar estudiante",
+      "roster": "Listado de estudiantes"
     },
-    "guardians": {
+    "guardiansSection": {
       "label": "Apoderados",
-      "home": "Inicio",
-      "list": "Listado",
-      "create": "Registrar"
+      "home": "Panel de apoderados",
+      "list": "Listado de apoderados",
+      "create": "Registrar apoderado"
     }
   },
   "breadcrumbs": {
     "home": "Inicio",
+    "classes": "Clases",
+    "attendance": "Asistencia",
+    "takeAttendance": "Tomar asistencia",
     "students": "Estudiantes",
     "enroll": "Inscribir",
     "roster": "Listado",
-    "grades": "Calificaciones",
-    "guardians": "Apoderados",
-    "guardiansList": "Listado",
-    "guardiansCreate": "Registrar"
+    "editStudent": "Editar estudiante",
+    "guardians": "Apoderados"
   },
   "tooltips": {
-    "students": "Gestión de estudiantes",
-    "guardians": "Gestión de apoderados",
-    "enroll": "Inscribir estudiante",
-    "roster": "Ver listado",
-    "grades": "Calificaciones",
-    "guardiansList": "Ver apoderados",
-    "guardiansCreate": "Registrar apoderado"
+    "classes": "Mis clases",
+    "attendance": "Asistencia",
+    "students": "Estudiantes",
+    "guardians": "Apoderados",
+    "enroll": "Inscribir",
+    "roster": "Listado"
   }
 }

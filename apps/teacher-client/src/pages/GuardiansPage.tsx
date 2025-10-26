@@ -30,9 +30,9 @@ export default function GuardiansPage() {
     <div className="space-y-6">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2 flex items-center gap-2">
-          <Shield className="w-5 h-5" /> {t('title')}
+          <Shield className="w-5 h-5" /> {t('page.title')}
         </h2>
-        <p className="text-muted-foreground">{t('description')}</p>
+        <p className="text-muted-foreground">{t('page.description')}</p>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

@@ -573,4 +573,165 @@ students.delete("/:id", async (c) => {
   }
 });
 
+// POST /api/students/:id/photos - Upload photos to existing student
+students.post("/:id/photos", async (c) => {
+  try {
+    const studentId = c.req.param("id");
+    const body = await c.req.json<{ photo_keys: string[] }>();
+    
+    if (!body.photo_keys || body.photo_keys.length === 0) {
+      return c.json({ error: "At least one photo key is required" }, 400);
+    }
+
+    if (body.photo_keys.length > 5) {
+      return c.json({ error: "Maximum 5 photos allowed" }, 400);
+    }
+
+    const db = drizzle(c.env.DB);
+
+    // Check if student exists
+    const studentRows = await db
+      .select()
+      .from(studentsTable)
+      .where(eq(studentsTable.id, studentId))
+      .limit(1);
+
+    if (studentRows.length === 0) {
+      return c.json({ error: "Student not found" }, 404);
+    }
+
+    const student = studentRows[0];
+    const collectionId = student.awsCollectionId ?? "eduguard-school-default";
+
+    // Initialize AWS Rekognition
+    const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_REKOGNITION_COLLECTION } = c.env;
+    if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION) {
+      return c.json(
+        { error: "AWS Rekognition credentials not configured" },
+        500
+      );
+    }
+
+    const rekognition = createRekognition({
+      AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY,
+      AWS_REGION,
+      AWS_REKOGNITION_COLLECTION: AWS_REKOGNITION_COLLECTION ?? "eduguard-school-default",
+    });
+
+    // Move photos from temp to final location
+    const accountId = c.env.R2_ACCOUNT_ID;
+    const bucket = c.env.R2_BUCKET_NAME;
+    const accessKeyId = c.env.R2_ACCESS_KEY_ID;
+    const secretAccessKey = c.env.R2_SECRET_ACCESS_KEY;
+
+    if (!accountId || !bucket || !accessKeyId || !secretAccessKey) {
+      return c.json({ error: "R2 configuration not found" }, 500);
+    }
+
+    const r2Config = { accountId, bucketName: bucket, accessKeyId, secretAccessKey };
+    const uploadedPhotos: {
+      key: string;
+      faceId: string;
+      qualityScore: number;
+    }[] = [];
+    const movedKeys: string[] = [];
+
+    try {
+      // Process each photo
+      for (let i = 0; i < body.photo_keys.length; i++) {
+        const tempKey = body.photo_keys[i];
+
+        // Security: validate key is from temp student location
+        if (!tempKey.startsWith("uploads/tmp/")) {
+          throw new Error(`Invalid photo key: ${tempKey}`);
+        }
+
+        // Fetch from temp location
+        const bytes = await fetchFromRemoteR2(tempKey, r2Config);
+        if (!bytes) {
+          throw new Error(`Photo not found: ${tempKey}`);
+        }
+
+        // Move to final location
+        const ext = tempKey.split('.').pop() || 'jpg';
+        const photoKey = `students/${studentId}/photo-${Date.now()}-${i}.${ext}`;
+        
+        // Infer content type from extension
+        const contentType = ext === 'png' ? 'image/png' : 
+                            ext === 'webp' ? 'image/webp' : 
+                            ext === 'heic' ? 'image/heic' : 'image/jpeg';
+
+        const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+        await uploadToRemoteR2(photoKey, arrayBuffer, r2Config, contentType);
+        movedKeys.push(photoKey);
+
+        // Delete temp file
+        await deleteFromRemoteR2(tempKey, r2Config);
+
+        console.log(`[PHOTO-UPLOAD] ✓ Moved photo from ${tempKey} to ${photoKey}`);
+
+        // Index face with AWS Rekognition
+        try {
+          const indexResult = await indexFaceBytes({
+            client: rekognition,
+            collectionId,
+            bytes,
+            externalImageId: `${studentId}_photo_${Date.now()}_${i}`,
+          });
+
+          if (indexResult.faceId) {
+            uploadedPhotos.push({
+              key: photoKey,
+              faceId: indexResult.faceId,
+              qualityScore: indexResult.qualityScore ?? 0,
+            });
+
+            // Store face record in database
+            await db.insert(studentFacesTable).values({
+              id: `face-${Date.now()}-${i}`,
+              studentId: studentId,
+              faceId: indexResult.faceId,
+              photoUrl: photoKey,
+              indexedAt: new Date().toISOString(),
+              qualityScore: indexResult.qualityScore ?? null,
+            });
+
+            console.log(
+              `[FACE-INDEX] ✓ Indexed face ${indexResult.faceId} for student ${studentId}`
+            );
+          }
+        } catch (awsError) {
+          console.error(`[FACE-INDEX] ❌ Failed to index face:`, awsError);
+          // Continue processing other photos even if one fails
+        }
+      }
+
+      return c.json({
+        success: true,
+        student_id: studentId,
+        photos_uploaded: uploadedPhotos.length,
+        faces_indexed: uploadedPhotos.map((p) => ({
+          face_id: p.faceId,
+          photo_key: p.key,
+        })),
+      });
+    } catch (error) {
+      console.error("Error processing photos:", error);
+      
+      // Rollback: delete any moved photos
+      for (const key of movedKeys) {
+        await deleteFromRemoteR2(key, r2Config).catch(() => {});
+      }
+      
+      return c.json({ 
+        error: error instanceof Error ? error.message : "Failed to process photos" 
+      }, 500);
+    }
+  } catch (error) {
+    console.error("Error uploading photos:", error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
 export default students;
