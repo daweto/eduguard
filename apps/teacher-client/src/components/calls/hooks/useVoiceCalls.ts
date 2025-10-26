@@ -10,5 +10,7 @@ export function useVoiceCalls() {
   return useQuery<VoiceCallsListResponse>({
     queryKey: queryKeys.voiceCalls,
     queryFn: getVoiceCalls,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10000,
   });
 }
