@@ -37,7 +37,7 @@ app.use(
   cors({
     origin: "*", // In production, restrict to your domains
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
+    allowHeaders: ["*"],
   }),
 );
 

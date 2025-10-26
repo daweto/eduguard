@@ -28,19 +28,28 @@ app.post("/elevenlabs/call-completed", async (c) => {
       c.env.WEBHOOK_SECRET ?? c.env.ELEVENLABS_CONVAI_WEBHOOK_SECRET;
 
     if (!secret || !header) {
+      console.warn("[Webhook] 401 unauthorized", {
+        hasSecret: Boolean(secret),
+        hasHeader: Boolean(header),
+      });
       return c.json({ error: "unauthorized" }, 401);
     }
 
     const parts = header.split(",");
     const t = parts.find((p) => p.startsWith("t="))?.slice(2);
     const v0 = parts.find((p) => p.startsWith("v0="));
-    if (!t || !v0) return c.json({ error: "invalid signature" }, 401);
+    if (!t || !v0) {
+      console.warn("[Webhook] 401 invalid signature format", { header });
+      return c.json({ error: "invalid signature" }, 401);
+    }
 
     // Timestamp tolerance: 30 minutes
     const tsMs = Number(t) * 1000;
     const tolerance = Date.now() - 30 * 60 * 1000;
-    if (Number.isFinite(tsMs) && tsMs < tolerance)
+    if (Number.isFinite(tsMs) && tsMs < tolerance) {
+      console.warn("[Webhook] 401 expired signature", { t, tsMs, tolerance });
       return c.json({ error: "expired" }, 401);
+    }
 
     const encoder = new TextEncoder();
     const key = await crypto.subtle.importKey(
@@ -60,7 +69,14 @@ app.post("/elevenlabs/call-completed", async (c) => {
       .join("");
     const expected = `v0=${hex}`;
 
-    if (expected !== v0) return c.json({ error: "invalid signature" }, 401);
+    if (expected !== v0) {
+      console.warn("[Webhook] 401 signature mismatch", {
+        match: expected === v0,
+        provided: v0.slice(0, 14),
+        expected: expected.slice(0, 14),
+      });
+      return c.json({ error: "invalid signature" }, 401);
+    }
 
     // Parse JSON now that signature is valid
     try {
